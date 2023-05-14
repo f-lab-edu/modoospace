@@ -10,7 +10,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class Address {
 
-  private String fullName;
+  private String fullAddress;
   private String depthFirst;
   private String depthSecond;
   private String depthThird;
