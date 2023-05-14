@@ -2,7 +2,7 @@ package com.modoospace.reservation.domain;
 
 import com.modoospace.common.BaseTimeEntity;
 import com.modoospace.space.domain.Facility;
-import com.modoospace.user.domain.User;
+import com.modoospace.user.domain.Member;
 import java.time.LocalDateTime;
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -16,7 +16,6 @@ import javax.persistence.ManyToOne;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-import org.springframework.data.annotation.CreatedDate;
 
 @Entity
 @Getter
@@ -43,6 +42,6 @@ public class Reservation extends BaseTimeEntity {
   private Facility facility; // 시설
 
   @ManyToOne(fetch = FetchType.LAZY)
-  @JoinColumn(name = "visitor_user_id")
-  private User visitor; // 방문자
+  @JoinColumn(name = "visitor_id")
+  private Member visitor; // 방문자
 }

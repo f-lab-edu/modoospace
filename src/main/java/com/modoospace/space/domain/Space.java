@@ -2,7 +2,7 @@ package com.modoospace.space.domain;
 
 import static javax.persistence.FetchType.LAZY;
 
-import com.modoospace.user.domain.User;
+import com.modoospace.user.domain.Member;
 import java.util.ArrayList;
 import java.util.List;
 import javax.persistence.CascadeType;
@@ -35,8 +35,8 @@ public class Space {
   private Address address;
 
   @ManyToOne(fetch = LAZY)
-  @JoinColumn(name = "host_user_id")
-  private User host;
+  @JoinColumn(name = "host_id")
+  private Member host;
 
   @OneToMany(mappedBy = "space", cascade = CascadeType.ALL)
   private List<Facility> facilities = new ArrayList<>();

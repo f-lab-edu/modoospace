@@ -13,11 +13,11 @@ import lombok.NoArgsConstructor;
 @Entity
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-public class User {
+public class Member {
 
   @Id
   @GeneratedValue
-  @Column(name = "user_id")
+  @Column(name = "member_id")
   private Long id;
 
   @Column(nullable = false)
