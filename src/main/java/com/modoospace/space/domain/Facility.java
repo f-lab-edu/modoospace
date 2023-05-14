@@ -19,7 +19,8 @@ public class Facility {
 
   @Id
   @GeneratedValue
-  private Long facilityId;
+  @Column(name = "facility_id")
+  private Long id;
 
   @Column(nullable = false)
   private String name;

@@ -25,7 +25,8 @@ public class Space {
 
   @Id
   @GeneratedValue
-  private Long spaceId;
+  @Column(name = "space_id")
+  private Long id;
 
   @Column(nullable = false)
   private String name;

@@ -15,8 +15,9 @@ public class Category {
 
   @Id
   @GeneratedValue
-  private Long categoryId;
+  @Column(name = "category_id")
+  private Long id;
 
   @Column(nullable = false)
-  private String categoryName;
+  private String name;
 }
