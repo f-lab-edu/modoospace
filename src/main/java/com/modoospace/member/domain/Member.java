@@ -1,4 +1,4 @@
-package com.modoospace.user.domain;
+package com.modoospace.member.domain;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;

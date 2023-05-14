@@ -2,7 +2,7 @@ package com.modoospace.reservation.domain;
 
 import com.modoospace.common.BaseTimeEntity;
 import com.modoospace.space.domain.Facility;
-import com.modoospace.user.domain.Member;
+import com.modoospace.member.domain.Member;
 import java.time.LocalDateTime;
 import javax.persistence.Column;
 import javax.persistence.Entity;
