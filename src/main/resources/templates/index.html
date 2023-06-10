@@ -1,0 +1,29 @@
+<!DOCTYPE HTML>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+  <title>Modoo Space</title>
+  <meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/>
+
+  <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css">
+</head>
+<body>
+<h1>Modoo Space</h1>
+<div class="col-md-12">
+  <div class="row">
+    <div class="col-md-6">
+      <div class="col-md-6" th:if="${userName != null}">
+        <span th:text="'Logged in as: ' + ${userName}" />
+        <a href="/logout" class="btn btn-info active" role="button">Logout</a>
+      </div>
+      <div class="col-md-6" th:if="${userName == null}">
+        <a href="/oauth2/authorization/google" class="btn btn-success active" role="button">Google Login</a>
+        <a href="/oauth2/authorization/naver" class="btn btn-secondary active" role="button">Naver Login</a>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script src="https://code.jquery.com/jquery-3.3.1.min.js"></script>
+<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js"></script>
+</body>
+</html>
