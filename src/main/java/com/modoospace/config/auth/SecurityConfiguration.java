@@ -23,11 +23,12 @@ public class SecurityConfiguration {
             .antMatchers("/reservation").hasRole(Role.VISITOR.name())
             .anyRequest().authenticated()
         )
-        .logout().logoutSuccessUrl("/")
-        .and()
         .oauth2Login().userInfoEndpoint()
         .userService(customOAuth2UserService); // 로그인 성공 후 후속조치를 진행할 UserServie 인터페이스의 구현체 등록
 
+    http.logout()
+        .logoutSuccessUrl("/")
+        .invalidateHttpSession(true); // 세션 날리기
     return http.build();
   }
 }
