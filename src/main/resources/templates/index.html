@@ -4,26 +4,25 @@
   <title>Modoo Space</title>
   <meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/>
 
-  <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/css/bootstrap.min.css" integrity="sha384-xOolHFLEh07PJGoPkLv1IbcEPTNtaed2xpHsD9ESMhqIYd0nLMwNLD69Npy4HI+N" crossorigin="anonymous">
 </head>
 <body>
-<h1>Modoo Space</h1>
-<div class="col-md-12">
-  <div class="row">
-    <div class="col-md-6">
-      <div class="col-md-6" th:if="${userName != null}">
-        <span th:text="'Logged in as: ' + ${userName}" />
-        <a href="/logout" class="btn btn-info active" role="button">Logout</a>
-      </div>
-      <div class="col-md-6" th:if="${userName == null}">
-        <a href="/oauth2/authorization/google" class="btn btn-success active" role="button">Google Login</a>
-        <a href="/oauth2/authorization/naver" class="btn btn-secondary active" role="button">Naver Login</a>
-      </div>
-    </div>
+<div class="page-header">
+  <h1>Modoo Space</h1>
+</div>
+
+<div class="row">
+  <div class="col-md-6" th:if="${userName != null}">
+    <span th:text="'Logged in as: ' + ${userName}"/>
+    <a href="/logout" class="btn btn-info active" role="button">Logout</a>
+  </div>
+  <div class="col-md-6" th:if="${userName == null}">
+    <a href="/oauth2/authorization/google" class="btn btn-primary active" role="button">Google Login</a>
+    <a href="/oauth2/authorization/naver" class="btn btn-success active" role="button">Naver Login</a>
   </div>
 </div>
 
 <script src="https://code.jquery.com/jquery-3.3.1.min.js"></script>
-<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/js/bootstrap.min.js" integrity="sha384-+sLIOodYLS7CIrQpBjl+C7nPvqq+FbNUBDunl/OZv93DB7Ln/533i8e/mZXLi/P+" crossorigin="anonymous"></script>
 </body>
 </html>
