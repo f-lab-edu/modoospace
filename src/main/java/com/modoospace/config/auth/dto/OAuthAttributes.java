@@ -1,12 +1,10 @@
 package com.modoospace.config.auth.dto;
 
-import com.modoospace.config.auth.AuthProvider;
 import com.modoospace.member.domain.Member;
 import com.modoospace.member.domain.Role;
 import java.util.Map;
 import lombok.Builder;
 import lombok.Getter;
-import org.springframework.security.oauth2.core.OAuth2AuthenticationException;
 
 @Getter
 public class OAuthAttributes {

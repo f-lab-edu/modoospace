@@ -1,6 +1,5 @@
-package com.modoospace.config.auth;
+package com.modoospace.config.auth.dto;
 
-import com.modoospace.config.auth.dto.OAuthAttributes;
 import java.util.Map;
 
 @FunctionalInterface
