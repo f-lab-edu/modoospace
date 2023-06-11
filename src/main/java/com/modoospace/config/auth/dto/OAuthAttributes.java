@@ -34,7 +34,7 @@ public class OAuthAttributes {
   public static OAuthAttributes of(String registrationId, String userNameAttributeName,
       Map<String, Object> attributes) {
     AuthProvider provider = AuthProvider.findProvider(registrationId);
-    return provider.of(userNameAttributeName, attributes);
+    return provider.convert(userNameAttributeName, attributes);
   }
 
   /**

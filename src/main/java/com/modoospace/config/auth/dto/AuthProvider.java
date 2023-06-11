@@ -35,26 +35,26 @@ public enum AuthProvider {
   });
 
   private String name;
-  private AuthProviderOf authProviderOf;
+  private AuthProviderConvertor convertor;
 
-  private AuthProvider(String name, AuthProviderOf authProviderOf) {
+  private AuthProvider(String name, AuthProviderConvertor convertor) {
     this.name = name;
-    this.authProviderOf = authProviderOf;
+    this.convertor = convertor;
   }
 
   public static AuthProvider findProvider(String registrationId) {
     return Arrays.stream(AuthProvider.values())
-        .filter(authProvider -> authProvider.isName(registrationId))
+        .filter(authProvider -> authProvider.isNameEqual(registrationId))
         .findFirst()
         .orElseThrow(
             () -> new OAuth2AuthenticationException("Unsupported Login Type: " + registrationId));
   }
 
-  private boolean isName(String name) {
+  private boolean isNameEqual(String name) {
     return this.name.equals(name);
   }
 
-  public OAuthAttributes of(String userNameAttributeName, Map<String, Object> attributes) {
-    return authProviderOf.of(userNameAttributeName, attributes);
+  public OAuthAttributes convert(String userNameAttributeName, Map<String, Object> attributes) {
+    return convertor.convert(userNameAttributeName, attributes);
   }
 }
