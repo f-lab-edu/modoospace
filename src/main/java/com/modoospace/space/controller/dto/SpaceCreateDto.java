@@ -3,12 +3,20 @@ package com.modoospace.space.controller.dto;
 import com.modoospace.member.domain.Member;
 import com.modoospace.space.domain.Address;
 import com.modoospace.space.domain.Space;
+import javax.validation.constraints.NotEmpty;
+import javax.validation.constraints.NotNull;
 import lombok.Builder;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
 
+@Getter
+@NoArgsConstructor
 public class SpaceCreateDto {
 
+  @NotEmpty
   private String name;
 
+  @NotNull
   private Address address;
 
   @Builder
