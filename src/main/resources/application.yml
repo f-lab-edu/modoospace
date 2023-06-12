@@ -13,3 +13,6 @@ spring:
       hibernate:
         show_sql: false # System.out
         format_sql: true # logger
+
+  config:
+    import: application-oauth.yml
