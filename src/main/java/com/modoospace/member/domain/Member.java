@@ -48,4 +48,8 @@ public class Member extends BaseTimeEntity {
   public String getRole() {
     return this.role.getKey();
   }
+
+  public boolean isRoleEqual(Role role){
+    return this.role.equals(role);
+  }
 }
