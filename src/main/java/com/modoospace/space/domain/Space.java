@@ -6,6 +6,7 @@ import com.modoospace.common.BaseTimeEntity;
 import com.modoospace.exception.HostPermissionException;
 import com.modoospace.member.domain.Member;
 import com.modoospace.member.domain.Role;
+import com.sun.istack.NotNull;
 import java.util.ArrayList;
 import java.util.List;
 import javax.persistence.CascadeType;
@@ -35,6 +36,7 @@ public class Space extends BaseTimeEntity {
   @Column(nullable = false)
   private String name;
 
+  @NotNull
   @Embedded
   private Address address;
 
