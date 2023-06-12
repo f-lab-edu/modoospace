@@ -7,8 +7,4 @@ public class HostPermissionException extends RuntimeException{
   public HostPermissionException() {
     super(MSG);
   }
-
-  public HostPermissionException(String message) {
-    super(message);
-  }
 }
