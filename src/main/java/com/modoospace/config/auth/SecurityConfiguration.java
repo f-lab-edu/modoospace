@@ -4,6 +4,7 @@ import com.modoospace.member.domain.Role;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.web.SecurityFilterChain;
 
@@ -20,7 +21,8 @@ public class SecurityConfiguration {
         .and()
         .authorizeHttpRequests(request -> request
             .antMatchers("/").permitAll()
-            .antMatchers("/reservation").hasRole(Role.VISITOR.name())
+            .antMatchers(HttpMethod.POST, "/api/v1/space").hasRole(Role.HOST.name())
+            .antMatchers(HttpMethod.PUT, "/api/v1/member").hasRole(Role.ADMIN.name())
             .anyRequest().authenticated()
         )
         .oauth2Login().userInfoEndpoint()
