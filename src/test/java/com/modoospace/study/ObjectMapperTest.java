@@ -1,4 +1,4 @@
-package com.modoospace.space.util;
+package com.modoospace.study;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
@@ -12,7 +12,7 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
 /**
- * Controller 단 에서 RequestBody 인자로 사용되는 DTO의 Getter를 제외하려했으나, 자꾸 역직렬화 실패 예외가 터짐. 따라서 Spring에서
+ * Controller 단 에서 RequestBody 인자로 사용되는 DTO의 Getter를 제외하려했으나, 자꾸 역직렬화 실패 예외가 터짐. 파악을 위해 Spring에서
  * Json형변환을 담당하는 Jackson2HttpMessageConverter가 MessageBody read 시 사용하는 objectMapper 학습테스트를 작성한다.
  */
 public class ObjectMapperTest {
