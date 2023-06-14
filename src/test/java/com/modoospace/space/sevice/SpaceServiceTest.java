@@ -2,19 +2,23 @@ package com.modoospace.space.sevice;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.junit.jupiter.api.Assertions.assertAll;
 
-import com.modoospace.exception.HostPermissionException;
+import com.modoospace.exception.NotFoundEntityException;
+import com.modoospace.exception.PermissionDeniedException;
 import com.modoospace.member.domain.Member;
 import com.modoospace.member.domain.MemberRepository;
 import com.modoospace.member.domain.Role;
 import com.modoospace.space.controller.dto.SpaceCreateDto;
 import com.modoospace.space.controller.dto.SpaceReadDto;
+import com.modoospace.space.controller.dto.SpaceUpdateDto;
 import com.modoospace.space.domain.Address;
-import com.modoospace.space.domain.Space;
 import com.modoospace.space.domain.SpaceRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 
@@ -31,6 +35,8 @@ class SpaceServiceTest {
 
   private Member hostMember;
   private Member visitorMember;
+  private Member adminMember;
+  private Address address;
 
   @BeforeEach
   public void setUp() {
@@ -48,19 +54,27 @@ class SpaceServiceTest {
         .role(Role.VISITOR)
         .build();
 
+    adminMember = Member.builder()
+        .email("admin@email")
+        .name("admin")
+        .role(Role.ADMIN)
+        .build();
+
     memberRepository.save(hostMember);
     memberRepository.save(visitorMember);
-  }
+    memberRepository.save(adminMember);
 
-  @DisplayName("공간을 등록한다.")
-  @Test
-  public void createSpace() {
-    Address address = Address.builder()
+    address = Address.builder()
         .fullAddress("fullAddress")
         .depthFirst("depthFirst")
         .depthSecond("depthSecond")
         .depthThird("depthThird")
         .build();
+  }
+
+  @DisplayName("호스트일 경우 공간을 등록할 수 있다.")
+  @Test
+  public void createSpace() {
     SpaceCreateDto createDto = SpaceCreateDto.builder()
         .name("공간이름")
         .address(address)
@@ -68,25 +82,108 @@ class SpaceServiceTest {
 
     Long spaceId = spaceService.createSpace(createDto, hostMember.getEmail());
 
-    SpaceReadDto retSpaceDto = spaceService.findSpaceById(spaceId);
+    SpaceReadDto retSpaceDto = spaceService.findSpace(spaceId);
     assertThat(retSpaceDto.getId()).isEqualTo(spaceId);
   }
 
   @DisplayName("Host가 아닐 경우 공간을 등록 시 예외를 던진다.")
   @Test
   public void createSpace_throwException_IfVisitorMember() {
-    Address address = Address.builder()
-        .fullAddress("fullAddress")
-        .depthFirst("depthFirst")
-        .depthSecond("depthSecond")
-        .depthThird("depthThird")
-        .build();
     SpaceCreateDto createDto = SpaceCreateDto.builder()
         .name("공간이름")
         .address(address)
         .build();
 
-    assertThatThrownBy(() -> spaceService.createSpace(createDto, visitorMember.getEmail()))
-        .isInstanceOf(HostPermissionException.class);
+    assertAll(
+        () -> assertThatThrownBy(() -> spaceService.createSpace(createDto, "notMember@Email"))
+            .isInstanceOf(NotFoundEntityException.class),
+        () -> assertThatThrownBy(
+            () -> spaceService.createSpace(createDto, visitorMember.getEmail()))
+            .isInstanceOf(PermissionDeniedException.class)
+    );
+  }
+
+  @DisplayName("본인의 공간 OR 관리자일 경우 공간을 업데이트할 수 있다.")
+  @ParameterizedTest
+  @ValueSource(strings = {"host@email", "admin@email"})
+  public void updateSpace(String testEmail) {
+    SpaceCreateDto createDto = SpaceCreateDto.builder()
+        .name("공간이름")
+        .address(address)
+        .build();
+    Long spaceId = spaceService.createSpace(createDto, hostMember.getEmail());
+    Address updateAddress = Address.builder()
+        .fullAddress("전체주소")
+        .depthFirst("시도")
+        .depthSecond("구")
+        .depthThird("동")
+        .build();
+    SpaceUpdateDto updateDto = SpaceUpdateDto.builder()
+        .id(spaceId)
+        .name("업데이트공간")
+        .address(updateAddress)
+        .build();
+
+    spaceService.updateSpace(updateDto, testEmail);
+
+    SpaceReadDto retSpaceDto = spaceService.findSpace(spaceId);
+    assertThat(retSpaceDto.getName()).isEqualTo("업데이트공간");
+    assertThat(retSpaceDto.getAddress()).isEqualTo(updateAddress);
+  }
+
+  @DisplayName("본인의 공간 AND 관리자가 아닐 경우 공간을 수정 시 예외를 던진다.")
+  @Test
+  public void updateSpace_throwException_IfAdminMemberOrOwnSpace() {
+    SpaceCreateDto createDto = SpaceCreateDto.builder()
+        .name("공간이름")
+        .address(address)
+        .build();
+    Long spaceId = spaceService.createSpace(createDto, hostMember.getEmail());
+    SpaceUpdateDto updateDto = SpaceUpdateDto.builder()
+        .id(spaceId)
+        .name("업데이트")
+        .address(address)
+        .build();
+
+    assertAll(
+        () -> assertThatThrownBy(() -> spaceService.updateSpace(updateDto, "notMember@Email"))
+            .isInstanceOf(NotFoundEntityException.class),
+        () -> assertThatThrownBy(
+            () -> spaceService.updateSpace(updateDto, visitorMember.getEmail()))
+            .isInstanceOf(PermissionDeniedException.class)
+    );
+  }
+
+  @DisplayName("본인의 공간 OR 관리자일 경우 공간을 삭제할 수 있다.")
+  @ParameterizedTest
+  @ValueSource(strings = {"host@email", "admin@email"})
+  public void deleteSpace(String testEmail) {
+    SpaceCreateDto createDto = SpaceCreateDto.builder()
+        .name("공간이름")
+        .address(address)
+        .build();
+    Long spaceId = spaceService.createSpace(createDto, hostMember.getEmail());
+
+    spaceService.deleteSpace(spaceId, testEmail);
+
+    assertThat(spaceRepository.existsById(spaceId)).isFalse();
+  }
+
+  @DisplayName("본인의 공간 AND 관리자가 아닐 경우 공간을 삭제 시 예외를 던진다.")
+  @Test
+  public void deleteSpace_throwException_IfAdminMemberOrOwnSpace() {
+    SpaceCreateDto createDto = SpaceCreateDto.builder()
+        .name("공간이름")
+        .address(address)
+        .build();
+    Long spaceId = spaceService.createSpace(createDto, hostMember.getEmail());
+
+    assertAll(
+        () -> assertThatThrownBy(() -> spaceService.deleteSpace(spaceId, "notMember@Email"))
+            .isInstanceOf(NotFoundEntityException.class),
+        () -> assertThatThrownBy(
+            () -> spaceService.deleteSpace(spaceId, visitorMember.getEmail()))
+            .isInstanceOf(PermissionDeniedException.class)
+    );
   }
 }

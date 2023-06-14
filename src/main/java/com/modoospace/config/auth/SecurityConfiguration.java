@@ -21,8 +21,8 @@ public class SecurityConfiguration {
         .and()
         .authorizeHttpRequests(request -> request
             .antMatchers(HttpMethod.GET, "/", "/error", "/api/v1/space/*").permitAll()
-            .antMatchers(HttpMethod.POST, "/api/v1/space").hasRole(Role.HOST.name())
-            .antMatchers(HttpMethod.PUT, "/api/v1/member").hasRole(Role.ADMIN.name())
+//            .antMatchers(HttpMethod.POST, "/api/v1/space").hasRole(Role.HOST.name())
+//            .antMatchers(HttpMethod.PUT, "/api/v1/member").hasRole(Role.ADMIN.name())
             .anyRequest().authenticated()
         )
         .oauth2Login().userInfoEndpoint()

@@ -18,10 +18,10 @@ public class MemberService {
 
   @Transactional
   public void updateMember(MemberUpdateDto updateDto, String loginEmail) {
-    Member admin = findByEmail(loginEmail);
+    Member loginMember = findByEmail(loginEmail);
     Member member = findByEmail(updateDto.getEmail());
 
-    checkPermission(admin);
+    checkPermission(loginMember);
     member.updateRole(updateDto.getRole());
   }
 
@@ -31,8 +31,8 @@ public class MemberService {
     return member;
   }
 
-  private void checkPermission(Member admin) {
-    if (!admin.isRoleEqual(Role.ADMIN)) {
+  private void checkPermission(Member loginMember) {
+    if (!loginMember.isRoleEqual(Role.ADMIN)) {
       throw new PermissionDeniedException();
     }
   }
