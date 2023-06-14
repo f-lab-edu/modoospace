@@ -1,5 +1,6 @@
 package com.modoospace;
 
+import com.modoospace.config.auth.LoginEmail;
 import com.modoospace.config.auth.LoginUser;
 import com.modoospace.config.auth.dto.SessionMember;
 import lombok.RequiredArgsConstructor;
@@ -12,9 +13,9 @@ import org.springframework.web.bind.annotation.GetMapping;
 public class MainController {
 
   @GetMapping({"", "/"})
-  public String index(Model model, @LoginUser SessionMember member) {
-    if (member != null) {
-      model.addAttribute("userName", member.getName());
+  public String index(Model model, @LoginEmail String loginEmail) {
+    if (loginEmail != null) {
+      model.addAttribute("userName", loginEmail);
     }
     return "index";
   }
