@@ -1,7 +1,6 @@
 package com.modoospace.member.domain;
 
 import com.modoospace.common.BaseTimeEntity;
-import com.modoospace.exception.AdminPermissionException;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.EnumType;
@@ -46,11 +45,7 @@ public class Member extends BaseTimeEntity {
     return this;
   }
 
-  public Member updateRole(Member admin, Role role) {
-    if (!admin.isRoleEqual(Role.ADMIN)) {
-      throw new AdminPermissionException();
-    }
-
+  public Member updateRole(Role role) {
     this.role = role;
     return this;
   }
@@ -61,5 +56,9 @@ public class Member extends BaseTimeEntity {
 
   public String getRoleKey() {
     return this.role.getKey();
+  }
+
+  public boolean isEqual(Member member) {
+    return this.id.equals(member.getId());
   }
 }

@@ -4,7 +4,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.junit.jupiter.api.Assertions.assertAll;
 
-import com.modoospace.exception.AdminPermissionException;
+import com.modoospace.exception.PermissionDeniedException;
 import com.modoospace.member.controller.dto.MemberUpdateDto;
 import com.modoospace.member.domain.Member;
 import com.modoospace.member.domain.MemberRepository;
@@ -78,9 +78,9 @@ class MemberServiceTest {
 
     assertAll(
         () -> assertThatThrownBy(() -> memberService.updateMember(updateDto, "visitor@email"))
-            .isInstanceOf(AdminPermissionException.class),
+            .isInstanceOf(PermissionDeniedException.class),
         () -> assertThatThrownBy(() -> memberService.updateMember(updateDto, "host@email"))
-            .isInstanceOf(AdminPermissionException.class)
+            .isInstanceOf(PermissionDeniedException.class)
     );
   }
 }
