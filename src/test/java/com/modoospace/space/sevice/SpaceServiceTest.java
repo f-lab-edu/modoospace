@@ -8,6 +8,7 @@ import com.modoospace.member.domain.Member;
 import com.modoospace.member.domain.MemberRepository;
 import com.modoospace.member.domain.Role;
 import com.modoospace.space.controller.dto.SpaceCreateDto;
+import com.modoospace.space.controller.dto.SpaceReadDto;
 import com.modoospace.space.domain.Address;
 import com.modoospace.space.domain.Space;
 import com.modoospace.space.domain.SpaceRepository;
@@ -67,14 +68,18 @@ class SpaceServiceTest {
 
     Long spaceId = spaceService.createSpace(createDto, hostMember.getEmail());
 
-    Space retSpace = spaceRepository.findById(spaceId).get();
-    assertThat(retSpace.getId()).isEqualTo(spaceId);
+    SpaceReadDto retSpaceDto = spaceService.findSpaceById(spaceId);
+    assertThat(retSpaceDto.getId()).isEqualTo(spaceId);
   }
 
   @DisplayName("Host가 아닐 경우 공간을 등록 시 예외를 던진다.")
   @Test
   public void createSpace_throwException_IfVisitorMember() {
     Address address = Address.builder()
+        .fullAddress("fullAddress")
+        .depthFirst("depthFirst")
+        .depthSecond("depthSecond")
+        .depthThird("depthThird")
         .build();
     SpaceCreateDto createDto = SpaceCreateDto.builder()
         .name("공간이름")
