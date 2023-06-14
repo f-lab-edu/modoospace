@@ -26,6 +26,7 @@ import lombok.NoArgsConstructor;
 @Entity
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
+@Builder
 public class Space extends BaseTimeEntity {
 
   @Id
@@ -44,10 +45,10 @@ public class Space extends BaseTimeEntity {
   @JoinColumn(name = "host_id")
   private Member host;
 
+  @Builder.Default
   @OneToMany(mappedBy = "space", cascade = CascadeType.ALL)
   private List<Facility> facilities = new ArrayList<>();
 
-  @Builder
   public Space(Long id, String name, Address address, Member host,
       List<Facility> facilities) {
     this.id = id;
