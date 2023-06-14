@@ -186,4 +186,21 @@ class SpaceServiceTest {
             .isInstanceOf(PermissionDeniedException.class)
     );
   }
+
+  @DisplayName("호스트ID로 호스트가 소유하고있는 공간을 조회할 수 있다.")
+  @Test
+  public void findSpaceByHost() {
+    SpaceCreateDto createDto = SpaceCreateDto.builder()
+        .name("공간이름")
+        .address(address)
+        .build();
+    spaceService.createSpace(createDto, hostMember.getEmail());
+    createDto = SpaceCreateDto.builder()
+        .name("공간이름2")
+        .address(address)
+        .build();
+    spaceService.createSpace(createDto, hostMember.getEmail());
+
+    assertThat(spaceService.findSpaceByHost(hostMember.getId())).hasSize(2);
+  }
 }

@@ -10,6 +10,7 @@ import com.modoospace.space.controller.dto.SpaceReadDto;
 import com.modoospace.space.controller.dto.SpaceUpdateDto;
 import com.modoospace.space.domain.Space;
 import com.modoospace.space.domain.SpaceRepository;
+import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -35,6 +36,14 @@ public class SpaceService {
     Space space = findSpaceById(spaceId);
 
     return SpaceReadDto.toDto(space);
+  }
+
+  public List<SpaceReadDto> findSpaceByHost(Long hostId) {
+    Member host = memberRepository.findById(hostId)
+        .orElseThrow(() -> new NotFoundEntityException("사용자"));
+    List<Space> spaces = spaceRepository.findByHost(host);
+
+    return SpaceReadDto.toList(spaces);
   }
 
   @Transactional

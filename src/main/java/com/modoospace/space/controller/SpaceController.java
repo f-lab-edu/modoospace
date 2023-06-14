@@ -6,6 +6,7 @@ import com.modoospace.space.controller.dto.SpaceReadDto;
 import com.modoospace.space.controller.dto.SpaceUpdateDto;
 import com.modoospace.space.sevice.SpaceService;
 import java.net.URI;
+import java.util.List;
 import javax.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -36,6 +37,12 @@ public class SpaceController {
   public ResponseEntity<SpaceReadDto> findSpace(@PathVariable Long spaceId) {
     SpaceReadDto spaceReadDto = spaceService.findSpace(spaceId);
     return ResponseEntity.ok().body(spaceReadDto);
+  }
+
+  @GetMapping("/spaces/{hostId}")
+  public ResponseEntity<List<SpaceReadDto>> findSpaceByHost(@PathVariable Long hostId) {
+    List<SpaceReadDto> spaceReadDtos = spaceService.findSpaceByHost(hostId);
+    return ResponseEntity.ok().body(spaceReadDtos);
   }
 
   @PutMapping("/space")

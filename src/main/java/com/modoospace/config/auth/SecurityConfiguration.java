@@ -20,7 +20,7 @@ public class SecurityConfiguration {
         .headers().frameOptions().disable() // h2-console화면을 사용하기 위해 해당 옵션들을 disable
         .and()
         .authorizeHttpRequests(request -> request
-            .antMatchers(HttpMethod.GET, "/", "/error", "/api/v1/space/*").permitAll()
+            .antMatchers(HttpMethod.GET, "/", "/error", "/api/v1/space/*", "/api/v1/spaces/*").permitAll()
 //            .antMatchers(HttpMethod.POST, "/api/v1/space").hasRole(Role.HOST.name())
 //            .antMatchers(HttpMethod.PUT, "/api/v1/member").hasRole(Role.ADMIN.name())
             .anyRequest().authenticated()

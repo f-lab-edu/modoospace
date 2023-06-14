@@ -6,6 +6,7 @@ import com.modoospace.space.domain.Space;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
@@ -48,5 +49,11 @@ public class SpaceReadDto {
         .createdTime(space.getCreatedTime())
         .updatedTime(space.getUpdatedTime())
         .build();
+  }
+
+  public static List<SpaceReadDto> toList(List<Space> spaces) {
+    return spaces.stream()
+        .map(SpaceReadDto::toDto)
+        .collect(Collectors.toList());
   }
 }
