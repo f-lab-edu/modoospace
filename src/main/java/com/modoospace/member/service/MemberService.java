@@ -18,14 +18,14 @@ public class MemberService {
 
   @Transactional
   public void updateMember(MemberUpdateDto updateDto, String loginEmail) {
-    Member loginMember = findByEmail(loginEmail);
-    Member member = findByEmail(updateDto.getEmail());
+    Member loginMember = findMemberByEmail(loginEmail);
+    Member member = findMemberByEmail(updateDto.getEmail());
 
     checkPermission(loginMember);
     member.updateRole(updateDto.getRole());
   }
 
-  private Member findByEmail(String email) {
+  private Member findMemberByEmail(String email) {
     Member member = memberRepository.findByEmail(email)
         .orElseThrow(() -> new NotFoundEntityException("사용자"));
     return member;
