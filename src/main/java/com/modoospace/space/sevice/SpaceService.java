@@ -1,10 +1,8 @@
 package com.modoospace.space.sevice;
 
 import com.modoospace.exception.NotFoundEntityException;
-import com.modoospace.exception.PermissionDeniedException;
 import com.modoospace.member.domain.Member;
 import com.modoospace.member.domain.MemberRepository;
-import com.modoospace.member.domain.Role;
 import com.modoospace.space.controller.dto.SpaceCreateDto;
 import com.modoospace.space.controller.dto.SpaceReadDto;
 import com.modoospace.space.controller.dto.SpaceUpdateDto;
@@ -51,8 +49,7 @@ public class SpaceService {
     Member loginMember = findMemberByEmail(email);
     Space space = findSpaceById(updateDto.getId());
 
-    checkPermission(space.getHost(), loginMember);
-
+    space.verifyUpdateAndDeletePermission(loginMember);
     space.update(updateDto.getName(), updateDto.getAddress());
   }
 
@@ -61,10 +58,9 @@ public class SpaceService {
     Member loginMember = findMemberByEmail(email);
     Space space = findSpaceById(spaceId);
 
-    checkPermission(space.getHost(), loginMember);
-
     // TODO: 예약이 존재하는지 확인이 필요합니다.
 
+    space.verifyUpdateAndDeletePermission(loginMember);
     spaceRepository.delete(space);
   }
 
@@ -78,11 +74,5 @@ public class SpaceService {
     Space space = spaceRepository.findById(spaceId)
         .orElseThrow(() -> new NotFoundEntityException("공간"));
     return space;
-  }
-
-  private void checkPermission(Member host, Member loginMember) {
-    if (!host.isEqual(loginMember) && !loginMember.isRoleEqual(Role.ADMIN)) {
-      throw new PermissionDeniedException();
-    }
   }
 }

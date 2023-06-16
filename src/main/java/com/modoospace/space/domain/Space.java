@@ -3,7 +3,6 @@ package com.modoospace.space.domain;
 import static javax.persistence.FetchType.LAZY;
 
 import com.modoospace.common.BaseTimeEntity;
-import com.modoospace.exception.PermissionDeniedException;
 import com.modoospace.member.domain.Member;
 import com.modoospace.member.domain.Role;
 import com.sun.istack.NotNull;
@@ -54,19 +53,22 @@ public class Space extends BaseTimeEntity {
     this.id = id;
     this.name = name;
     this.address = address;
-    validateHost(host);
-    this.host = host;
-    this.facilities = facilities;
-  }
 
-  private void validateHost(Member host) {
-    if (!host.isRoleEqual(Role.HOST)) {
-      throw new PermissionDeniedException();
-    }
+    host.verifyRolePermission(Role.HOST);
+    this.host = host;
+
+    this.facilities = facilities;
   }
 
   public void update(String name, Address address) {
     this.name = name;
     this.address = address;
+  }
+
+  public void verifyUpdateAndDeletePermission(Member loginMember) {
+    if(host == loginMember){
+      return;
+    }
+    loginMember.verifyRolePermission(Role.ADMIN);
   }
 }

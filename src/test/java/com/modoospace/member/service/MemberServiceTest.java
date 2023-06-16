@@ -1,6 +1,5 @@
 package com.modoospace.member.service;
 
-import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.junit.jupiter.api.Assertions.assertAll;
 
@@ -56,30 +55,30 @@ class MemberServiceTest {
 
   @DisplayName("Visitor 사용자를 Host로 변경한디.")
   @Test
-  public void updateMember() {
+  public void updateMemberRole() {
     MemberUpdateDto updateDto = MemberUpdateDto.builder()
         .email("visitor@email")
         .role(Role.HOST)
         .build();
 
-    memberService.updateMember(updateDto, "admin@email");
+    memberService.updateMemberRole(updateDto, "admin@email");
 
     Member updateMember = memberRepository.findByEmail("visitor@email").get();
-    assertThat(updateMember.isRoleEqual(Role.HOST)).isTrue();
+    updateMember.verifyRolePermission(Role.HOST);
   }
 
   @DisplayName("관리자가 아닐 경우, 사용자의 권한을 변경할 수 없다. (본인도 포함이다.)")
   @Test
-  public void updateMember_throwException_ifNotAdmin() {
+  public void updateMemberRole_throwException_ifNotAdmin() {
     MemberUpdateDto updateDto = MemberUpdateDto.builder()
         .email("visitor@email")
         .role(Role.HOST)
         .build();
 
     assertAll(
-        () -> assertThatThrownBy(() -> memberService.updateMember(updateDto, "visitor@email"))
+        () -> assertThatThrownBy(() -> memberService.updateMemberRole(updateDto, "visitor@email"))
             .isInstanceOf(PermissionDeniedException.class),
-        () -> assertThatThrownBy(() -> memberService.updateMember(updateDto, "host@email"))
+        () -> assertThatThrownBy(() -> memberService.updateMemberRole(updateDto, "host@email"))
             .isInstanceOf(PermissionDeniedException.class)
     );
   }

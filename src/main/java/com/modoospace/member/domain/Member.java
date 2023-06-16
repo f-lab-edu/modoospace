@@ -1,6 +1,7 @@
 package com.modoospace.member.domain;
 
 import com.modoospace.common.BaseTimeEntity;
+import com.modoospace.exception.PermissionDeniedException;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.EnumType;
@@ -11,6 +12,8 @@ import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 
 @Entity
 @Getter
@@ -40,25 +43,27 @@ public class Member extends BaseTimeEntity {
     this.role = role;
   }
 
-  public Member updateName(String name) {
+  public Member updateNameFromProvider(String name) {
     this.name = name;
     return this;
   }
 
-  public Member updateRole(Role role) {
+  public GrantedAuthority createGrantedAuthority() {
+    return new SimpleGrantedAuthority(role.getKey());
+  }
+
+  public void updateRoleOnlyAdmin(Role role, Member loginMember) {
+    loginMember.verifyRolePermission(Role.ADMIN);
     this.role = role;
-    return this;
   }
 
-  public boolean isRoleEqual(Role role) {
-    return this.role.equals(role);
+  public void verifyRolePermission(Role role) {
+    if (isSameRole(role)) {
+      throw new PermissionDeniedException();
+    }
   }
 
-  public String getRoleKey() {
-    return this.role.getKey();
-  }
-
-  public boolean isEqual(Member member) {
-    return this.id.equals(member.getId());
+  private boolean isSameRole(Role role) {
+    return !this.role.equals(role);
   }
 }
