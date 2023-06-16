@@ -11,17 +11,16 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class Address {
 
-  private String fullAddress; // 전체 주소
   private String depthFirst; // 시도
   private String depthSecond; // 구
   private String depthThird; // 동
+  private String detailAddress; // 상세 주소
 
   @Builder
-  public Address(String fullAddress, String depthFirst, String depthSecond,
-      String depthThird) {
-    this.fullAddress = fullAddress;
+  public Address(String depthFirst, String depthSecond, String depthThird, String detailAddress) {
     this.depthFirst = depthFirst;
     this.depthSecond = depthSecond;
     this.depthThird = depthThird;
+    this.detailAddress = detailAddress;
   }
 }

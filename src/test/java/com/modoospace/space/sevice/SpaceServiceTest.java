@@ -65,10 +65,10 @@ class SpaceServiceTest {
     memberRepository.save(adminMember);
 
     address = Address.builder()
-        .fullAddress("fullAddress")
         .depthFirst("depthFirst")
         .depthSecond("depthSecond")
         .depthThird("depthThird")
+        .detailAddress("detailAddress")
         .build();
   }
 
@@ -113,10 +113,10 @@ class SpaceServiceTest {
         .build();
     Long spaceId = spaceService.createSpace(createDto, hostMember.getEmail());
     Address updateAddress = Address.builder()
-        .fullAddress("전체주소")
         .depthFirst("시도")
         .depthSecond("구")
         .depthThird("동")
+        .detailAddress("상세주소")
         .build();
     SpaceUpdateDto updateDto = SpaceUpdateDto.builder()
         .id(spaceId)
