@@ -4,6 +4,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.junit.jupiter.api.Assertions.assertAll;
 
+import com.modoospace.exception.PermissionDeniedException;
 import com.modoospace.member.domain.Member;
 import com.modoospace.member.domain.Role;
 import org.junit.jupiter.api.BeforeEach;
@@ -61,5 +62,31 @@ class SpaceTest {
             .host(adminMember)
             .build())
     );
+  }
+
+  @DisplayName("공간의 주인 또는 관리자만이 공간 수정/삭제를 할 수 있음을 검증한다.")
+  @Test
+  public void verifyUpdateAndDeletePermission() {
+    Space space = Space.builder()
+        .name("test")
+        .host(hostMember)
+        .build();
+
+    assertAll(
+        () -> space.verifyUpdateAndDeletePermission(hostMember),
+        () -> space.verifyUpdateAndDeletePermission(adminMember)
+    );
+  }
+
+  @DisplayName("공간의 주인 또는 관리자가 아닐 경우 공간 수정/삭제 권한 검증 시 예외를 던진다.")
+  @Test
+  public void verifyUpdateAndDeletePermission_throwException_ifNotPermission() {
+    Space space = Space.builder()
+        .name("test")
+        .host(hostMember)
+        .build();
+
+    assertThatThrownBy(() -> space.verifyUpdateAndDeletePermission(visitorMember))
+        .isInstanceOf(PermissionDeniedException.class);
   }
 }

@@ -103,7 +103,7 @@ class SpaceServiceTest {
     );
   }
 
-  @DisplayName("본인의 공간 OR 관리자일 경우 공간을 업데이트할 수 있다.")
+  @DisplayName("공간의 주인 또는 관리자만이 공간을 수정할 수 있다.")
   @ParameterizedTest
   @ValueSource(strings = {"host@email", "admin@email"})
   public void updateSpace(String testEmail) {
@@ -131,7 +131,7 @@ class SpaceServiceTest {
     assertThat(retSpaceDto.getAddress()).isEqualTo(updateAddress);
   }
 
-  @DisplayName("본인의 공간 AND 관리자가 아닐 경우 공간을 수정 시 예외를 던진다.")
+  @DisplayName("공간의 주인 또는 관리자가 아닐 경우 공간을 수정 시 예외를 던진다.")
   @Test
   public void updateSpace_throwException_IfAdminMemberOrOwnSpace() {
     SpaceCreateDto createDto = SpaceCreateDto.builder()
@@ -154,7 +154,7 @@ class SpaceServiceTest {
     );
   }
 
-  @DisplayName("본인의 공간 OR 관리자일 경우 공간을 삭제할 수 있다.")
+  @DisplayName("공간의 주인 또는 관리자만이 공간을 삭제할 수 있다.")
   @ParameterizedTest
   @ValueSource(strings = {"host@email", "admin@email"})
   public void deleteSpace(String testEmail) {
@@ -169,7 +169,7 @@ class SpaceServiceTest {
     assertThat(spaceRepository.existsById(spaceId)).isFalse();
   }
 
-  @DisplayName("본인의 공간 AND 관리자가 아닐 경우 공간을 삭제 시 예외를 던진다.")
+  @DisplayName("공간의 주인 또는 관리자가 아닐 경우 공간을 삭제 시 예외를 던진다.")
   @Test
   public void deleteSpace_throwException_IfAdminMemberOrOwnSpace() {
     SpaceCreateDto createDto = SpaceCreateDto.builder()
