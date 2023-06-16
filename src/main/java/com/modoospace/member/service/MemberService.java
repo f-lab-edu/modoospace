@@ -24,7 +24,7 @@ public class MemberService {
 
   private Member findMemberByEmail(String email) {
     Member member = memberRepository.findByEmail(email)
-        .orElseThrow(() -> new NotFoundEntityException("사용자"));
+        .orElseThrow(() -> new NotFoundEntityException("사용자", email));
     return member;
   }
 }

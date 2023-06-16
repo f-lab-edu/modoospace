@@ -38,7 +38,7 @@ public class SpaceService {
 
   public List<SpaceReadDto> findSpaceByHost(Long hostId) {
     Member host = memberRepository.findById(hostId)
-        .orElseThrow(() -> new NotFoundEntityException("사용자"));
+        .orElseThrow(() -> new NotFoundEntityException("사용자", hostId));
     List<Space> spaces = spaceRepository.findByHost(host);
 
     return SpaceReadDto.toList(spaces);
@@ -66,13 +66,13 @@ public class SpaceService {
 
   private Member findMemberByEmail(String email) {
     Member member = memberRepository.findByEmail(email)
-        .orElseThrow(() -> new NotFoundEntityException("사용자"));
+        .orElseThrow(() -> new NotFoundEntityException("사용자", email));
     return member;
   }
 
   private Space findSpaceById(Long spaceId) {
     Space space = spaceRepository.findById(spaceId)
-        .orElseThrow(() -> new NotFoundEntityException("공간"));
+        .orElseThrow(() -> new NotFoundEntityException("공간", spaceId));
     return space;
   }
 }
