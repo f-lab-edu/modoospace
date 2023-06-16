@@ -19,9 +19,9 @@ public class MemberController {
   private final MemberService memberService;
 
   @PutMapping("/member")
-  public ResponseEntity<Void> updateMember(@RequestBody @Valid MemberUpdateDto updateDto,
+  public ResponseEntity<Void> updateMemberRole(@RequestBody @Valid MemberUpdateDto updateDto,
       @LoginEmail String loginEmail) {
-    memberService.updateMember(updateDto, loginEmail);
+    memberService.updateMemberRole(updateDto, loginEmail);
     return ResponseEntity.noContent().build();
   }
 }
