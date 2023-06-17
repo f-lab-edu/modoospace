@@ -5,6 +5,7 @@ import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
 import lombok.AccessLevel;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
@@ -20,4 +21,10 @@ public class Category {
 
   @Column(nullable = false)
   private String name;
+
+  @Builder
+  public Category(Long id, String name) {
+    this.id = id;
+    this.name = name;
+  }
 }
