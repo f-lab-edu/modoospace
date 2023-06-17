@@ -12,7 +12,7 @@ import org.springframework.web.method.support.ModelAndViewContainer;
 
 @RequiredArgsConstructor
 @Component
-public class LoginUserArgumentResolver implements HandlerMethodArgumentResolver {
+public class LoginEmailArgumentResolver implements HandlerMethodArgumentResolver {
 
   private final HttpSession httpSession;
 
@@ -24,12 +24,12 @@ public class LoginUserArgumentResolver implements HandlerMethodArgumentResolver 
    */
   @Override
   public boolean supportsParameter(MethodParameter parameter) {
-    boolean isLoginUserAnnotation =
-        parameter.getParameterAnnotation(LoginUser.class) != null; // 파라미터에 @LoginUser 어노테이션 유무 확인
-    boolean isUserClass = SessionMember.class
-        .equals(parameter.getParameterType()); // 파라미터 클래스 타입 SessionUser인지 확인
+    boolean isLoginEmailAnnotation =
+        parameter.getParameterAnnotation(LoginEmail.class) != null;
+    boolean isStringClass = String.class
+        .equals(parameter.getParameterType());
 
-    return isLoginUserAnnotation && isUserClass;
+    return isLoginEmailAnnotation && isStringClass;
   }
 
   /**
@@ -45,6 +45,7 @@ public class LoginUserArgumentResolver implements HandlerMethodArgumentResolver 
   @Override
   public Object resolveArgument(MethodParameter parameter, ModelAndViewContainer mavContainer,
       NativeWebRequest webRequest, WebDataBinderFactory binderFactory) throws Exception {
-    return httpSession.getAttribute("member"); // 세션에서 객체를 가져와 전달
+    SessionMember member = (SessionMember) httpSession.getAttribute("member");
+    return member == null ? null : member.getEmail();
   }
 }

@@ -2,7 +2,10 @@ package com.modoospace.space.domain;
 
 import static javax.persistence.FetchType.LAZY;
 
+import com.modoospace.common.BaseTimeEntity;
 import com.modoospace.member.domain.Member;
+import com.modoospace.member.domain.Role;
+import com.sun.istack.NotNull;
 import java.util.ArrayList;
 import java.util.List;
 import javax.persistence.CascadeType;
@@ -15,13 +18,15 @@ import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 import lombok.AccessLevel;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 @Entity
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-public class Space {
+@Builder
+public class Space extends BaseTimeEntity {
 
   @Id
   @GeneratedValue
@@ -31,6 +36,7 @@ public class Space {
   @Column(nullable = false)
   private String name;
 
+  @NotNull
   @Embedded
   private Address address;
 
@@ -38,6 +44,31 @@ public class Space {
   @JoinColumn(name = "host_id")
   private Member host;
 
+  @Builder.Default
   @OneToMany(mappedBy = "space", cascade = CascadeType.ALL)
   private List<Facility> facilities = new ArrayList<>();
+
+  public Space(Long id, String name, Address address, Member host,
+      List<Facility> facilities) {
+    this.id = id;
+    this.name = name;
+    this.address = address;
+
+    host.verifyRolePermission(Role.HOST);
+    this.host = host;
+
+    this.facilities = facilities;
+  }
+
+  public void update(String name, Address address) {
+    this.name = name;
+    this.address = address;
+  }
+
+  public void verifyUpdateAndDeletePermission(Member loginMember) {
+    if(host == loginMember){
+      return;
+    }
+    loginMember.verifyRolePermission(Role.ADMIN);
+  }
 }
