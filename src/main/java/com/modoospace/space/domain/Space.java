@@ -71,7 +71,7 @@ public class Space extends BaseTimeEntity {
     this.category = category;
   }
 
-  public void verifyPermission(Member loginMember) {
+  public void verifyManagementPermission(Member loginMember) {
     if (host == loginMember) {
       return;
     }

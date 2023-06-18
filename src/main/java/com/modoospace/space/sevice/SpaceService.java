@@ -31,7 +31,7 @@ public class SpaceService {
 
     Space space = createDto.toEntity(host, category);
 
-    space.verifyPermission(loginMember);
+    space.verifyManagementPermission(loginMember);
     spaceRepository.save(space);
 
     return space.getId();
@@ -57,7 +57,7 @@ public class SpaceService {
     Space space = findSpaceById(updateDto.getId());
     Category category = findCategoryById(updateDto.getCategoryId());
 
-    space.verifyPermission(loginMember);
+    space.verifyManagementPermission(loginMember);
     space.update(updateDto.getName(), updateDto.getAddress(), category);
   }
 
@@ -68,7 +68,7 @@ public class SpaceService {
 
     // TODO: 예약이 존재하는지 확인이 필요합니다.
 
-    space.verifyPermission(loginMember);
+    space.verifyManagementPermission(loginMember);
     spaceRepository.delete(space);
   }
 
