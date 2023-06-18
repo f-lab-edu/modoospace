@@ -41,6 +41,10 @@ public class Space extends BaseTimeEntity {
   private Address address;
 
   @ManyToOne(fetch = LAZY)
+  @JoinColumn(name = "category_id")
+  private Category category;
+
+  @ManyToOne(fetch = LAZY)
   @JoinColumn(name = "host_id")
   private Member host;
 
@@ -48,11 +52,12 @@ public class Space extends BaseTimeEntity {
   @OneToMany(mappedBy = "space", cascade = CascadeType.ALL)
   private List<Facility> facilities = new ArrayList<>();
 
-  public Space(Long id, String name, Address address, Member host,
-      List<Facility> facilities) {
+  public Space(Long id, String name, Address address, Category category,
+      Member host, List<Facility> facilities) {
     this.id = id;
     this.name = name;
     this.address = address;
+    this.category = category;
 
     host.verifyRolePermission(Role.HOST);
     this.host = host;
@@ -60,13 +65,14 @@ public class Space extends BaseTimeEntity {
     this.facilities = facilities;
   }
 
-  public void update(String name, Address address) {
+  public void update(String name, Address address, Category category) {
     this.name = name;
     this.address = address;
+    this.category = category;
   }
 
-  public void verifyUpdateAndDeletePermission(Member loginMember) {
-    if(host == loginMember){
+  public void verifyPermission(Member loginMember) {
+    if (host == loginMember) {
       return;
     }
     loginMember.verifyRolePermission(Role.ADMIN);
