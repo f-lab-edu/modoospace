@@ -20,10 +20,13 @@ public class SpaceUpdateDto {
   @NotNull
   private Address address;
 
+  private Long categoryId;
+
   @Builder
-  public SpaceUpdateDto(Long id, String name, Address address) {
+  public SpaceUpdateDto(Long id, String name, Address address, Long categoryId) {
     this.id = id;
     this.name = name;
     this.address = address;
+    this.categoryId = categoryId;
   }
 }

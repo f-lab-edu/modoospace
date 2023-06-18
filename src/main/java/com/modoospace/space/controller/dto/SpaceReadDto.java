@@ -3,7 +3,6 @@ package com.modoospace.space.controller.dto;
 import com.modoospace.member.controller.dto.MemberReadDto;
 import com.modoospace.space.domain.Address;
 import com.modoospace.space.domain.Space;
-import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -32,12 +31,11 @@ public class SpaceReadDto {
   @NotNull
   private MemberReadDto host;
 
+  @NotNull
+  private CategoryReadDto category;
+
   @Builder.Default
   List<FacilityReadDto> facilities = new ArrayList<>();
-
-  private LocalDateTime createdTime;
-
-  private LocalDateTime updatedTime;
 
   public static SpaceReadDto toDto(Space space) {
     return SpaceReadDto.builder()
@@ -45,13 +43,12 @@ public class SpaceReadDto {
         .name(space.getName())
         .address(space.getAddress())
         .host(MemberReadDto.toDto(space.getHost()))
-        .facilities(FacilityReadDto.toDtoList(space.getFacilities()))
-        .createdTime(space.getCreatedTime())
-        .updatedTime(space.getUpdatedTime())
+        .category(CategoryReadDto.toDto(space.getCategory()))
+        .facilities(FacilityReadDto.toDtos(space.getFacilities()))
         .build();
   }
 
-  public static List<SpaceReadDto> toList(List<Space> spaces) {
+  public static List<SpaceReadDto> toDtos(List<Space> spaces) {
     return spaces.stream()
         .map(SpaceReadDto::toDto)
         .collect(Collectors.toList());
