@@ -10,7 +10,7 @@ import com.modoospace.member.domain.Member;
 import com.modoospace.member.domain.MemberRepository;
 import com.modoospace.member.domain.Role;
 import com.modoospace.space.controller.dto.SpaceCreateUpdateDto;
-import com.modoospace.space.controller.dto.SpaceReadDto;
+import com.modoospace.space.controller.dto.SpaceReadDetailDto;
 import com.modoospace.space.domain.Address;
 import com.modoospace.space.domain.Category;
 import com.modoospace.space.domain.CategoryRepository;
@@ -94,7 +94,7 @@ class SpaceServiceTest {
   public void createSpace_IfHost() {
     Long spaceId = spaceService.createSpace(category.getId(), createDto, hostMember.getEmail());
 
-    SpaceReadDto retSpaceDto = spaceService.findSpace(spaceId);
+    SpaceReadDetailDto retSpaceDto = spaceService.findSpace(spaceId);
     assertAll(
         () -> assertThat(retSpaceDto.getId()).isEqualTo(spaceId),
         () -> assertThat(retSpaceDto.getName()).isEqualTo("공간이름"),
@@ -130,7 +130,7 @@ class SpaceServiceTest {
 
     spaceService.updateSpace(spaceId, updateDto, email);
 
-    SpaceReadDto retSpaceDto = spaceService.findSpace(spaceId);
+    SpaceReadDetailDto retSpaceDto = spaceService.findSpace(spaceId);
     assertAll(
         () -> assertThat(retSpaceDto.getName()).isEqualTo("업데이트공간"),
         () -> assertThat(retSpaceDto.getDesc()).isEqualTo("업데이트설명"),
