@@ -33,6 +33,9 @@ public class Facility extends BaseTimeEntity {
   @Column(nullable = false)
   private FacilityType facilityType;
 
+  @Column(nullable = false)
+  private Boolean reservationEnable;
+
   private String desc;
 
   @ManyToOne(fetch = LAZY)
@@ -40,11 +43,12 @@ public class Facility extends BaseTimeEntity {
   private Space space;
 
   @Builder
-  public Facility(Long id, String name, FacilityType facilityType, String desc,
-      Space space) {
+  public Facility(Long id, String name, FacilityType facilityType, Boolean reservationEnable,
+      String desc, Space space) {
     this.id = id;
     this.name = name;
     this.facilityType = facilityType;
+    this.reservationEnable = reservationEnable;
     this.desc = desc;
     this.space = space;
   }
