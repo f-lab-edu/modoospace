@@ -3,9 +3,9 @@ package com.modoospace.space.sevice;
 import com.modoospace.exception.NotFoundEntityException;
 import com.modoospace.member.domain.Member;
 import com.modoospace.member.domain.MemberRepository;
-import com.modoospace.space.controller.dto.SpaceCreateDto;
+import com.modoospace.space.controller.dto.SpaceCreateUpdateDto;
 import com.modoospace.space.controller.dto.SpaceReadDto;
-import com.modoospace.space.controller.dto.SpaceUpdateDto;
+import com.modoospace.space.controller.dto.SpaceSearchDto;
 import com.modoospace.space.domain.Category;
 import com.modoospace.space.domain.CategoryRepository;
 import com.modoospace.space.domain.Space;
@@ -24,23 +24,23 @@ public class SpaceService {
   private final CategoryRepository categoryRepository;
 
   @Transactional
-  public Long createSpace(SpaceCreateDto createDto, String loginEmail) {
-    Member loginMember = findMemberByEmail(loginEmail);
-    Member host = findMemberByEmail(createDto.getHostEmail());
-    Category category = findCategoryById(createDto.getCategoryId());
+  public Long createSpace(Long categoryId, SpaceCreateUpdateDto createDto, String loginEmail) {
+    Member host = findMemberByEmail(loginEmail);
+    Category category = findCategoryById(categoryId);
 
-    Space space = createDto.toEntity(host, category);
-
-    space.verifyManagementPermission(loginMember);
+    Space space = createDto.toEntity(category, host);
     spaceRepository.save(space);
 
     return space.getId();
   }
 
-  public SpaceReadDto findSpace(Long spaceId) {
-    Space space = findSpaceById(spaceId);
+  public List<SpaceReadDto> findSpaceByCategoryAndLocation(Long categoryId,
+      SpaceSearchDto spaceSearchDto) {
+    // TODO: 페이징 처리 및 위치기반 필터링 필요합니다.
+    Category category = findCategoryById(categoryId);
+    List<Space> spaces = spaceRepository.findByCategory(category);
 
-    return SpaceReadDto.toDto(space);
+    return SpaceReadDto.toDtos(spaces);
   }
 
   public List<SpaceReadDto> findSpaceByHost(Long hostId) {
@@ -51,14 +51,19 @@ public class SpaceService {
     return SpaceReadDto.toDtos(spaces);
   }
 
+  public SpaceReadDto findSpace(Long spaceId) {
+    Space space = findSpaceById(spaceId);
+
+    return SpaceReadDto.toDto(space);
+  }
+
   @Transactional
-  public void updateSpace(SpaceUpdateDto updateDto, String email) {
+  public void updateSpace(Long spaceId, SpaceCreateUpdateDto updateDto, String email) {
     Member loginMember = findMemberByEmail(email);
-    Space space = findSpaceById(updateDto.getId());
-    Category category = findCategoryById(updateDto.getCategoryId());
+    Space space = findSpaceById(spaceId);
 
     space.verifyManagementPermission(loginMember);
-    space.update(updateDto.getName(), updateDto.getAddress(), category);
+    space.update(updateDto.toEntity(space.getCategory(), space.getHost()));
   }
 
   @Transactional
