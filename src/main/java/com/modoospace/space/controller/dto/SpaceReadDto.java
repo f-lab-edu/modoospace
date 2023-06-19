@@ -25,6 +25,8 @@ public class SpaceReadDto {
   @NotEmpty
   private String name;
 
+  private String desc;
+
   @NotNull
   private Address address;
 
@@ -41,6 +43,7 @@ public class SpaceReadDto {
     return SpaceReadDto.builder()
         .id(space.getId())
         .name(space.getName())
+        .desc(space.getDesc())
         .address(space.getAddress())
         .host(MemberReadDto.toDto(space.getHost()))
         .category(CategoryReadDto.toDto(space.getCategory()))

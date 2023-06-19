@@ -36,6 +36,8 @@ public class Space extends BaseTimeEntity {
   @Column(nullable = false)
   private String name;
 
+  private String desc;
+
   @NotNull
   @Embedded
   private Address address;
@@ -52,10 +54,11 @@ public class Space extends BaseTimeEntity {
   @OneToMany(mappedBy = "space", cascade = CascadeType.ALL)
   private List<Facility> facilities = new ArrayList<>();
 
-  public Space(Long id, String name, Address address, Category category,
-      Member host, List<Facility> facilities) {
+  public Space(Long id, String name, String desc, Address address,
+      Category category, Member host, List<Facility> facilities) {
     this.id = id;
     this.name = name;
+    this.desc = desc;
     this.address = address;
     this.category = category;
 
@@ -65,10 +68,10 @@ public class Space extends BaseTimeEntity {
     this.facilities = facilities;
   }
 
-  public void update(String name, Address address, Category category) {
-    this.name = name;
-    this.address = address;
-    this.category = category;
+  public void update(final Space updateSpace) {
+    this.name = updateSpace.getName();
+    this.desc = updateSpace.getDesc();
+    this.address = updateSpace.getAddress();
   }
 
   public void verifyManagementPermission(Member loginMember) {

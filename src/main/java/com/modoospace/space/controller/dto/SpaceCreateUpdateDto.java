@@ -12,31 +12,27 @@ import lombok.NoArgsConstructor;
 
 @Getter
 @NoArgsConstructor
-public class SpaceCreateDto {
+public class SpaceCreateUpdateDto {
 
   @NotEmpty
   private String name;
 
+  private String desc;
+
   @NotNull
   private Address address;
 
-  @NotNull
-  private Long categoryId;
-
-  @NotEmpty
-  private String hostEmail;
-
   @Builder
-  public SpaceCreateDto(String name, Address address, Long categoryId, String hostEmail) {
+  public SpaceCreateUpdateDto(String name, String desc, Address address) {
     this.name = name;
+    this.desc = desc;
     this.address = address;
-    this.categoryId = categoryId;
-    this.hostEmail = hostEmail;
   }
 
-  public Space toEntity(Member host, Category category) {
+  public Space toEntity(Category category, Member host) {
     return Space.builder()
         .name(name)
+        .desc(desc)
         .address(address)
         .category(category)
         .host(host)
