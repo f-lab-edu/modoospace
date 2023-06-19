@@ -57,11 +57,10 @@ class MemberServiceTest {
   @Test
   public void updateMemberRole() {
     MemberUpdateDto updateDto = MemberUpdateDto.builder()
-        .email("visitor@email")
         .role(Role.HOST)
         .build();
 
-    memberService.updateMemberRole(updateDto, "admin@email");
+    memberService.updateMemberRole(visitorMember.getId(), updateDto, "admin@email");
 
     Member updateMember = memberRepository.findByEmail("visitor@email").get();
     updateMember.verifyRolePermission(Role.HOST);
@@ -71,14 +70,15 @@ class MemberServiceTest {
   @Test
   public void updateMemberRole_throwException_ifNotAdmin() {
     MemberUpdateDto updateDto = MemberUpdateDto.builder()
-        .email("visitor@email")
         .role(Role.HOST)
         .build();
 
     assertAll(
-        () -> assertThatThrownBy(() -> memberService.updateMemberRole(updateDto, "visitor@email"))
+        () -> assertThatThrownBy(
+            () -> memberService.updateMemberRole(visitorMember.getId(), updateDto, "visitor@email"))
             .isInstanceOf(PermissionDeniedException.class),
-        () -> assertThatThrownBy(() -> memberService.updateMemberRole(updateDto, "host@email"))
+        () -> assertThatThrownBy(
+            () -> memberService.updateMemberRole(hostMember.getId(), updateDto, "host@email"))
             .isInstanceOf(PermissionDeniedException.class)
     );
   }
