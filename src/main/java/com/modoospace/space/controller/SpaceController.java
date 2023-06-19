@@ -3,7 +3,6 @@ package com.modoospace.space.controller;
 import com.modoospace.config.auth.LoginEmail;
 import com.modoospace.space.controller.dto.SpaceCreateUpdateDto;
 import com.modoospace.space.controller.dto.SpaceReadDto;
-import com.modoospace.space.controller.dto.SpaceSearchDto;
 import com.modoospace.space.sevice.SpaceService;
 import java.net.URI;
 import java.util.List;
@@ -31,14 +30,12 @@ public class SpaceController {
       @RequestBody @Valid SpaceCreateUpdateDto createDto,
       @LoginEmail String loginEmail) {
     Long spaceId = spaceService.createSpace(categoryId, createDto, loginEmail);
-    return ResponseEntity.created(URI.create("/space/" + spaceId)).build();
+    return ResponseEntity.created(URI.create("/api/v1/spaces/" + spaceId)).build();
   }
 
   @GetMapping("/category/{categoryId}")
-  public ResponseEntity<List<SpaceReadDto>> findByCategoryAndLocation(@PathVariable Long categoryId,
-      @RequestBody @Valid SpaceSearchDto spaceSearchDto) {
-    List<SpaceReadDto> spaceReadDtos = spaceService
-        .findSpaceByCategoryAndLocation(categoryId, spaceSearchDto);
+  public ResponseEntity<List<SpaceReadDto>> findByCategory(@PathVariable Long categoryId) {
+    List<SpaceReadDto> spaceReadDtos = spaceService.findSpaceByCategory(categoryId);
     return ResponseEntity.ok().body(spaceReadDtos);
   }
 

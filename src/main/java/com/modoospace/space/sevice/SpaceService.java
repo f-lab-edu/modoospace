@@ -34,9 +34,8 @@ public class SpaceService {
     return space.getId();
   }
 
-  public List<SpaceReadDto> findSpaceByCategoryAndLocation(Long categoryId,
-      SpaceSearchDto spaceSearchDto) {
-    // TODO: 페이징 처리 및 위치기반 필터링 필요합니다.
+  public List<SpaceReadDto> findSpaceByCategory(Long categoryId){
+    // TODO : 페이징처리가 필요합니다.
     Category category = findCategoryById(categoryId);
     List<Space> spaces = spaceRepository.findByCategory(category);
 

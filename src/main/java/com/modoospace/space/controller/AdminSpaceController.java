@@ -29,7 +29,7 @@ public class AdminSpaceController {
   }
 
   @DeleteMapping("/{spaceId}")
-  public ResponseEntity<Void> deleteSpace(@PathVariable Long spaceId,
+  public ResponseEntity<Void> delete(@PathVariable Long spaceId,
       @LoginEmail String loginEmail) {
     spaceService.deleteSpace(spaceId, loginEmail);
     return ResponseEntity.noContent().build();
