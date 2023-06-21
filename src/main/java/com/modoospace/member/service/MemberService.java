@@ -15,9 +15,9 @@ public class MemberService {
   private final MemberRepository memberRepository;
 
   @Transactional
-  public void updateMemberRole(Long memberId, MemberUpdateDto updateDto, String loginEmail) {
+  public void updateMemberRole(MemberUpdateDto updateDto, String loginEmail) {
     Member loginMember = findMemberByEmail(loginEmail);
-    Member member = findMemberById(memberId);
+    Member member = findMemberByEmail(updateDto.getEmail());
 
     member.updateRoleOnlyAdmin(updateDto.getRole(), loginMember);
   }
@@ -25,12 +25,6 @@ public class MemberService {
   private Member findMemberByEmail(String email) {
     Member member = memberRepository.findByEmail(email)
         .orElseThrow(() -> new NotFoundEntityException("사용자", email));
-    return member;
-  }
-
-  private Member findMemberById(Long id) {
-    Member member = memberRepository.findById(id)
-        .orElseThrow(() -> new NotFoundEntityException("사용자", id));
     return member;
   }
 }

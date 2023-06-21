@@ -1,9 +1,9 @@
 package com.modoospace.space.controller;
 
 import com.modoospace.config.auth.LoginEmail;
-import com.modoospace.space.controller.dto.SpaceCreateUpdateDto;
-import com.modoospace.space.controller.dto.SpaceReadDetailDto;
+import com.modoospace.space.controller.dto.SpaceCreateDto;
 import com.modoospace.space.controller.dto.SpaceReadDto;
+import com.modoospace.space.controller.dto.SpaceUpdateDto;
 import com.modoospace.space.sevice.SpaceService;
 import java.net.URI;
 import java.util.List;
@@ -21,47 +21,39 @@ import org.springframework.web.bind.annotation.RestController;
 
 @RequiredArgsConstructor
 @RestController
-@RequestMapping("/api/v1/spaces")
+@RequestMapping("/api/v1")
 public class SpaceController {
 
   private final SpaceService spaceService;
 
-  @PostMapping("/category/{categoryId}")
-  public ResponseEntity<Void> create(@PathVariable Long categoryId,
-      @RequestBody @Valid SpaceCreateUpdateDto createDto,
+  @PostMapping("/space")
+  public ResponseEntity<Void> createSpace(@RequestBody @Valid SpaceCreateDto createDto,
       @LoginEmail String loginEmail) {
-    Long spaceId = spaceService.createSpace(categoryId, createDto, loginEmail);
-    return ResponseEntity.created(URI.create("/api/v1/spaces/" + spaceId)).build();
+    Long spaceId = spaceService.createSpace(createDto, loginEmail);
+    return ResponseEntity.created(URI.create("/space/" + spaceId)).build();
   }
 
-  @GetMapping("/category/{categoryId}")
-  public ResponseEntity<List<SpaceReadDto>> findByCategory(@PathVariable Long categoryId) {
-    List<SpaceReadDto> spaceReadDtos = spaceService.findSpaceByCategory(categoryId);
-    return ResponseEntity.ok().body(spaceReadDtos);
+  @GetMapping("/space/{spaceId}")
+  public ResponseEntity<SpaceReadDto> findSpace(@PathVariable Long spaceId) {
+    SpaceReadDto spaceReadDto = spaceService.findSpace(spaceId);
+    return ResponseEntity.ok().body(spaceReadDto);
   }
 
-  @GetMapping("/host/{hostId}")
-  public ResponseEntity<List<SpaceReadDto>> findByHost(@PathVariable Long hostId) {
+  @GetMapping("/spaces/{hostId}")
+  public ResponseEntity<List<SpaceReadDto>> findSpaceByHost(@PathVariable Long hostId) {
     List<SpaceReadDto> spaceReadDtos = spaceService.findSpaceByHost(hostId);
     return ResponseEntity.ok().body(spaceReadDtos);
   }
 
-  @GetMapping("/{spaceId}")
-  public ResponseEntity<SpaceReadDetailDto> find(@PathVariable Long spaceId) {
-    SpaceReadDetailDto spaceReadDto = spaceService.findSpace(spaceId);
-    return ResponseEntity.ok().body(spaceReadDto);
-  }
-
-  @PutMapping("/{spaceId}")
-  public ResponseEntity<Void> update(@PathVariable Long spaceId,
-      @RequestBody @Valid SpaceCreateUpdateDto updateDto,
+  @PutMapping("/space")
+  public ResponseEntity<Void> updateSpace(@RequestBody @Valid SpaceUpdateDto updateDto,
       @LoginEmail String loginEmail) {
-    spaceService.updateSpace(spaceId, updateDto, loginEmail);
+    spaceService.updateSpace(updateDto, loginEmail);
     return ResponseEntity.noContent().build();
   }
 
-  @DeleteMapping("/{spaceId}")
-  public ResponseEntity<Void> delete(@PathVariable Long spaceId,
+  @DeleteMapping("/space/{spaceId}")
+  public ResponseEntity<Void> deleteSpace(@PathVariable Long spaceId,
       @LoginEmail String loginEmail) {
     spaceService.deleteSpace(spaceId, loginEmail);
     return ResponseEntity.noContent().build();

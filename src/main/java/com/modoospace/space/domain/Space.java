@@ -36,15 +36,9 @@ public class Space extends BaseTimeEntity {
   @Column(nullable = false)
   private String name;
 
-  private String desc;
-
   @NotNull
   @Embedded
   private Address address;
-
-  @ManyToOne(fetch = LAZY)
-  @JoinColumn(name = "category_id")
-  private Category category;
 
   @ManyToOne(fetch = LAZY)
   @JoinColumn(name = "host_id")
@@ -54,13 +48,11 @@ public class Space extends BaseTimeEntity {
   @OneToMany(mappedBy = "space", cascade = CascadeType.ALL)
   private List<Facility> facilities = new ArrayList<>();
 
-  public Space(Long id, String name, String desc, Address address,
-      Category category, Member host, List<Facility> facilities) {
+  public Space(Long id, String name, Address address, Member host,
+      List<Facility> facilities) {
     this.id = id;
     this.name = name;
-    this.desc = desc;
     this.address = address;
-    this.category = category;
 
     host.verifyRolePermission(Role.HOST);
     this.host = host;
@@ -68,14 +60,13 @@ public class Space extends BaseTimeEntity {
     this.facilities = facilities;
   }
 
-  public void update(final Space updateSpace) {
-    this.name = updateSpace.getName();
-    this.desc = updateSpace.getDesc();
-    this.address = updateSpace.getAddress();
+  public void update(String name, Address address) {
+    this.name = name;
+    this.address = address;
   }
 
-  public void verifyManagementPermission(Member loginMember) {
-    if (host == loginMember) {
+  public void verifyUpdateAndDeletePermission(Member loginMember) {
+    if(host == loginMember){
       return;
     }
     loginMember.verifyRolePermission(Role.ADMIN);

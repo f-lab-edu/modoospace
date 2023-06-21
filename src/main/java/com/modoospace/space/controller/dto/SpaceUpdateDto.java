@@ -1,6 +1,6 @@
 package com.modoospace.space.controller.dto;
 
-import com.modoospace.space.domain.Category;
+import com.modoospace.space.domain.Address;
 import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.NotNull;
 import lombok.Builder;
@@ -9,7 +9,7 @@ import lombok.NoArgsConstructor;
 
 @Getter
 @NoArgsConstructor
-public class CategoryReadDto {
+public class SpaceUpdateDto {
 
   @NotNull
   private Long id;
@@ -17,16 +17,13 @@ public class CategoryReadDto {
   @NotEmpty
   private String name;
 
+  @NotNull
+  private Address address;
+
   @Builder
-  public CategoryReadDto(Long id, String name) {
+  public SpaceUpdateDto(Long id, String name, Address address) {
     this.id = id;
     this.name = name;
-  }
-
-  public static CategoryReadDto toDto(Category category) {
-    return CategoryReadDto.builder()
-        .id(category.getId())
-        .name(category.getName())
-        .build();
+    this.address = address;
   }
 }

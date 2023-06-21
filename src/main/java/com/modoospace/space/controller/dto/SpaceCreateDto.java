@@ -2,7 +2,6 @@ package com.modoospace.space.controller.dto;
 
 import com.modoospace.member.domain.Member;
 import com.modoospace.space.domain.Address;
-import com.modoospace.space.domain.Category;
 import com.modoospace.space.domain.Space;
 import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.NotNull;
@@ -12,30 +11,25 @@ import lombok.NoArgsConstructor;
 
 @Getter
 @NoArgsConstructor
-public class SpaceCreateUpdateDto {
+public class SpaceCreateDto {
 
   @NotEmpty
   private String name;
-
-  private String desc;
 
   @NotNull
   private Address address;
 
   @Builder
-  public SpaceCreateUpdateDto(String name, String desc, Address address) {
+  public SpaceCreateDto(String name, Address address) {
     this.name = name;
-    this.desc = desc;
     this.address = address;
   }
 
-  public Space toEntity(Category category, Member host) {
+  public Space toEntity(Member member) {
     return Space.builder()
         .name(name)
-        .desc(desc)
         .address(address)
-        .category(category)
-        .host(host)
+        .host(member)
         .build();
   }
 }
