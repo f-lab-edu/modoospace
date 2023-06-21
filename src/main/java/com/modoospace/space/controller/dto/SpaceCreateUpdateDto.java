@@ -17,22 +17,22 @@ public class SpaceCreateUpdateDto {
   @NotEmpty
   private String name;
 
-  private String desc;
+  private String description;
 
   @NotNull
   private Address address;
 
   @Builder
-  public SpaceCreateUpdateDto(String name, String desc, Address address) {
+  public SpaceCreateUpdateDto(String name, String description, Address address) {
     this.name = name;
-    this.desc = desc;
+    this.description = description;
     this.address = address;
   }
 
   public Space toEntity(Category category, Member host) {
     return Space.builder()
         .name(name)
-        .desc(desc)
+        .description(description)
         .address(address)
         .category(category)
         .host(host)
