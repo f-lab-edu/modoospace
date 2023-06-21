@@ -19,6 +19,7 @@ class SpaceTest {
 
   @BeforeEach
   public void setUp() {
+
     adminMember = Member.builder()
         .email("admin@email")
         .name("admin")
@@ -64,29 +65,29 @@ class SpaceTest {
     );
   }
 
-  @DisplayName("공간의 주인 또는 관리자만이 공간 수정/삭제를 할 수 있음을 검증한다.")
+  @DisplayName("공간의 주인/관리자만이 공간 수정/삭제를 할 수 있음을 검증한다.")
   @Test
-  public void verifyUpdateAndDeletePermission() {
+  public void verifyManagementPermission() {
     Space space = Space.builder()
         .name("test")
         .host(hostMember)
         .build();
 
     assertAll(
-        () -> space.verifyUpdateAndDeletePermission(hostMember),
-        () -> space.verifyUpdateAndDeletePermission(adminMember)
+        () -> space.verifyManagementPermission(hostMember),
+        () -> space.verifyManagementPermission(adminMember)
     );
   }
 
-  @DisplayName("공간의 주인 또는 관리자가 아닐 경우 공간 수정/삭제 권한 검증 시 예외를 던진다.")
+  @DisplayName("공간의 주인/관리자가 아닐 경우 공간 수정/삭제 권한 검증 시 예외를 던진다.")
   @Test
-  public void verifyUpdateAndDeletePermission_throwException_ifNotPermission() {
+  public void verifyManagementPermission_throwException_ifNotPermission() {
     Space space = Space.builder()
         .name("test")
         .host(hostMember)
         .build();
 
-    assertThatThrownBy(() -> space.verifyUpdateAndDeletePermission(visitorMember))
+    assertThatThrownBy(() -> space.verifyManagementPermission(visitorMember))
         .isInstanceOf(PermissionDeniedException.class);
   }
 }

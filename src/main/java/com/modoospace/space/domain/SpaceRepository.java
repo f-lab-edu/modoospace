@@ -7,4 +7,6 @@ import org.springframework.data.jpa.repository.JpaRepository;
 public interface SpaceRepository extends JpaRepository<Space, Long> {
 
   List<Space> findByHost(Member host);
+
+  List<Space> findByCategory(Category category);
 }

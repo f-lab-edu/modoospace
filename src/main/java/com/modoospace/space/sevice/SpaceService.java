@@ -3,9 +3,11 @@ package com.modoospace.space.sevice;
 import com.modoospace.exception.NotFoundEntityException;
 import com.modoospace.member.domain.Member;
 import com.modoospace.member.domain.MemberRepository;
-import com.modoospace.space.controller.dto.SpaceCreateDto;
+import com.modoospace.space.controller.dto.SpaceCreateUpdateDto;
+import com.modoospace.space.controller.dto.SpaceReadDetailDto;
 import com.modoospace.space.controller.dto.SpaceReadDto;
-import com.modoospace.space.controller.dto.SpaceUpdateDto;
+import com.modoospace.space.domain.Category;
+import com.modoospace.space.domain.CategoryRepository;
 import com.modoospace.space.domain.Space;
 import com.modoospace.space.domain.SpaceRepository;
 import java.util.List;
@@ -19,21 +21,25 @@ public class SpaceService {
 
   private final MemberRepository memberRepository;
   private final SpaceRepository spaceRepository;
+  private final CategoryRepository categoryRepository;
 
   @Transactional
-  public Long createSpace(SpaceCreateDto createDto, String email) {
-    Member member = findMemberByEmail(email);
-    Space space = createDto.toEntity(member);
+  public Long createSpace(Long categoryId, SpaceCreateUpdateDto createDto, String loginEmail) {
+    Member host = findMemberByEmail(loginEmail);
+    Category category = findCategoryById(categoryId);
 
+    Space space = createDto.toEntity(category, host);
     spaceRepository.save(space);
 
     return space.getId();
   }
 
-  public SpaceReadDto findSpace(Long spaceId) {
-    Space space = findSpaceById(spaceId);
+  public List<SpaceReadDto> findSpaceByCategory(Long categoryId){
+    // TODO : 페이징처리가 필요합니다.
+    Category category = findCategoryById(categoryId);
+    List<Space> spaces = spaceRepository.findByCategory(category);
 
-    return SpaceReadDto.toDto(space);
+    return SpaceReadDto.toDtos(spaces);
   }
 
   public List<SpaceReadDto> findSpaceByHost(Long hostId) {
@@ -41,16 +47,22 @@ public class SpaceService {
         .orElseThrow(() -> new NotFoundEntityException("사용자", hostId));
     List<Space> spaces = spaceRepository.findByHost(host);
 
-    return SpaceReadDto.toList(spaces);
+    return SpaceReadDto.toDtos(spaces);
+  }
+
+  public SpaceReadDetailDto findSpace(Long spaceId) {
+    Space space = findSpaceById(spaceId);
+
+    return SpaceReadDetailDto.toDto(space);
   }
 
   @Transactional
-  public void updateSpace(SpaceUpdateDto updateDto, String email) {
+  public void updateSpace(Long spaceId, SpaceCreateUpdateDto updateDto, String email) {
     Member loginMember = findMemberByEmail(email);
-    Space space = findSpaceById(updateDto.getId());
+    Space space = findSpaceById(spaceId);
 
-    space.verifyUpdateAndDeletePermission(loginMember);
-    space.update(updateDto.getName(), updateDto.getAddress());
+    space.verifyManagementPermission(loginMember);
+    space.update(updateDto.toEntity(space.getCategory(), space.getHost()));
   }
 
   @Transactional
@@ -60,7 +72,7 @@ public class SpaceService {
 
     // TODO: 예약이 존재하는지 확인이 필요합니다.
 
-    space.verifyUpdateAndDeletePermission(loginMember);
+    space.verifyManagementPermission(loginMember);
     spaceRepository.delete(space);
   }
 
@@ -74,5 +86,11 @@ public class SpaceService {
     Space space = spaceRepository.findById(spaceId)
         .orElseThrow(() -> new NotFoundEntityException("공간", spaceId));
     return space;
+  }
+
+  private Category findCategoryById(Long categoryId) {
+    Category category = categoryRepository.findById(categoryId)
+        .orElseThrow(() -> new NotFoundEntityException("카테고리", categoryId));
+    return category;
   }
 }
