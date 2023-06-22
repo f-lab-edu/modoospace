@@ -84,7 +84,7 @@ class SpaceServiceTest {
 
     createDto = SpaceCreateUpdateDto.builder()
         .name("공간이름")
-        .desc("설명")
+        .description("설명")
         .address(address)
         .build();
   }
@@ -98,7 +98,7 @@ class SpaceServiceTest {
     assertAll(
         () -> assertThat(retSpaceDto.getId()).isEqualTo(spaceId),
         () -> assertThat(retSpaceDto.getName()).isEqualTo("공간이름"),
-        () -> assertThat(retSpaceDto.getDesc()).isEqualTo("설명"),
+        () -> assertThat(retSpaceDto.getDescription()).isEqualTo("설명"),
         () -> assertThat(retSpaceDto.getAddress()).isEqualTo(address)
     );
   }
@@ -124,7 +124,7 @@ class SpaceServiceTest {
         .build();
     SpaceCreateUpdateDto updateDto = SpaceCreateUpdateDto.builder()
         .name("업데이트공간")
-        .desc("업데이트설명")
+        .description("업데이트설명")
         .address(updateAddress)
         .build();
 
@@ -133,7 +133,7 @@ class SpaceServiceTest {
     SpaceReadDetailDto retSpaceDto = spaceService.findSpace(spaceId);
     assertAll(
         () -> assertThat(retSpaceDto.getName()).isEqualTo("업데이트공간"),
-        () -> assertThat(retSpaceDto.getDesc()).isEqualTo("업데이트설명"),
+        () -> assertThat(retSpaceDto.getDescription()).isEqualTo("업데이트설명"),
         () -> assertThat(retSpaceDto.getAddress()).isEqualTo(updateAddress)
     );
   }

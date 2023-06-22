@@ -21,7 +21,7 @@ public class SpaceReadDto {
   @NotEmpty
   private String name;
 
-  private String desc;
+  private String description;
 
   @NotNull
   private Address address;
@@ -33,11 +33,11 @@ public class SpaceReadDto {
   private CategoryReadDto category;
 
   @Builder
-  public SpaceReadDto(Long id, String name, String desc, Address address, MemberReadDto host,
+  public SpaceReadDto(Long id, String name, String description, Address address, MemberReadDto host,
       CategoryReadDto category) {
     this.id = id;
     this.name = name;
-    this.desc = desc;
+    this.description = description;
     this.address = address;
     this.host = host;
     this.category = category;
@@ -47,7 +47,7 @@ public class SpaceReadDto {
     return SpaceReadDto.builder()
         .id(space.getId())
         .name(space.getName())
-        .desc(space.getDesc())
+        .description(space.getDescription())
         .address(space.getAddress())
         .host(MemberReadDto.toDto(space.getHost()))
         .category(CategoryReadDto.toDto(space.getCategory()))
