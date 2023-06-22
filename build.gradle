@@ -25,7 +25,6 @@ dependencies {
 
 	// Test
 	testImplementation 'org.springframework.boot:spring-boot-starter-test'
-	testImplementation 'org.projectlombok:lombok:1.18.26'
 
 	// Database
 	runtimeOnly 'com.h2database:h2'
