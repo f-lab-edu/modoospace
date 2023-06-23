@@ -59,7 +59,7 @@ class FacilityServiceTest {
     categoryRepository.save(category);
     SpaceCreateUpdateDto spaceCreateDto = SpaceCreateUpdateDto.builder()
         .name("공간이름")
-        .desc("설명")
+        .description("설명")
         .build();
     space = spaceCreateDto.toEntity(category, hostMember);
     spaceRepository.save(space);
@@ -71,7 +71,7 @@ class FacilityServiceTest {
     FacilityCreateUpdateDto createDto = FacilityCreateUpdateDto.builder()
         .name("스터디룸1")
         .facilityType(FacilityType.ROOM)
-        .desc("1~4인실 입니다.")
+        .description("1~4인실 입니다.")
         .reservationEnable(false)
         .build();
 
@@ -83,12 +83,12 @@ class FacilityServiceTest {
         () -> assertThat(facility.getId()).isEqualTo(facilityId),
         () -> assertThat(facility.getName()).isEqualTo("스터디룸1"),
         () -> assertThat(facility.getFacilityType()).isEqualTo(FacilityType.ROOM),
-        () -> assertThat(facility.getDesc()).isEqualTo("1~4인실 입니다."),
+        () -> assertThat(facility.getDescription()).isEqualTo("1~4인실 입니다."),
         () -> assertThat(facility.getReservationEnable()).isFalse(),
-        () -> assertThat(facility.getSettings()).hasSize(1),
-        () -> assertThat(facility.getSettings().get(0).getStartTime())
+        () -> assertThat(facility.getTimeSettings()).hasSize(1),
+        () -> assertThat(facility.getTimeSettings().get(0).getStartTime())
             .isEqualTo(LocalTime.of(0, 0, 0)),
-        () -> assertThat(facility.getSettings().get(0).getEndTime())
+        () -> assertThat(facility.getTimeSettings().get(0).getEndTime())
             .isEqualTo(LocalTime.of(23, 59, 59))
     );
   }

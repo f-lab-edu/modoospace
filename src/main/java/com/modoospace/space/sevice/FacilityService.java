@@ -10,6 +10,7 @@ import com.modoospace.space.domain.Space;
 import com.modoospace.space.domain.SpaceRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 @RequiredArgsConstructor
 @Service
@@ -19,6 +20,7 @@ public class FacilityService {
   private final SpaceRepository spaceRepository;
   private final FacilityRepository facilityRepository;
 
+  @Transactional
   public Long createFacility(Long spaceId, FacilityCreateUpdateDto createDto, String loginEmail){
     Member host = findMemberByEmail(loginEmail);
     Space space = findSpaceById(spaceId);

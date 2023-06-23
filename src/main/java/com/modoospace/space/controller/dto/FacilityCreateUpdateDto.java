@@ -2,8 +2,11 @@ package com.modoospace.space.controller.dto;
 
 import com.modoospace.space.domain.Facility;
 import com.modoospace.space.domain.FacilityType;
-import com.modoospace.space.domain.Setting;
 import com.modoospace.space.domain.Space;
+import com.modoospace.space.domain.TimeSetting;
+import com.modoospace.space.domain.Weekday;
+import com.modoospace.space.domain.WeekdaySetting;
+import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 import javax.validation.constraints.NotEmpty;
@@ -26,18 +29,31 @@ public class FacilityCreateUpdateDto {
   @NotNull
   private Boolean reservationEnable;
 
-  private String desc;
+  private String description;
 
   @Builder.Default
-  private List<SettingCreateDto> settingCreateDtos = List.of(new SettingCreateDto());
+  private List<TimeSettingCreateDto> timeSettings = Arrays.asList(new TimeSettingCreateDto());
+
+  @Builder.Default
+  private List<WeekdaySettingCreateDto> weekdaySettings = Arrays.asList(
+      new WeekdaySettingCreateDto(Weekday.SUN),
+      new WeekdaySettingCreateDto(Weekday.MON),
+      new WeekdaySettingCreateDto(Weekday.TUE),
+      new WeekdaySettingCreateDto(Weekday.WED),
+      new WeekdaySettingCreateDto(Weekday.THU),
+      new WeekdaySettingCreateDto(Weekday.FRI),
+      new WeekdaySettingCreateDto(Weekday.SAT)
+  );
 
   public FacilityCreateUpdateDto(String name, FacilityType facilityType, Boolean reservationEnable,
-      String desc, List<SettingCreateDto> settingCreateDtos) {
+      String description, List<TimeSettingCreateDto> timeSettings,
+      List<WeekdaySettingCreateDto> weekdaySettings) {
     this.name = name;
     this.facilityType = facilityType;
     this.reservationEnable = reservationEnable;
-    this.desc = desc;
-    this.settingCreateDtos = settingCreateDtos;
+    this.description = description;
+    this.timeSettings = timeSettings;
+    this.weekdaySettings = weekdaySettings;
   }
 
   public Facility toEntity(Space space) {
@@ -45,15 +61,21 @@ public class FacilityCreateUpdateDto {
         .name(name)
         .facilityType(facilityType)
         .reservationEnable(reservationEnable)
-        .desc(desc)
+        .description(description)
         .space(space)
-        .settings(toSettings(settingCreateDtos))
+        .timeSettings(toTimeSettings(timeSettings))
+        .weekdaySettings(toWeekdaySettings(weekdaySettings))
         .build();
   }
 
-  private List<Setting> toSettings(List<SettingCreateDto> settingCreateDtos) {
-    // TODO : 시작시간 순서대로 정렬 후 겹치는 시간이 있는지 validation 필요
-    return settingCreateDtos.stream()
+  private List<TimeSetting> toTimeSettings(List<TimeSettingCreateDto> timeSettings) {
+    return timeSettings.stream()
+        .map(settingCreateDto -> settingCreateDto.toEntity())
+        .collect(Collectors.toList());
+  }
+
+  private List<WeekdaySetting> toWeekdaySettings(List<WeekdaySettingCreateDto> weekdaySettings) {
+    return weekdaySettings.stream()
         .map(settingCreateDto -> settingCreateDto.toEntity())
         .collect(Collectors.toList());
   }
