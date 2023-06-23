@@ -41,7 +41,7 @@ public class Facility extends BaseTimeEntity {
   @Column(nullable = false)
   private Boolean reservationEnable;
 
-  private String desc;
+  private String description;
 
   @ManyToOne(fetch = LAZY)
   @JoinColumn(name = "space_id")
@@ -58,7 +58,7 @@ public class Facility extends BaseTimeEntity {
     this.name = name;
     this.facilityType = facilityType;
     this.reservationEnable = reservationEnable;
-    this.desc = desc;
+    this.description = description;
     this.space = space;
     this.settings = settings;
   }

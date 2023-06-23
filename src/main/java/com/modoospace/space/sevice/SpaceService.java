@@ -34,7 +34,7 @@ public class SpaceService {
     return space.getId();
   }
 
-  public List<SpaceReadDto> findSpaceByCategory(Long categoryId){
+  public List<SpaceReadDto> findSpaceByCategory(Long categoryId) {
     // TODO : 페이징처리가 필요합니다.
     Category category = findCategoryById(categoryId);
     List<Space> spaces = spaceRepository.findByCategory(category);
@@ -61,8 +61,7 @@ public class SpaceService {
     Member loginMember = findMemberByEmail(email);
     Space space = findSpaceById(spaceId);
 
-    space.verifyManagementPermission(loginMember);
-    space.update(updateDto.toEntity(space.getCategory(), space.getHost()));
+    space.update(updateDto.toEntity(space.getCategory(), space.getHost()), loginMember);
   }
 
   @Transactional

@@ -26,16 +26,16 @@ public class FacilityReadDto {
   @NotNull
   private Boolean reservationEnable;
 
-  private String desc;
+  private String description;
 
   @Builder
   public FacilityReadDto(Long id, String name, FacilityType facilityType, Boolean reservationEnable,
-      String desc) {
+      String description) {
     this.id = id;
     this.name = name;
     this.facilityType = facilityType;
     this.reservationEnable = reservationEnable;
-    this.desc = desc;
+    this.description = description;
   }
 
   public static FacilityReadDto toDto(Facility facility) {
@@ -44,7 +44,7 @@ public class FacilityReadDto {
         .name(facility.getName())
         .facilityType(facility.getFacilityType())
         .reservationEnable(facility.getReservationEnable())
-        .desc(facility.getDesc())
+        .description(facility.getDescription())
         .build();
   }
 
