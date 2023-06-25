@@ -3,7 +3,6 @@ package com.modoospace.reservation.controller;
 import com.modoospace.config.auth.LoginEmail;
 import com.modoospace.reservation.controller.dto.ReservationReadDto;
 import com.modoospace.reservation.controller.dto.ReservationUpdateDto;
-import com.modoospace.reservation.domain.Reservation;
 import com.modoospace.reservation.serivce.ReservationService;
 import java.util.List;
 import javax.validation.Valid;
@@ -25,8 +24,7 @@ public class HostReservationController {
   private final ReservationService reservationService;
 
   @GetMapping
-  public ResponseEntity<List<ReservationReadDto>> findAll(
-      @LoginEmail final String loginEmail) {
+  public ResponseEntity<List<ReservationReadDto>> findAll(@LoginEmail final String loginEmail) {
     List<ReservationReadDto> reservationList = reservationService.findAll(loginEmail);
     return ResponseEntity.ok().body(reservationList);
   }
@@ -42,6 +40,7 @@ public class HostReservationController {
       @PathVariable Long reservationId,
       @RequestBody @Valid ReservationUpdateDto reservationUpdateDto,
       @LoginEmail String loginEmail) {
+
     reservationService.updateReservation(reservationId, reservationUpdateDto, loginEmail);
     return ResponseEntity.ok().build();
   }

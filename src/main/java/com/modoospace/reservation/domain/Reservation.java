@@ -59,20 +59,20 @@ public class Reservation extends BaseTimeEntity {
     this.visitor = visitor;
   }
 
-  public Reservation approveReservation() {
+  public Reservation approveReservation(Member loginMember) {
+    verifyHostRole(loginMember);
     this.status = ReservationStatus.APPROVED;
     return this;
   }
 
   public void update(final Reservation updateReservation, Member loginMember) {
-    validateReservationOwnership(loginMember);
+    verifyHostRole(loginMember);
     this.reservationStart = updateReservation.getReservationStart();
     this.reservationEnd = updateReservation.getReservationEnd();
     this.status = updateReservation.getStatus();
   }
 
-  private void validateReservationOwnership(Member loginMember) {
-    //TODO : 해당 공간의 호스트가 요청한게 맞는지 확인
+  public void verifyHostRole(Member loginMember) {
     if(facility.getSpace().getHost() == loginMember){
       return;
     }

@@ -26,14 +26,15 @@ public class VisitorsReservationController {
   @GetMapping
   public ResponseEntity<List<ReservationReadDto>> findAll(
       @LoginEmail final String loginEmail) {
+
     List<ReservationReadDto> reservationList = reservationService.findAll(loginEmail);
     return ResponseEntity.ok().body(reservationList);
   }
 
   @PostMapping("/facilities/{facilityId}")
-  public ResponseEntity<Reservation> createReservation(@PathVariable Long facilityId,
-      @LoginEmail String loginEmail,
+  public ResponseEntity<Reservation> createReservation(@PathVariable Long facilityId,@LoginEmail String loginEmail,
       @RequestBody @Valid ReservationCreateDto createDto) {
+
     Reservation reservation = reservationService.createReservation(createDto, facilityId, loginEmail);
     return ResponseEntity.ok().body(reservation);
   }

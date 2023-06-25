@@ -23,8 +23,7 @@ public class AdminReservationController {
   private final ReservationService reservationService;
 
   @GetMapping
-  public ResponseEntity<List<ReservationReadDto>> findAll(
-      @LoginEmail final String loginEmail) {
+  public ResponseEntity<List<ReservationReadDto>> findAll(@LoginEmail final String loginEmail) {
     List<ReservationReadDto> reservationList = reservationService.findAll(loginEmail);
     return ResponseEntity.ok().body(reservationList);
   }
@@ -34,6 +33,7 @@ public class AdminReservationController {
       @PathVariable Long reservationId,
       @RequestBody @Valid ReservationUpdateDto reservationCreateDto,
       @LoginEmail String loginEmail) {
+
     reservationService.updateReservation(reservationId, reservationCreateDto, loginEmail);
     return ResponseEntity.ok().build();
   }

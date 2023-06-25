@@ -3,7 +3,6 @@ package com.modoospace.reservation.controller.dto;
 import com.modoospace.member.domain.Member;
 import com.modoospace.reservation.domain.Reservation;
 import com.modoospace.reservation.domain.ReservationStatus;
-import com.modoospace.space.controller.dto.FacilityReadDto;
 import com.modoospace.space.domain.Facility;
 import com.modoospace.space.domain.FacilityType;
 import java.time.LocalDateTime;

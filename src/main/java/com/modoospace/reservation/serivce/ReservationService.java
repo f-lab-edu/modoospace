@@ -10,8 +10,8 @@ import com.modoospace.reservation.domain.Reservation;
 import com.modoospace.reservation.domain.ReservationRepository;
 import com.modoospace.space.domain.Facility;
 import com.modoospace.space.domain.FacilityRepository;
+import com.modoospace.space.domain.SpaceRepository;
 import java.util.List;
-import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -24,9 +24,11 @@ public class ReservationService {
   private final ReservationRepository reservationRepository;
   private final FacilityRepository facilityRepository;
   private final MemberRepository memberRepository;
+  private final SpaceRepository spaceRepository;
 
   @Transactional
-  public Reservation createReservation(ReservationCreateDto createDto, Long facilityId, String loginEmail) {
+  public Reservation createReservation(ReservationCreateDto createDto, Long facilityId,
+      String loginEmail) {
     Facility facility = findFacilityById(facilityId);
     //TODO : 시설이용이 가능한 상태인지 조회 필요
     Member visitor = findMemberByEmail(loginEmail);
@@ -43,15 +45,16 @@ public class ReservationService {
   }
 
   public void updateStatus(Long reservationId) {
-    Optional<Reservation> reservation = reservationRepository.findById(reservationId);
-    reservation.map(Reservation::approveReservation);
+    Reservation reservation = findById(reservationId);
+    Member host = reservation.getFacility().getSpace().getHost();
+    reservation.approveReservation(host);
   }
 
   public void updateReservation(Long reservationId, ReservationUpdateDto reservationUpdateDto, String loginEmail) {
     Reservation reservation = findById(reservationId);
     Member loginMember = findMemberByEmail(loginEmail);
 
-    reservation.update(reservationUpdateDto.toEntity(reservation),loginMember);
+    reservation.update(reservationUpdateDto.toEntity(reservation), loginMember);
   }
 
   public List<ReservationReadDto> findAll(String loginEmail) {
