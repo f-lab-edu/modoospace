@@ -11,9 +11,7 @@ import com.modoospace.reservation.domain.ReservationRepository;
 import com.modoospace.reservation.domain.ReservationStatus;
 import com.modoospace.space.domain.Facility;
 import com.modoospace.space.domain.FacilityRepository;
-import com.modoospace.space.domain.SpaceRepository;
 import java.util.List;
-import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -25,7 +23,6 @@ public class ReservationService {
   private final ReservationRepository reservationRepository;
   private final FacilityRepository facilityRepository;
   private final MemberRepository memberRepository;
-  private final SpaceRepository spaceRepository;
 
   @Transactional
   public Reservation createReservation(ReservationCreateDto createDto, Long facilityId,
@@ -57,6 +54,7 @@ public class ReservationService {
     reservation.approveReservation(host);
   }
 
+  @Transactional
   public void updateReservation(Long reservationId, ReservationUpdateDto reservationUpdateDto,
       String loginEmail) {
     Reservation reservation = findReservationById(reservationId);
@@ -90,6 +88,6 @@ public class ReservationService {
         .status(ReservationStatus.CANCELED)
         .build();
 
-    reservation.updateAsVisitor(updateDto.toEntity(reservation),loginMember);
+    reservation.updateAsVisitor(updateDto.toEntity(reservation), loginMember);
   }
 }

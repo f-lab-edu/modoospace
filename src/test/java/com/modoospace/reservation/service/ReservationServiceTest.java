@@ -60,20 +60,20 @@ public class ReservationServiceTest {
   @BeforeEach
   public void setUp() {
     SpaceService spaceService = new SpaceService(memberRepository, spaceRepository,categoryRepository);
-    reservationService = new ReservationService(reservationRepository, facilityRepository,memberRepository, spaceRepository);
+    reservationService = new ReservationService(reservationRepository, facilityRepository,memberRepository);
 
     hostMember = createMember("host", Role.HOST);
     visitorMember = createMember("visitor", Role.VISITOR);
 
-    Address address = createAddress("depthFirst", "depthSecond", "depthThird", "detailAddress");
-    Category category = createCategory("스터디 공간");
+    Address address = createAddress();
+    Category category = createCategory();
 
-    SpaceCreateUpdateDto createDto = createSpaceDto("공간이름", "설명", address);
+    SpaceCreateUpdateDto createDto = createSpaceDto(address);
     Long spaceId = spaceService.createSpace(category.getId(), createDto, hostMember.getEmail());
     Space space = spaceService.findSpaceById(spaceId);
 
-    facilityRoom = createFacility(FacilityType.ROOM, true, "스터디 룸", space, "facilityRoom");
-    facilitySeat = createFacility(FacilityType.SEAT, true, "좌석", space, "facilitySeat");
+    facilityRoom = createFacility(FacilityType.ROOM, "스터디 룸", space, "facilityRoom");
+    facilitySeat = createFacility(FacilityType.SEAT, "좌석", space, "facilitySeat");
 
     reservationCreateDto = createReservationDto(LocalDateTime.now(),LocalDateTime.now().plusHours(3));
   }
@@ -126,16 +126,16 @@ public class ReservationServiceTest {
     );
   }
 
-  @DisplayName("예약을 생성한 비지터가 아닌 다른 사용자가 해당 예약을 취소하려고 한다면 예외가 발생한다")
+  @DisplayName("예약을 생성한 사용자가 아닌 다른 사용자가 해당 예약을 취소하려고 한다면 예외가 발생한다")
   @Test
   public void cancelReservation_throwException_IfNotMyReservation() {
     Reservation reservation = reservationService.createReservation(reservationCreateDto,
         facilitySeat.getId(),
-        visitorMember.getEmail());
+        hostMember.getEmail());
 
     assertAll(
         () -> assertThatThrownBy(
-            ()->reservationService.cancelReservation(reservation.getId(),hostMember.getEmail()))
+            ()->reservationService.cancelReservation(reservation.getId(),visitorMember.getEmail()))
             .isInstanceOf(PermissionDeniedException.class)
     );
   }
@@ -149,36 +149,36 @@ public class ReservationServiceTest {
     return memberRepository.save(member);
   }
 
-  private Address createAddress(String depthFirst, String depthSecond, String depthThird,String detailAddress) {
+  private Address createAddress() {
     Address address = Address.builder()
-        .depthFirst(depthFirst)
-        .depthSecond(depthSecond)
-        .depthThird(depthThird)
-        .detailAddress(detailAddress)
+        .depthFirst("depthFirst")
+        .depthSecond("depthSecond")
+        .depthThird("depthThird")
+        .detailAddress("detailAddress")
         .build();
     return address;
   }
 
-  private Category createCategory(String name) {
+  private Category createCategory() {
     Category category = Category.builder()
-        .name(name)
+        .name("스터디 공간")
         .build();
     return categoryRepository.save(category);
   }
 
-  private SpaceCreateUpdateDto createSpaceDto(String name, String description, Address address) {
+  private SpaceCreateUpdateDto createSpaceDto(Address address) {
     return SpaceCreateUpdateDto.builder()
-        .name(name)
-        .description(description)
+        .name("공간이름")
+        .description("설명")
         .address(address)
         .build();
   }
 
-  private Facility createFacility(FacilityType facilityType, boolean reservationEnable,
+  private Facility createFacility(FacilityType facilityType,
       String description, Space space, String name) {
     Facility facility = Facility.builder()
         .facilityType(facilityType)
-        .reservationEnable(reservationEnable)
+        .reservationEnable(true)
         .description(description)
         .space(space)
         .name(name)
