@@ -1,0 +1,40 @@
+package com.modoospace.reservation.controller;
+
+import com.modoospace.config.auth.LoginEmail;
+import com.modoospace.reservation.controller.dto.ReservationCreateDto;
+import com.modoospace.reservation.controller.dto.ReservationReadDto;
+import com.modoospace.reservation.domain.Reservation;
+import com.modoospace.reservation.serivce.ReservationService;
+import java.util.List;
+import javax.validation.Valid;
+import lombok.RequiredArgsConstructor;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
+
+@RequiredArgsConstructor
+@RestController
+@RequestMapping("/api/v1/visitors/reservations")
+public class VisitorsReservationController {
+
+  private final ReservationService reservationService;
+
+  @GetMapping
+  public ResponseEntity<List<ReservationReadDto>> findAll(
+      @LoginEmail final String loginEmail) {
+    List<ReservationReadDto> reservationList = reservationService.findAll(loginEmail);
+    return ResponseEntity.ok().body(reservationList);
+  }
+
+  @PostMapping("/facilities/{facilityId}")
+  public ResponseEntity<Reservation> createReservation(@PathVariable Long facilityId,
+      @LoginEmail String loginEmail,
+      @RequestBody @Valid ReservationCreateDto createDto) {
+    Reservation reservation = reservationService.createReservation(createDto, facilityId, loginEmail);
+    return ResponseEntity.ok().body(reservation);
+  }
+}
