@@ -35,7 +35,6 @@ public class ReservationReadDto {
   private Member visitor;
 
   @Builder
-
   public ReservationReadDto(Long id, LocalDateTime reservationStart, LocalDateTime reservationEnd,
       ReservationStatus status, Facility facility, Member visitor) {
     this.id = id;

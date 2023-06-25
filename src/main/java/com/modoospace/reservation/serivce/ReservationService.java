@@ -39,19 +39,25 @@ public class ReservationService {
     return reservation;
   }
 
-  public Reservation findById(Long reservationId) {
+  public ReservationReadDto findReservation(Long reservationId) {
+    Reservation reservation = findReservationById(reservationId);
+    return ReservationReadDto.toDto(reservation);
+  }
+
+  private Reservation findReservationById(Long reservationId) {
     return reservationRepository.findById(reservationId)
         .orElseThrow(() -> new NotFoundEntityException("예약", reservationId));
   }
 
   public void updateStatus(Long reservationId) {
-    Reservation reservation = findById(reservationId);
+    Reservation reservation = findReservationById(reservationId);
     Member host = reservation.getFacility().getSpace().getHost();
     reservation.approveReservation(host);
   }
 
-  public void updateReservation(Long reservationId, ReservationUpdateDto reservationUpdateDto, String loginEmail) {
-    Reservation reservation = findById(reservationId);
+  public void updateReservation(Long reservationId, ReservationUpdateDto reservationUpdateDto,
+      String loginEmail) {
+    Reservation reservation = findReservationById(reservationId);
     Member loginMember = findMemberByEmail(loginEmail);
 
     reservation.update(reservationUpdateDto.toEntity(reservation), loginMember);

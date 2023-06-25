@@ -38,4 +38,10 @@ public class VisitorsReservationController {
     Reservation reservation = reservationService.createReservation(createDto, facilityId, loginEmail);
     return ResponseEntity.ok().body(reservation);
   }
+
+  @GetMapping("/{reservationId}")
+  public ResponseEntity<ReservationReadDto> find(@PathVariable Long reservationId){
+    ReservationReadDto reservationReadDto = reservationService.findReservation(reservationId);
+    return ResponseEntity.ok().body(reservationReadDto);
+  }
 }

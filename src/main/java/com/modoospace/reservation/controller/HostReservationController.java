@@ -44,4 +44,10 @@ public class HostReservationController {
     reservationService.updateReservation(reservationId, reservationUpdateDto, loginEmail);
     return ResponseEntity.ok().build();
   }
+
+  @GetMapping("/{reservationId}")
+  public ResponseEntity<ReservationReadDto> find(@PathVariable Long reservationId){
+    ReservationReadDto reservationReadDto = reservationService.findReservation(reservationId);
+    return ResponseEntity.ok().body(reservationReadDto);
+  }
 }
