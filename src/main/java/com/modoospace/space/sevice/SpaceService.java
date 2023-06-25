@@ -81,7 +81,7 @@ public class SpaceService {
     return member;
   }
 
-  private Space findSpaceById(Long spaceId) {
+  public Space findSpaceById(Long spaceId) {
     Space space = spaceRepository.findById(spaceId)
         .orElseThrow(() -> new NotFoundEntityException("공간", spaceId));
     return space;

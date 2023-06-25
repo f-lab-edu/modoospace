@@ -61,7 +61,7 @@ public class Reservation extends BaseTimeEntity {
 
   public Reservation approveReservation(Member loginMember) {
     verifyHostRole(loginMember);
-    this.status = ReservationStatus.APPROVED;
+    this.status = ReservationStatus.COMPLETED;
     return this;
   }
 
@@ -79,10 +79,18 @@ public class Reservation extends BaseTimeEntity {
     loginMember.verifyRolePermission(Role.ADMIN);
   }
 
+  public void updateAsVisitor(final Reservation updateReservation, Member loginMember) {
+    verifySameVisitor(loginMember);
+    this.reservationStart = updateReservation.getReservationStart();
+    this.reservationEnd = updateReservation.getReservationEnd();
+    this.status = updateReservation.getStatus();
+  }
+
   public void verifySameVisitor(Member loginMember) {
     if (visitor.equals(loginMember)) {
       return;
     }
     throw new PermissionDeniedException();
   }
+
 }

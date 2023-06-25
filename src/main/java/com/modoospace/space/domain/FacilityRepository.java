@@ -1,7 +1,8 @@
 package com.modoospace.space.domain;
 
+import java.util.List;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 public interface FacilityRepository extends JpaRepository<Facility, Long> {
-  Facility findBySpaceId(Long spaceId);
+  List<Facility> findBySpaceId(Long spaceId);
 }

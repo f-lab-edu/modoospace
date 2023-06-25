@@ -1,6 +1,5 @@
 package com.modoospace.reservation.serivce;
 
-import com.modoospace.config.auth.LoginEmail;
 import com.modoospace.exception.NotFoundEntityException;
 import com.modoospace.member.domain.Member;
 import com.modoospace.member.domain.MemberRepository;
@@ -14,13 +13,13 @@ import com.modoospace.space.domain.Facility;
 import com.modoospace.space.domain.FacilityRepository;
 import com.modoospace.space.domain.SpaceRepository;
 import java.util.List;
+import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 @RequiredArgsConstructor
 @Service
-@Transactional
 public class ReservationService {
 
   private final ReservationRepository reservationRepository;
@@ -51,6 +50,7 @@ public class ReservationService {
         .orElseThrow(() -> new NotFoundEntityException("예약", reservationId));
   }
 
+  @Transactional
   public void updateStatus(Long reservationId) {
     Reservation reservation = findReservationById(reservationId);
     Member host = reservation.getFacility().getSpace().getHost();
@@ -72,7 +72,8 @@ public class ReservationService {
 
 
   private Facility findFacilityById(Long facilityId) {
-    return facilityRepository.findBySpaceId(facilityId);
+    return facilityRepository.findById(facilityId)
+        .orElseThrow();
   }
 
   private Member findMemberByEmail(String email) {
@@ -80,15 +81,15 @@ public class ReservationService {
         .orElseThrow(() -> new NotFoundEntityException("사용자", email));
   }
 
+  @Transactional
   public void cancelReservation(Long reservationId, String loginEmail) {
     Member loginMember = findMemberByEmail(loginEmail);
     Reservation reservation = findReservationById(reservationId);
-    reservation.verifySameVisitor(loginMember);
 
     ReservationUpdateDto updateDto = ReservationUpdateDto.builder()
         .status(ReservationStatus.CANCELED)
         .build();
 
-    updateReservation(reservation.getId(),updateDto,loginEmail);
+    reservation.updateAsVisitor(updateDto.toEntity(reservation),loginMember);
   }
 }
