@@ -1,10 +1,10 @@
 package com.modoospace.reservation.domain;
 
 import com.modoospace.common.BaseTimeEntity;
+import com.modoospace.exception.PermissionDeniedException;
 import com.modoospace.member.domain.Member;
 import com.modoospace.member.domain.Role;
 import com.modoospace.space.domain.Facility;
-import com.modoospace.space.domain.Space;
 import java.time.LocalDateTime;
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -65,7 +65,7 @@ public class Reservation extends BaseTimeEntity {
     return this;
   }
 
-  public void update(final Reservation updateReservation, Member loginMember) {
+  public void updateAsHost(final Reservation updateReservation, Member loginMember) {
     verifyHostRole(loginMember);
     this.reservationStart = updateReservation.getReservationStart();
     this.reservationEnd = updateReservation.getReservationEnd();
@@ -73,9 +73,16 @@ public class Reservation extends BaseTimeEntity {
   }
 
   public void verifyHostRole(Member loginMember) {
-    if(facility.getSpace().getHost() == loginMember){
+    if (facility.getSpace().getHost() == loginMember) {
       return;
     }
     loginMember.verifyRolePermission(Role.ADMIN);
+  }
+
+  public void verifySameVisitor(Member loginMember) {
+    if (visitor.equals(loginMember)) {
+      return;
+    }
+    throw new PermissionDeniedException();
   }
 }

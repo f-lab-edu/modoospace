@@ -44,4 +44,10 @@ public class VisitorsReservationController {
     ReservationReadDto reservationReadDto = reservationService.findReservation(reservationId);
     return ResponseEntity.ok().body(reservationReadDto);
   }
+
+  @PostMapping("/{reservationId}/cancel")
+  public ResponseEntity<Void> cancelReservation(@PathVariable Long reservationId,@LoginEmail String loginEmail) {
+    reservationService.cancelReservation(reservationId,loginEmail);
+    return ResponseEntity.ok().build();
+  }
 }

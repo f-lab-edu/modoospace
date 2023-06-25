@@ -1,5 +1,6 @@
 package com.modoospace.reservation.serivce;
 
+import com.modoospace.config.auth.LoginEmail;
 import com.modoospace.exception.NotFoundEntityException;
 import com.modoospace.member.domain.Member;
 import com.modoospace.member.domain.MemberRepository;
@@ -8,6 +9,7 @@ import com.modoospace.reservation.controller.dto.ReservationReadDto;
 import com.modoospace.reservation.controller.dto.ReservationUpdateDto;
 import com.modoospace.reservation.domain.Reservation;
 import com.modoospace.reservation.domain.ReservationRepository;
+import com.modoospace.reservation.domain.ReservationStatus;
 import com.modoospace.space.domain.Facility;
 import com.modoospace.space.domain.FacilityRepository;
 import com.modoospace.space.domain.SpaceRepository;
@@ -60,7 +62,7 @@ public class ReservationService {
     Reservation reservation = findReservationById(reservationId);
     Member loginMember = findMemberByEmail(loginEmail);
 
-    reservation.update(reservationUpdateDto.toEntity(reservation), loginMember);
+    reservation.updateAsHost(reservationUpdateDto.toEntity(reservation), loginMember);
   }
 
   public List<ReservationReadDto> findAll(String loginEmail) {
@@ -76,5 +78,17 @@ public class ReservationService {
   private Member findMemberByEmail(String email) {
     return memberRepository.findByEmail(email)
         .orElseThrow(() -> new NotFoundEntityException("사용자", email));
+  }
+
+  public void cancelReservation(Long reservationId, String loginEmail) {
+    Member loginMember = findMemberByEmail(loginEmail);
+    Reservation reservation = findReservationById(reservationId);
+    reservation.verifySameVisitor(loginMember);
+
+    ReservationUpdateDto updateDto = ReservationUpdateDto.builder()
+        .status(ReservationStatus.CANCELED)
+        .build();
+
+    updateReservation(reservation.getId(),updateDto,loginEmail);
   }
 }

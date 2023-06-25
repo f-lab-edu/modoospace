@@ -1,8 +1,10 @@
 package com.modoospace.reservation.domain;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.junit.jupiter.api.Assertions.assertAll;
 
+import com.modoospace.exception.PermissionDeniedException;
 import com.modoospace.member.domain.Member;
 import com.modoospace.member.domain.Role;
 import com.modoospace.space.domain.Facility;
@@ -73,7 +75,7 @@ public class ReservationTest {
 
   @DisplayName("호스트 및 관리자는 예약을 변경할 수 있다.")
   @Test
-  public void changeReservationStatus(){
+  public void updateAsHost(){
     Reservation reservation = Reservation.builder()
         .reservationStart(LocalDateTime.now())
         .reservationEnd(LocalDateTime.now().plusHours(3))
@@ -83,8 +85,23 @@ public class ReservationTest {
         .build();
 
     assertAll(
-        () -> reservation.update(reservation,hostMember),
-        () -> reservation.update(reservation,adminMember)
+        () -> reservation.updateAsHost(reservation,hostMember),
+        () -> reservation.updateAsHost(reservation,adminMember)
     );
+  }
+
+  @DisplayName("예약 요청자와 방문자가 다를 경우 예외가 발생한다.")
+  @Test
+  public void verifySameVisitor(){
+    Reservation reservation = Reservation.builder()
+        .reservationStart(LocalDateTime.now())
+        .reservationEnd(LocalDateTime.now().plusHours(3))
+        .visitor(hostMember)
+        .status(ReservationStatus.COMPLETED)
+        .facility(facilityRoom)
+        .build();
+
+    assertThatThrownBy(()->reservation.verifySameVisitor(visitorMember))
+        .isInstanceOf(PermissionDeniedException.class);
   }
 }

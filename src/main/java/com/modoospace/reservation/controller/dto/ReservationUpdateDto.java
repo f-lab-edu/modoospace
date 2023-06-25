@@ -21,7 +21,7 @@ public class ReservationUpdateDto {
     return Reservation.builder()
         .reservationStart(reservation.getReservationStart())
         .reservationEnd(reservation.getReservationEnd())
-        .status(reservation.getStatus())
+        .status(status)
         .visitor(reservation.getVisitor())
         .facility(reservation.getFacility())
         .build();
