@@ -53,36 +53,28 @@ public class ReservationServiceTest {
 
   private Member visitorMember;
   private Member hostMember;
-  private Facility facilitySeat;
-  private Facility facilityRoom;
+  private Facility seat;
+  private Facility room;
+
+  private Address address;
+  private Category category;
   private ReservationCreateDto reservationCreateDto;
 
   @BeforeEach
   public void setUp() {
-    SpaceService spaceService = new SpaceService(memberRepository, spaceRepository,categoryRepository);
-    reservationService = new ReservationService(reservationRepository, facilityRepository,memberRepository);
-
-    hostMember = createMember("host", Role.HOST);
-    visitorMember = createMember("visitor", Role.VISITOR);
-
-    Address address = createAddress();
-    Category category = createCategory();
-
-    SpaceCreateUpdateDto createDto = createSpaceDto(address);
-    Long spaceId = spaceService.createSpace(category.getId(), createDto, hostMember.getEmail());
-    Space space = spaceService.findSpaceById(spaceId);
-
-    facilityRoom = createFacility(FacilityType.ROOM, "스터디 룸", space, "facilityRoom");
-    facilitySeat = createFacility(FacilityType.SEAT, "좌석", space, "facilitySeat");
-
-    reservationCreateDto = createReservationDto(LocalDateTime.now(),LocalDateTime.now().plusHours(3));
+    createMembers();
+    createAddress();
+    createCategory();
+    createFacilities();
+    reservationService = new ReservationService(reservationRepository, facilityRepository, memberRepository);
+    reservationCreateDto = createReservationDto(LocalDateTime.now(), LocalDateTime.now().plusHours(3));
   }
 
   @DisplayName("로그인한 멤버가 비지터일 경우 예약을 생성할 수 있다.")
   @Test
   public void createReservation_IfVisitor() {
     Reservation reservation = reservationService.createReservation(reservationCreateDto,
-        facilityRoom.getId(),
+        room.getId(),
         visitorMember.getEmail());
 
     ReservationReadDto readDto = reservationService.findReservation(reservation.getId());
@@ -99,7 +91,7 @@ public class ReservationServiceTest {
   @Test
   public void reservationStatus_IfSeat() {
     Reservation reservation = reservationService.createReservation(reservationCreateDto,
-        facilitySeat.getId(),
+        seat.getId(),
         visitorMember.getEmail());
 
     ReservationReadDto readDto = reservationService.findReservation(reservation.getId());
@@ -109,11 +101,11 @@ public class ReservationServiceTest {
     );
   }
 
-  @DisplayName("방문자가 예약을 취소할 수 있다.")
+  @DisplayName("방문자가 본인의 예약을 취소할 수 있다.")
   @Test
   public void cancelReservation() {
     Reservation reservation = reservationService.createReservation(reservationCreateDto,
-        facilitySeat.getId(),
+        seat.getId(),
         visitorMember.getEmail());
 
     reservationService.cancelReservation(reservation.getId(), visitorMember.getEmail());
@@ -122,6 +114,7 @@ public class ReservationServiceTest {
 
     assertAll(
         () -> assertThat(readDto.getId()).isEqualTo(reservation.getId()),
+        () -> assertThat(readDto.getVisitor()).isEqualTo(visitorMember),
         () -> assertThat(readDto.getStatus()).isEqualTo(ReservationStatus.CANCELED)
     );
   }
@@ -130,14 +123,29 @@ public class ReservationServiceTest {
   @Test
   public void cancelReservation_throwException_IfNotMyReservation() {
     Reservation reservation = reservationService.createReservation(reservationCreateDto,
-        facilitySeat.getId(),
-        hostMember.getEmail());
+        seat.getId(),
+        visitorMember.getEmail());
 
     assertAll(
         () -> assertThatThrownBy(
-            ()->reservationService.cancelReservation(reservation.getId(),visitorMember.getEmail()))
+            () -> reservationService.cancelReservation(reservation.getId(), hostMember.getEmail()))
             .isInstanceOf(PermissionDeniedException.class)
     );
+  }
+
+
+  private void createFacilities() {
+    SpaceService spaceService = new SpaceService(memberRepository, spaceRepository, categoryRepository);
+    SpaceCreateUpdateDto createDto = createSpaceDto(address);
+    Long spaceId = spaceService.createSpace(category.getId(), createDto, hostMember.getEmail());
+    Space space = spaceService.findSpaceById(spaceId);
+    room = createFacility(FacilityType.ROOM, "스터디 룸", space, "facilityRoom");
+    seat = createFacility(FacilityType.SEAT, "좌석", space, "facilitySeat");
+  }
+
+  private void createMembers() {
+    hostMember = createMember("host", Role.HOST);
+    visitorMember = createMember("visitor", Role.VISITOR);
   }
 
   private Member createMember(String name, Role role) {
@@ -149,21 +157,20 @@ public class ReservationServiceTest {
     return memberRepository.save(member);
   }
 
-  private Address createAddress() {
-    Address address = Address.builder()
+  private void createAddress() {
+    address = Address.builder()
         .depthFirst("depthFirst")
         .depthSecond("depthSecond")
         .depthThird("depthThird")
         .detailAddress("detailAddress")
         .build();
-    return address;
   }
 
-  private Category createCategory() {
-    Category category = Category.builder()
+  private void createCategory() {
+    Category build = Category.builder()
         .name("스터디 공간")
         .build();
-    return categoryRepository.save(category);
+    category = categoryRepository.save(build);
   }
 
   private SpaceCreateUpdateDto createSpaceDto(Address address) {
