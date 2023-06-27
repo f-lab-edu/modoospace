@@ -1,6 +1,7 @@
 package com.modoospace.space.domain;
 
 import com.modoospace.exception.DuplicatedWeekdayException;
+import java.time.DayOfWeek;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.EnumType;
@@ -27,14 +28,14 @@ public class WeekdaySetting {
 
   @Enumerated(EnumType.STRING)
   @Column(nullable = false)
-  private Weekday weekday;
+  private DayOfWeek weekday;
 
   @ManyToOne(fetch = FetchType.LAZY)
   @JoinColumn(name = "facility_id")
   private Facility facility;
 
   @Builder
-  public WeekdaySetting(Long id, Weekday weekday, Facility facility) {
+  public WeekdaySetting(Long id, DayOfWeek weekday, Facility facility) {
     this.id = id;
     this.weekday = weekday;
     this.facility = facility;
@@ -48,6 +49,10 @@ public class WeekdaySetting {
     if (weekday.equals(compareWeekdaySetting.getWeekday())) {
       throw new DuplicatedWeekdayException(weekday);
     }
+  }
+
+  public boolean isEqualWeekday(DayOfWeek weekday) {
+    return this.weekday.equals(weekday);
   }
 
   @Override

@@ -2,6 +2,8 @@ package com.modoospace.space.domain;
 
 import com.modoospace.exception.ConflictingTimeException;
 import com.modoospace.exception.InvalidTimeRangeException;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.LocalTime;
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -47,14 +49,14 @@ public class TimeSetting {
     this.facility = facility;
   }
 
-  public void setFacility(Facility facility) {
-    this.facility = facility;
-  }
-
   private void validateTimeRange(LocalTime startTime, LocalTime endTime) {
     if (startTime.isAfter(endTime)) {
       throw new InvalidTimeRangeException(startTime, endTime);
     }
+  }
+
+  public void setFacility(Facility facility) {
+    this.facility = facility;
   }
 
   public void verifyConflicting(TimeSetting compareTimeSetting) {
@@ -62,6 +64,17 @@ public class TimeSetting {
         !compareTimeSetting.getEndTime().isBefore(startTime)) {
       throw new ConflictingTimeException(this, compareTimeSetting);
     }
+  }
+
+  public FacilitySchedule createFacilitySchedule(LocalDate scheduleDate) {
+    LocalDateTime startDateTime = LocalDateTime.of(scheduleDate, this.startTime);
+    LocalDateTime endDateTime = LocalDateTime.of(scheduleDate, this.endTime);
+
+    return FacilitySchedule.builder()
+        .startDateTime(startDateTime)
+        .endDateTime(endDateTime)
+        .facility(this.facility)
+        .build();
   }
 
   @Override

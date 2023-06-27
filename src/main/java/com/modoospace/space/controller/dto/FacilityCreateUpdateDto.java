@@ -4,8 +4,10 @@ import com.modoospace.space.domain.Facility;
 import com.modoospace.space.domain.FacilityType;
 import com.modoospace.space.domain.Space;
 import com.modoospace.space.domain.TimeSetting;
-import com.modoospace.space.domain.Weekday;
+import com.modoospace.space.domain.TimeSettings;
 import com.modoospace.space.domain.WeekdaySetting;
+import com.modoospace.space.domain.WeekdaySettings;
+import java.time.DayOfWeek;
 import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -36,13 +38,13 @@ public class FacilityCreateUpdateDto {
 
   @Builder.Default
   private List<WeekdaySettingCreateDto> weekdaySettings = Arrays.asList(
-      new WeekdaySettingCreateDto(Weekday.SUN),
-      new WeekdaySettingCreateDto(Weekday.MON),
-      new WeekdaySettingCreateDto(Weekday.TUE),
-      new WeekdaySettingCreateDto(Weekday.WED),
-      new WeekdaySettingCreateDto(Weekday.THU),
-      new WeekdaySettingCreateDto(Weekday.FRI),
-      new WeekdaySettingCreateDto(Weekday.SAT)
+      new WeekdaySettingCreateDto(DayOfWeek.MONDAY),
+      new WeekdaySettingCreateDto(DayOfWeek.TUESDAY),
+      new WeekdaySettingCreateDto(DayOfWeek.WEDNESDAY),
+      new WeekdaySettingCreateDto(DayOfWeek.THURSDAY),
+      new WeekdaySettingCreateDto(DayOfWeek.FRIDAY),
+      new WeekdaySettingCreateDto(DayOfWeek.SATURDAY),
+      new WeekdaySettingCreateDto(DayOfWeek.SUNDAY)
   );
 
   public FacilityCreateUpdateDto(String name, FacilityType facilityType, Boolean reservationEnable,
@@ -63,8 +65,8 @@ public class FacilityCreateUpdateDto {
         .reservationEnable(reservationEnable)
         .description(description)
         .space(space)
-        .timeSettings(toTimeSettings(timeSettings))
-        .weekdaySettings(toWeekdaySettings(weekdaySettings))
+        .timeSettings(new TimeSettings(toTimeSettings(timeSettings)))
+        .weekdaySettings(new WeekdaySettings(toWeekdaySettings(weekdaySettings)))
         .build();
   }
 

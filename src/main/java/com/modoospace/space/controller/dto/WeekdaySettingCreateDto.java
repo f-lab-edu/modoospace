@@ -1,7 +1,7 @@
 package com.modoospace.space.controller.dto;
 
-import com.modoospace.space.domain.Weekday;
 import com.modoospace.space.domain.WeekdaySetting;
+import java.time.DayOfWeek;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
@@ -9,9 +9,9 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 public class WeekdaySettingCreateDto {
 
-  private Weekday weekday;
+  private DayOfWeek weekday;
 
-  public WeekdaySettingCreateDto(Weekday weekday) {
+  public WeekdaySettingCreateDto(DayOfWeek weekday) {
     this.weekday = weekday;
   }
 
