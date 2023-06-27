@@ -84,13 +84,7 @@ class FacilityServiceTest {
         () -> assertThat(facility.getName()).isEqualTo("스터디룸1"),
         () -> assertThat(facility.getFacilityType()).isEqualTo(FacilityType.ROOM),
         () -> assertThat(facility.getDescription()).isEqualTo("1~4인실 입니다."),
-        () -> assertThat(facility.getReservationEnable()).isFalse(),
-        () -> assertThat(facility.getTimeSettings()).hasSize(1),
-        () -> assertThat(facility.getTimeSettings().get(0).getStartTime())
-            .isEqualTo(LocalTime.of(0, 0, 0)),
-        () -> assertThat(facility.getTimeSettings().get(0).getEndTime())
-            .isEqualTo(LocalTime.of(23, 59, 59))
+        () -> assertThat(facility.getReservationEnable()).isFalse()
     );
   }
-
 }

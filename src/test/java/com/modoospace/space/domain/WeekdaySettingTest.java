@@ -1,6 +1,6 @@
 package com.modoospace.space.domain;
 
-import java.time.LocalTime;
+import java.time.DayOfWeek;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
@@ -14,10 +14,10 @@ class WeekdaySettingTest {
   @Test
   public void WeekdaySetting_Sort() {
     WeekdaySetting weekdaySetting1 = WeekdaySetting.builder()
-        .weekday(Weekday.SAT)
+        .weekday(DayOfWeek.SATURDAY)
         .build();
     WeekdaySetting weekdaySetting2 = WeekdaySetting.builder()
-        .weekday(Weekday.TUE)
+        .weekday(DayOfWeek.TUESDAY)
         .build();
     List<WeekdaySetting> weekdaySettings = Arrays.asList(weekdaySetting1, weekdaySetting2);
 
