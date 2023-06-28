@@ -8,7 +8,6 @@ import com.modoospace.reservation.controller.dto.ReservationReadDto;
 import com.modoospace.reservation.controller.dto.ReservationUpdateDto;
 import com.modoospace.reservation.domain.Reservation;
 import com.modoospace.reservation.domain.ReservationRepository;
-import com.modoospace.reservation.domain.ReservationStatus;
 import com.modoospace.space.domain.Facility;
 import com.modoospace.space.domain.FacilityRepository;
 import java.util.List;
@@ -59,8 +58,8 @@ public class ReservationService {
       String loginEmail) {
     Reservation reservation = findReservationById(reservationId);
     Member loginMember = findMemberByEmail(loginEmail);
-
-    reservation.updateAsHost(reservationUpdateDto.toEntity(reservation), loginMember);
+    Reservation updatedReservation = reservationUpdateDto.toEntity(reservation);
+    reservation.updateAsHost(updatedReservation, loginMember);
   }
 
   public List<ReservationReadDto> findAll(String loginEmail) {
@@ -83,11 +82,6 @@ public class ReservationService {
   public void cancelReservation(Long reservationId, String loginEmail) {
     Member loginMember = findMemberByEmail(loginEmail);
     Reservation reservation = findReservationById(reservationId);
-
-    ReservationUpdateDto updateDto = ReservationUpdateDto.builder()
-        .status(ReservationStatus.CANCELED)
-        .build();
-
-    reservation.updateAsVisitor(updateDto.toEntity(reservation), loginMember);
+    reservation.updateStatusToCanceled(loginMember);
   }
 }
