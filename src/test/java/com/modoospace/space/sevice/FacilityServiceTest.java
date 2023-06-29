@@ -6,7 +6,7 @@ import static org.junit.jupiter.api.Assertions.assertAll;
 import com.modoospace.member.domain.Member;
 import com.modoospace.member.domain.MemberRepository;
 import com.modoospace.member.domain.Role;
-import com.modoospace.space.controller.dto.FacilityCreateUpdateDto;
+import com.modoospace.space.controller.dto.FacilityCreateDto;
 import com.modoospace.space.controller.dto.SpaceCreateUpdateDto;
 import com.modoospace.space.domain.Category;
 import com.modoospace.space.domain.CategoryRepository;
@@ -15,7 +15,6 @@ import com.modoospace.space.domain.FacilityRepository;
 import com.modoospace.space.domain.FacilityType;
 import com.modoospace.space.domain.Space;
 import com.modoospace.space.domain.SpaceRepository;
-import java.time.LocalTime;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -68,7 +67,7 @@ class FacilityServiceTest {
   @DisplayName("시설 생성 시 Setting시간을 선택하지않으면 24시간 예약이 가능한 시설이 생성된다.")
   @Test
   public void createFacility_24HourOpen_ifNotSelectSetting() {
-    FacilityCreateUpdateDto createDto = FacilityCreateUpdateDto.builder()
+    FacilityCreateDto createDto = FacilityCreateDto.builder()
         .name("스터디룸1")
         .facilityType(FacilityType.ROOM)
         .description("1~4인실 입니다.")

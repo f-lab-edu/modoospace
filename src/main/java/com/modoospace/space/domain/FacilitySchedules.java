@@ -18,8 +18,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class FacilitySchedules {
 
-  // TODO : 프록시 공부 후 수정 필요
-  @OneToMany(mappedBy = "facility", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+  @OneToMany(mappedBy = "facility", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
   private List<FacilitySchedule> facilitySchedules = new ArrayList<>();
 
   private FacilitySchedules(List<FacilitySchedule> facilitySchedules) {

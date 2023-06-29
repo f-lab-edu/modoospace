@@ -21,9 +21,8 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class TimeSettings {
 
-  // TODO : 프록시 공부 후 수정 필요
-  @OneToMany(mappedBy = "facility", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
-  private List<TimeSetting> timeSettings = new ArrayList<>();;
+  @OneToMany(mappedBy = "facility", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
+  private List<TimeSetting> timeSettings = new ArrayList<>();
 
   public TimeSettings(List<TimeSetting> timeSettings) {
     validateTimeSettings(timeSettings);
