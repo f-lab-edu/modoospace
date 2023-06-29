@@ -18,12 +18,9 @@ public class ReservationUpdateDto {
   }
 
   public Reservation toEntity(Reservation reservation) {
-    return Reservation.builder()
-        .reservationStart(reservation.getReservationStart())
-        .reservationEnd(reservation.getReservationEnd())
-        .status(status)
-        .visitor(reservation.getVisitor())
-        .facility(reservation.getFacility())
-        .build();
+    return new Reservation(reservation.getReservationStart(),
+        reservation.getReservationEnd(),
+        reservation.getFacility(),
+        reservation.getVisitor());
   }
 }

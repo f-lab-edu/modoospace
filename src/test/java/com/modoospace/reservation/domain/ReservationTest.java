@@ -66,7 +66,6 @@ public class ReservationTest {
         .reservationStart(LocalDateTime.now())
         .reservationEnd(LocalDateTime.now().plusHours(3))
         .visitor(visitorMember)
-        .status(ReservationStatus.WAITING)
         .facility(facilityRoom)
         .build();
 
@@ -80,7 +79,6 @@ public class ReservationTest {
         .reservationStart(LocalDateTime.now())
         .reservationEnd(LocalDateTime.now().plusHours(3))
         .visitor(visitorMember)
-        .status(ReservationStatus.COMPLETED)
         .facility(facilityRoom)
         .build();
 
@@ -97,7 +95,6 @@ public class ReservationTest {
         .reservationStart(LocalDateTime.now())
         .reservationEnd(LocalDateTime.now().plusHours(3))
         .visitor(hostMember)
-        .status(ReservationStatus.COMPLETED)
         .facility(facilityRoom)
         .build();
 

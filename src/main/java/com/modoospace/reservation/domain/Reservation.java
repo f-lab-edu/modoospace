@@ -5,6 +5,7 @@ import com.modoospace.exception.PermissionDeniedException;
 import com.modoospace.member.domain.Member;
 import com.modoospace.member.domain.Role;
 import com.modoospace.space.domain.Facility;
+import com.modoospace.space.domain.FacilityType;
 import java.time.LocalDateTime;
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -23,7 +24,6 @@ import lombok.NoArgsConstructor;
 @Entity
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-@Builder
 public class Reservation extends BaseTimeEntity {
 
   @Id
@@ -49,14 +49,23 @@ public class Reservation extends BaseTimeEntity {
   @JoinColumn(name = "visitor_id")
   private Member visitor; // 방문자
 
-  public Reservation(Long id, LocalDateTime reservationStart, LocalDateTime reservationEnd,
-      ReservationStatus status, Facility facility, Member visitor) {
-    this.id = id;
+  @Builder
+  public Reservation(LocalDateTime reservationStart, LocalDateTime reservationEnd, Facility facility, Member visitor) {
     this.reservationStart = reservationStart;
     this.reservationEnd = reservationEnd;
-    this.status = status;
+    this.status = setReservationStatusByFacilityType(facility.getFacilityType());
     this.facility = facility;
     this.visitor = visitor;
+  }
+
+  private ReservationStatus setReservationStatusByFacilityType(FacilityType facilityType) {
+    if (facilityType == FacilityType.SEAT) {
+      return ReservationStatus.COMPLETED;
+    } else if (facilityType == FacilityType.ROOM) {
+      return ReservationStatus.WAITING;
+    } else {
+      return ReservationStatus.WAITING;
+    }
   }
 
   public Reservation approveReservation(Member loginMember) {
