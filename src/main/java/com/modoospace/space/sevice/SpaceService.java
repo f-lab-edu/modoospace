@@ -10,10 +10,11 @@ import com.modoospace.space.domain.Category;
 import com.modoospace.space.domain.CategoryRepository;
 import com.modoospace.space.domain.Space;
 import com.modoospace.space.domain.SpaceRepository;
-import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.util.List;
 
 @RequiredArgsConstructor
 @Service
@@ -60,8 +61,9 @@ public class SpaceService {
   public void updateSpace(Long spaceId, SpaceCreateUpdateDto updateDto, String email) {
     Member loginMember = findMemberByEmail(email);
     Space space = findSpaceById(spaceId);
+    Space updatedSpace = updateDto.toEntity(space.getCategory(), space.getHost());
 
-    space.update(updateDto.toEntity(space.getCategory(), space.getHost()), loginMember);
+    space.update(updatedSpace, loginMember);
   }
 
   @Transactional

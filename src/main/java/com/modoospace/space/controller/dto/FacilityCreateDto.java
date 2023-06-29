@@ -20,7 +20,7 @@ import lombok.NoArgsConstructor;
 @Getter
 @NoArgsConstructor
 @Builder
-public class FacilityCreateUpdateDto {
+public class FacilityCreateDto {
 
   @NotEmpty
   private String name;
@@ -47,9 +47,9 @@ public class FacilityCreateUpdateDto {
       new WeekdaySettingCreateDto(DayOfWeek.SUNDAY)
   );
 
-  public FacilityCreateUpdateDto(String name, FacilityType facilityType, Boolean reservationEnable,
-      String description, List<TimeSettingCreateDto> timeSettings,
-      List<WeekdaySettingCreateDto> weekdaySettings) {
+  public FacilityCreateDto(String name, FacilityType facilityType, Boolean reservationEnable,
+                           String description, List<TimeSettingCreateDto> timeSettings,
+                           List<WeekdaySettingCreateDto> weekdaySettings) {
     this.name = name;
     this.facilityType = facilityType;
     this.reservationEnable = reservationEnable;
