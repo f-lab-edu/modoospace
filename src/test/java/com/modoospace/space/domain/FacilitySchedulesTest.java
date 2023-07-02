@@ -50,6 +50,12 @@ class FacilitySchedulesTest {
             .build(),
         WeekdaySetting.builder()
             .weekday(DayOfWeek.FRIDAY)
+            .build(),
+        WeekdaySetting.builder()
+            .weekday(DayOfWeek.SATURDAY)
+            .build(),
+        WeekdaySetting.builder()
+            .weekday(DayOfWeek.SUNDAY)
             .build());
     FacilitySchedules facilitySchedules = FacilitySchedules
         .createFacilitySchedules(new TimeSettings(timeSettings),

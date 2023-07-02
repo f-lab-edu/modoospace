@@ -29,12 +29,12 @@ public class FacilitySchedules {
 
   public static FacilitySchedules createFacilitySchedules(TimeSettings timeSettings,
       WeekdaySettings weekdaySettings) {
-    LocalDate now = LocalDate.now();
-    int daysBetween = (int) ChronoUnit.DAYS.between(now, now.plusMonths(3));
+    LocalDate nowMonthDate = LocalDate.of(LocalDate.now().getYear(), LocalDate.now().getMonth(), 1);
+    int daysBetween = (int) ChronoUnit.DAYS.between(nowMonthDate, nowMonthDate.plusMonths(3));
 
     List<FacilitySchedule> facilitySchedules = new ArrayList<>();
     IntStream.range(0, daysBetween)
-        .mapToObj(now::plusDays)
+        .mapToObj(nowMonthDate::plusDays)
         .filter(scheduleDate -> weekdaySettings.isContainWeekday(scheduleDate.getDayOfWeek()))
         .flatMap(scheduleDate -> timeSettings.createFacilitySchedules(scheduleDate).stream())
         .forEach(facilitySchedules::add);
