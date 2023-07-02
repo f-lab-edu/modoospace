@@ -1,9 +1,12 @@
 package com.modoospace.space.domain;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 import com.modoospace.exception.ConflictingTimeException;
 import com.modoospace.exception.InvalidTimeRangeException;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.Arrays;
 import java.util.Collections;
@@ -71,5 +74,22 @@ class TimeSettingTest {
     Collections.sort(timeSettings, Comparator.comparing(TimeSetting::getStartTime));
 
     System.out.println(timeSettings);
+  }
+
+  @DisplayName("해당 날짜의 시설 스케줄을 생성한다.")
+  @Test
+  public void createFacilitySchedule() {
+    TimeSetting timeSetting = TimeSetting.builder()
+        .startTime(LocalTime.of(14, 0))
+        .endTime(LocalTime.of(18, 59, 59))
+        .build();
+    LocalDate scheduleDate = LocalDate.of(2022, 1, 1);
+
+    FacilitySchedule retFacilitySchedule = timeSetting.createFacilitySchedule(scheduleDate);
+
+    assertThat(retFacilitySchedule.getStartDateTime())
+        .isEqualTo(LocalDateTime.of(2022, 1, 1, 14, 0));
+    assertThat(retFacilitySchedule.getEndDateTime())
+        .isEqualTo(LocalDateTime.of(2022, 1, 1, 18, 59, 59));
   }
 }

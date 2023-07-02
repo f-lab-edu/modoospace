@@ -3,6 +3,8 @@ package com.modoospace.space.domain;
 import static javax.persistence.FetchType.LAZY;
 
 import com.modoospace.common.BaseTimeEntity;
+import com.modoospace.member.domain.Member;
+import java.time.LocalDateTime;
 import javax.persistence.Column;
 import javax.persistence.Embedded;
 import javax.persistence.Entity;
@@ -75,5 +77,43 @@ public class Facility extends BaseTimeEntity {
       this.facilitySchedules = FacilitySchedules
           .createFacilitySchedules(timeSettings, weekdaySettings);
     }
+  }
+
+  public void update(Facility facility, Member loginMember) {
+    verifyManagementPermission(loginMember);
+
+    this.name = facility.getName();
+    this.reservationEnable = facility.getReservationEnable();
+    this.description = facility.getDescription();
+
+    if (!facility.getTimeSettings().isEmpty()) {
+      this.timeSettings.update(facility.getTimeSettings(), this);
+    }
+
+    if (!facility.getWeekdaySettings().isEmpty()) {
+      this.weekdaySettings.update(facility.getWeekdaySettings(), this);
+    }
+
+    if (!facility.getTimeSettings().isEmpty() || !facility.getWeekdaySettings().isEmpty()) {
+      FacilitySchedules facilitySchedules = FacilitySchedules
+          .createFacilitySchedules(this.timeSettings, this.weekdaySettings);
+      this.facilitySchedules.update(facilitySchedules);
+    }
+  }
+
+  public void updateSchedules(Facility facility, Member loginMember) {
+    verifyManagementPermission(loginMember);
+
+    this.facilitySchedules.clear();
+    this.facilitySchedules = facility.getFacilitySchedules();
+    facility.getFacilitySchedules().setFacility(this);
+  }
+
+  public void verifyManagementPermission(Member loginMember) {
+    space.verifyManagementPermission(loginMember);
+  }
+
+  public boolean isOpen(LocalDateTime start, LocalDateTime end) {
+    return facilitySchedules.isOpen(start, end);
   }
 }

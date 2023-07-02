@@ -6,8 +6,11 @@ import static org.junit.jupiter.api.Assertions.assertAll;
 import com.modoospace.member.domain.Member;
 import com.modoospace.member.domain.MemberRepository;
 import com.modoospace.member.domain.Role;
-import com.modoospace.space.controller.dto.FacilityCreateDto;
-import com.modoospace.space.controller.dto.SpaceCreateUpdateDto;
+import com.modoospace.space.controller.dto.facility.FacilityCreateDto;
+import com.modoospace.space.controller.dto.facility.FacilityUpdateDto;
+import com.modoospace.space.controller.dto.space.SpaceCreateUpdateDto;
+import com.modoospace.space.controller.dto.timeSetting.TimeSettingCreateDto;
+import com.modoospace.space.controller.dto.weekdaySetting.WeekdaySettingCreateDto;
 import com.modoospace.space.domain.Category;
 import com.modoospace.space.domain.CategoryRepository;
 import com.modoospace.space.domain.Facility;
@@ -15,6 +18,12 @@ import com.modoospace.space.domain.FacilityRepository;
 import com.modoospace.space.domain.FacilityType;
 import com.modoospace.space.domain.Space;
 import com.modoospace.space.domain.SpaceRepository;
+import java.time.DayOfWeek;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.LocalTime;
+import java.util.Arrays;
+import java.util.List;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -40,6 +49,7 @@ class FacilityServiceTest {
 
   private Member hostMember;
   private Space space;
+  private LocalDate testDate;
 
   @BeforeEach
   public void setUp() {
@@ -62,6 +72,14 @@ class FacilityServiceTest {
         .build();
     space = spaceCreateDto.toEntity(category, hostMember);
     spaceRepository.save(space);
+
+    testDate = LocalDate.now();
+    if(testDate.getDayOfWeek().equals(DayOfWeek.SUNDAY)){
+      testDate = testDate.plusDays(1);
+    }
+    if(testDate.getDayOfWeek().equals(DayOfWeek.SATURDAY)){
+      testDate = testDate.plusDays(2);
+    }
   }
 
   @DisplayName("시설 생성 시 Setting시간을 선택하지않으면 24시간 예약이 가능한 시설이 생성된다.")
@@ -83,7 +101,128 @@ class FacilityServiceTest {
         () -> assertThat(facility.getName()).isEqualTo("스터디룸1"),
         () -> assertThat(facility.getFacilityType()).isEqualTo(FacilityType.ROOM),
         () -> assertThat(facility.getDescription()).isEqualTo("1~4인실 입니다."),
-        () -> assertThat(facility.getReservationEnable()).isFalse()
+        () -> assertThat(facility.getReservationEnable()).isFalse(),
+        () -> assertThat(facility.isOpen(LocalDateTime.of(LocalDate.now(), LocalTime.of(0, 0, 0)),
+            LocalDateTime.of(LocalDate.now(), LocalTime.of(23, 59, 59)))).isTrue(),
+        () -> assertThat(facility.isOpen(LocalDateTime.of(LocalDate.now(), LocalTime.of(0, 0, 0)),
+            LocalDateTime.of(LocalDate.now().plusDays(2), LocalTime.of(23, 59, 59)))).isTrue()
+    );
+  }
+
+  @DisplayName("시설 생성 시 시간, 요일Setting에 맞게 예약이 가능한 시설이 생성된다.")
+  @Test
+  public void createFacility() {
+    List<TimeSettingCreateDto> timeSettings = Arrays
+        .asList(new TimeSettingCreateDto(LocalTime.of(9, 0, 0), LocalTime.of(20, 59, 59)));
+    List<WeekdaySettingCreateDto> weekdaySettings = Arrays.asList(
+        new WeekdaySettingCreateDto(DayOfWeek.MONDAY),
+        new WeekdaySettingCreateDto(DayOfWeek.TUESDAY),
+        new WeekdaySettingCreateDto(DayOfWeek.WEDNESDAY),
+        new WeekdaySettingCreateDto(DayOfWeek.THURSDAY),
+        new WeekdaySettingCreateDto(DayOfWeek.FRIDAY)
+    );
+    FacilityCreateDto createDto = FacilityCreateDto.builder()
+        .name("스터디룸1")
+        .facilityType(FacilityType.ROOM)
+        .description("1~4인실 입니다.")
+        .reservationEnable(false)
+        .timeSettings(timeSettings)
+        .weekdaySettings(weekdaySettings)
+        .build();
+
+    Long facilityId = facilityService
+        .createFacility(space.getId(), createDto, hostMember.getEmail());
+    Facility facility = facilityRepository.findById(facilityId).get();
+
+    assertAll(
+        () -> assertThat(facility.getId()).isEqualTo(facilityId),
+        () -> assertThat(facility.getName()).isEqualTo("스터디룸1"),
+        () -> assertThat(facility.getFacilityType()).isEqualTo(FacilityType.ROOM),
+        () -> assertThat(facility.getDescription()).isEqualTo("1~4인실 입니다."),
+        () -> assertThat(facility.getReservationEnable()).isFalse(),
+        () -> assertThat(facility.isOpen(LocalDateTime.of(testDate, LocalTime.of(9, 0, 0)),
+            LocalDateTime.of(testDate, LocalTime.of(20, 59, 59)))).isTrue(),
+        () -> assertThat(facility.isOpen(LocalDateTime.of(testDate, LocalTime.of(9, 0, 0)),
+            LocalDateTime.of(testDate.plusDays(1), LocalTime.of(20, 59, 59)))).isFalse()
+    );
+  }
+
+  @DisplayName("시설 정보를 업데이트한다.")
+  @Test
+  public void updateFacility() {
+    FacilityCreateDto createDto = FacilityCreateDto.builder()
+        .name("스터디룸1")
+        .facilityType(FacilityType.ROOM)
+        .reservationEnable(false)
+        .description("1~4인실 입니다.")
+        .build();
+    Long facilityId = facilityService
+        .createFacility(space.getId(), createDto, hostMember.getEmail());
+    FacilityUpdateDto updateDto = FacilityUpdateDto.builder()
+        .name("스터디룸업데이트")
+        .description("설명업데이트")
+        .reservationEnable(true)
+        .build();
+
+    facilityService
+        .updateFacility(facilityId, updateDto, hostMember.getEmail());
+    Facility facility = facilityRepository.findById(facilityId).get();
+
+    assertAll(
+        () -> assertThat(facility.getId()).isEqualTo(facilityId),
+        () -> assertThat(facility.getName()).isEqualTo("스터디룸업데이트"),
+        () -> assertThat(facility.getFacilityType()).isEqualTo(FacilityType.ROOM),
+        () -> assertThat(facility.getDescription()).isEqualTo("설명업데이트"),
+        () -> assertThat(facility.getReservationEnable()).isTrue(),
+        () -> assertThat(facility.isOpen(LocalDateTime.of(testDate, LocalTime.of(0, 0, 0)),
+            LocalDateTime.of(testDate, LocalTime.of(23, 59, 59)))).isTrue(),
+        () -> assertThat(facility.isOpen(LocalDateTime.of(testDate, LocalTime.of(0, 0, 0)),
+            LocalDateTime.of(testDate.plusDays(1), LocalTime.of(23, 59, 59)))).isTrue()
+    );
+  }
+
+  @DisplayName("시설 정보와 세팅정보도 함께 업데이트한다.")
+  @Test
+  public void updateFacility_withSetting() {
+    FacilityCreateDto createDto = FacilityCreateDto.builder()
+        .name("스터디룸1")
+        .facilityType(FacilityType.ROOM)
+        .reservationEnable(false)
+        .description("1~4인실 입니다.")
+        .build();
+    Long facilityId = facilityService
+        .createFacility(space.getId(), createDto, hostMember.getEmail());
+    List<TimeSettingCreateDto> timeSettings = Arrays
+        .asList(new TimeSettingCreateDto(LocalTime.of(9, 0, 0), LocalTime.of(20, 59, 59)));
+    List<WeekdaySettingCreateDto> weekdaySettings = Arrays.asList(
+        new WeekdaySettingCreateDto(DayOfWeek.MONDAY),
+        new WeekdaySettingCreateDto(DayOfWeek.TUESDAY),
+        new WeekdaySettingCreateDto(DayOfWeek.WEDNESDAY),
+        new WeekdaySettingCreateDto(DayOfWeek.THURSDAY),
+        new WeekdaySettingCreateDto(DayOfWeek.FRIDAY)
+    );
+    FacilityUpdateDto updateDto = FacilityUpdateDto.builder()
+        .name("스터디룸업데이트")
+        .description("설명업데이트")
+        .reservationEnable(true)
+        .timeSettings(timeSettings)
+        .weekdaySettings(weekdaySettings)
+        .build();
+
+    facilityService
+        .updateFacility(facilityId, updateDto, hostMember.getEmail());
+    Facility facility = facilityRepository.findById(facilityId).get();
+
+    assertAll(
+        () -> assertThat(facility.getId()).isEqualTo(facilityId),
+        () -> assertThat(facility.getName()).isEqualTo("스터디룸업데이트"),
+        () -> assertThat(facility.getFacilityType()).isEqualTo(FacilityType.ROOM),
+        () -> assertThat(facility.getDescription()).isEqualTo("설명업데이트"),
+        () -> assertThat(facility.getReservationEnable()).isTrue(),
+        () -> assertThat(facility.isOpen(LocalDateTime.of(testDate, LocalTime.of(9, 0, 0)),
+            LocalDateTime.of(testDate, LocalTime.of(20, 59, 59)))).isTrue(),
+        () -> assertThat(facility.isOpen(LocalDateTime.of(testDate, LocalTime.of(9, 0, 0)),
+            LocalDateTime.of(testDate.plusDays(1), LocalTime.of(20, 59, 59)))).isFalse()
     );
   }
 }

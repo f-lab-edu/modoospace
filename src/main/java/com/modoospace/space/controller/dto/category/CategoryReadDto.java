@@ -1,4 +1,4 @@
-package com.modoospace.space.controller.dto;
+package com.modoospace.space.controller.dto.category;
 
 import com.modoospace.space.domain.Category;
 import javax.validation.constraints.NotEmpty;

@@ -3,8 +3,10 @@ package com.modoospace.space.sevice;
 import com.modoospace.exception.NotFoundEntityException;
 import com.modoospace.member.domain.Member;
 import com.modoospace.member.domain.MemberRepository;
-import com.modoospace.space.controller.dto.FacilityCreateDto;
-import com.modoospace.space.controller.dto.FacilityUpdateDto;
+import com.modoospace.space.controller.dto.FacilitySchedulesUpdateDto;
+import com.modoospace.space.controller.dto.facility.FacilityCreateDto;
+import com.modoospace.space.controller.dto.facility.FacilityReadDetailDto;
+import com.modoospace.space.controller.dto.facility.FacilityUpdateDto;
 import com.modoospace.space.domain.Facility;
 import com.modoospace.space.domain.FacilityRepository;
 import com.modoospace.space.domain.Space;
@@ -22,7 +24,7 @@ public class FacilityService {
   private final FacilityRepository facilityRepository;
 
   @Transactional
-  public Long createFacility(Long spaceId, FacilityCreateDto createDto, String loginEmail){
+  public Long createFacility(Long spaceId, FacilityCreateDto createDto, String loginEmail) {
     Member host = findMemberByEmail(loginEmail);
     Space space = findSpaceById(spaceId);
     space.verifyManagementPermission(host);
@@ -33,12 +35,42 @@ public class FacilityService {
     return facility.getId();
   }
 
-  public void updateFacility(Long facilityId, FacilityUpdateDto updateDto, String loginEmail){
+
+  public FacilityReadDetailDto findFacility(Long facilityId) {
+    Facility facility = findFacilityById(facilityId);
+
+    return FacilityReadDetailDto.toDto(facility);
+  }
+
+  @Transactional
+  public void updateFacility(Long facilityId, FacilityUpdateDto updateDto, String loginEmail) {
     Member loginMember = findMemberByEmail(loginEmail);
     Facility facility = findFacilityById(facilityId);
     Facility updatedFacility = updateDto.toEntity();
-    
-    //facility.update(updatedFacility, loginMember);
+
+    facility.update(updatedFacility, loginMember);
+  }
+
+  // 해당 메서드 제거 예정 (FacilitySchedule 서비스 생성예정)
+  @Transactional
+  public void updateFacilitySchedules(Long facilityId, FacilitySchedulesUpdateDto updateDto,
+      String loginEmail) {
+    Member loginMember = findMemberByEmail(loginEmail);
+    Facility facility = findFacilityById(facilityId);
+    Facility updatedFacility = updateDto.toEntity();
+
+    facility.updateSchedules(updatedFacility, loginMember);
+  }
+
+  @Transactional
+  public void deleteFacility(Long facilityId, String email) {
+    Member loginMember = findMemberByEmail(email);
+    Facility facility = findFacilityById(facilityId);
+
+    // TODO: 예약이 존재하는지 확인이 필요합니다.
+
+    facility.verifyManagementPermission(loginMember);
+    facilityRepository.delete(facility);
   }
 
   private Member findMemberByEmail(String email) {

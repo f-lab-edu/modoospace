@@ -48,4 +48,14 @@ public class WeekdaySettings {
     return weekdaySettings.stream()
         .anyMatch(weekdaySetting -> weekdaySetting.isEqualWeekday(dayOfWeek));
   }
+
+  public boolean isEmpty() {
+    return weekdaySettings.isEmpty();
+  }
+
+  public void update(WeekdaySettings weekdaySettings, Facility facility) {
+    this.weekdaySettings.clear();
+    this.weekdaySettings.addAll(weekdaySettings.getWeekdaySettings());
+    weekdaySettings.setFacility(facility);
+  }
 }

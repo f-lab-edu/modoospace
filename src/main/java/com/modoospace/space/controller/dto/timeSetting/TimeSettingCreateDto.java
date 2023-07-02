@@ -1,4 +1,4 @@
-package com.modoospace.space.controller.dto;
+package com.modoospace.space.controller.dto.timeSetting;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.modoospace.space.domain.TimeSetting;

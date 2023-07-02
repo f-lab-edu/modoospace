@@ -1,4 +1,4 @@
-package com.modoospace.space.controller.dto;
+package com.modoospace.space.controller.dto.weekdaySetting;
 
 import com.modoospace.space.domain.WeekdaySetting;
 import java.time.DayOfWeek;

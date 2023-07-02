@@ -1,4 +1,4 @@
-package com.modoospace.space.controller.dto;
+package com.modoospace.space.controller.dto.facility;
 
 import com.modoospace.space.domain.Facility;
 import com.modoospace.space.domain.FacilityType;

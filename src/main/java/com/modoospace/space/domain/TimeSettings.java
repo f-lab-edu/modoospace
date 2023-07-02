@@ -1,7 +1,6 @@
 package com.modoospace.space.domain;
 
 import java.time.LocalDate;
-import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
@@ -47,9 +46,19 @@ public class TimeSettings {
     }
   }
 
-  public List<FacilitySchedule> createFacilitySchedules(LocalDate scheduleDate){
+  public List<FacilitySchedule> createFacilitySchedules(LocalDate scheduleDate) {
     return timeSettings.stream()
         .map(timeSetting -> timeSetting.createFacilitySchedule(scheduleDate))
         .collect(Collectors.toList());
+  }
+
+  public boolean isEmpty() {
+    return timeSettings.isEmpty();
+  }
+
+  public void update(TimeSettings timeSettings, Facility facility) {
+    this.timeSettings.clear();
+    this.timeSettings.addAll(timeSettings.getTimeSettings());
+    timeSettings.setFacility(facility);
   }
 }

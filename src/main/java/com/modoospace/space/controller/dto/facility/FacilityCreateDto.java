@@ -1,5 +1,7 @@
-package com.modoospace.space.controller.dto;
+package com.modoospace.space.controller.dto.facility;
 
+import com.modoospace.space.controller.dto.timeSetting.TimeSettingCreateDto;
+import com.modoospace.space.controller.dto.weekdaySetting.WeekdaySettingCreateDto;
 import com.modoospace.space.domain.Facility;
 import com.modoospace.space.domain.FacilityType;
 import com.modoospace.space.domain.Space;

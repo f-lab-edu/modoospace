@@ -1,4 +1,4 @@
-package com.modoospace.space.controller.dto;
+package com.modoospace.space.controller.dto.space;
 
 import com.modoospace.member.domain.Member;
 import com.modoospace.space.domain.Address;
