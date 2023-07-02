@@ -51,17 +51,6 @@ public class FacilityService {
     facility.update(updatedFacility, loginMember);
   }
 
-  // 해당 메서드 제거 예정 (FacilitySchedule 서비스 생성예정)
-  @Transactional
-  public void updateFacilitySchedules(Long facilityId, FacilitySchedulesUpdateDto updateDto,
-      String loginEmail) {
-    Member loginMember = findMemberByEmail(loginEmail);
-    Facility facility = findFacilityById(facilityId);
-    Facility updatedFacility = updateDto.toEntity();
-
-    facility.updateSchedules(updatedFacility, loginMember);
-  }
-
   @Transactional
   public void deleteFacility(Long facilityId, String email) {
     Member loginMember = findMemberByEmail(email);
@@ -71,6 +60,23 @@ public class FacilityService {
 
     facility.verifyManagementPermission(loginMember);
     facilityRepository.delete(facility);
+  }
+
+  /**
+   * 임시 메서드 (제거 예정)
+   *
+   * @param facilityId
+   * @param updateDto
+   * @param loginEmail
+   */
+  @Transactional
+  public void updateFacilitySchedules(Long facilityId, FacilitySchedulesUpdateDto updateDto,
+      String loginEmail) {
+    Member loginMember = findMemberByEmail(loginEmail);
+    Facility facility = findFacilityById(facilityId);
+    Facility updatedFacility = updateDto.toEntity();
+
+    facility.updateSchedules(updatedFacility, loginMember);
   }
 
   private Member findMemberByEmail(String email) {

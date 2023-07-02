@@ -11,6 +11,9 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
+/**
+ * 임시 DTO (제거 예정)
+ */
 @Getter
 @NoArgsConstructor
 public class FacilitySchedulesUpdateDto {
