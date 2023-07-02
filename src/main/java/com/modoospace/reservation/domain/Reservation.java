@@ -1,8 +1,11 @@
 package com.modoospace.reservation.domain;
 
 import com.modoospace.common.BaseTimeEntity;
-import com.modoospace.space.domain.Facility;
+import com.modoospace.exception.PermissionDeniedException;
 import com.modoospace.member.domain.Member;
+import com.modoospace.member.domain.Role;
+import com.modoospace.space.domain.Facility;
+import com.modoospace.space.domain.FacilityType;
 import java.time.LocalDateTime;
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -14,6 +17,7 @@ import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import lombok.AccessLevel;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
@@ -44,4 +48,48 @@ public class Reservation extends BaseTimeEntity {
   @ManyToOne(fetch = FetchType.LAZY)
   @JoinColumn(name = "visitor_id")
   private Member visitor; // 방문자
+
+  @Builder
+  public Reservation(LocalDateTime reservationStart, LocalDateTime reservationEnd, Facility facility, Member visitor) {
+    this.reservationStart = reservationStart;
+    this.reservationEnd = reservationEnd;
+
+    FacilityType facilityType = facility.getFacilityType();
+    this.status = facilityType.getDefaultStatus();
+
+    this.facility = facility;
+    this.visitor = visitor;
+  }
+
+  public Reservation approveReservation(Member loginMember) {
+    verifyHostRole(loginMember);
+    this.status = ReservationStatus.COMPLETED;
+    return this;
+  }
+
+  public void updateAsHost(final Reservation updateReservation, Member loginMember) {
+    verifyHostRole(loginMember);
+    this.reservationStart = updateReservation.getReservationStart();
+    this.reservationEnd = updateReservation.getReservationEnd();
+    this.status = updateReservation.getStatus();
+  }
+
+  public void verifyHostRole(Member loginMember) {
+    if (facility.getSpace().getHost() == loginMember) {
+      return;
+    }
+    loginMember.verifyRolePermission(Role.ADMIN);
+  }
+
+  public void updateStatusToCanceled(Member loginMember) {
+    verifySameVisitor(loginMember);
+    this.status = ReservationStatus.CANCELED;
+  }
+
+  public void verifySameVisitor(Member loginMember) {
+    if (visitor.equals(loginMember)) {
+      return;
+    }
+    throw new PermissionDeniedException();
+  }
 }

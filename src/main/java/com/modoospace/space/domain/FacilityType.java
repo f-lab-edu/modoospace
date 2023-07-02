@@ -1,6 +1,18 @@
 package com.modoospace.space.domain;
 
-public enum FacilityType {
+import com.modoospace.reservation.domain.ReservationStatus;
 
-  SEAT, ROOM
+public enum FacilityType {
+  SEAT(ReservationStatus.COMPLETED),
+  ROOM(ReservationStatus.WAITING);
+
+  private final ReservationStatus defaultStatus;
+
+  FacilityType(ReservationStatus defaultStatus) {
+    this.defaultStatus = defaultStatus;
+  }
+
+  public ReservationStatus getDefaultStatus() {
+    return defaultStatus;
+  }
 }
