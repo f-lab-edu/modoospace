@@ -53,19 +53,12 @@ public class Reservation extends BaseTimeEntity {
   public Reservation(LocalDateTime reservationStart, LocalDateTime reservationEnd, Facility facility, Member visitor) {
     this.reservationStart = reservationStart;
     this.reservationEnd = reservationEnd;
-    this.status = setReservationStatusByFacilityType(facility.getFacilityType());
+
+    FacilityType facilityType = facility.getFacilityType();
+    this.status = facilityType.getDefaultStatus();
+
     this.facility = facility;
     this.visitor = visitor;
-  }
-
-  private ReservationStatus setReservationStatusByFacilityType(FacilityType facilityType) {
-    if (facilityType == FacilityType.SEAT) {
-      return ReservationStatus.COMPLETED;
-    } else if (facilityType == FacilityType.ROOM) {
-      return ReservationStatus.WAITING;
-    } else {
-      return ReservationStatus.WAITING;
-    }
   }
 
   public Reservation approveReservation(Member loginMember) {
