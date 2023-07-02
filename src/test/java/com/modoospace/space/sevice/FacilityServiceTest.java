@@ -109,7 +109,7 @@ class FacilityServiceTest {
     );
   }
 
-  @DisplayName("시설 생성 시 시간, 요일Setting에 맞게 예약이 가능한 시설이 생성된다.")
+  @DisplayName("시설 생성 시 시간, 요일 Setting에 맞게 예약이 가능한 시설이 생성된다.")
   @Test
   public void createFacility() {
     List<TimeSettingCreateDto> timeSettings = Arrays

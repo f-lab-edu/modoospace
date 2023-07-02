@@ -29,27 +29,19 @@ public class FacilitySchedules {
 
   public static FacilitySchedules createFacilitySchedules(TimeSettings timeSettings,
       WeekdaySettings weekdaySettings) {
-    LocalDate nowMonthDate = LocalDate.of(LocalDate.now().getYear(), LocalDate.now().getMonth(), 1);
-    int daysBetween = (int) ChronoUnit.DAYS.between(nowMonthDate, nowMonthDate.plusMonths(3));
+    LocalDate nowMonthStartDate = LocalDate
+        .of(LocalDate.now().getYear(), LocalDate.now().getMonth(), 1);
+    int daysBetween = (int) ChronoUnit.DAYS
+        .between(nowMonthStartDate, nowMonthStartDate.plusMonths(3));
 
     List<FacilitySchedule> facilitySchedules = new ArrayList<>();
     IntStream.range(0, daysBetween)
-        .mapToObj(nowMonthDate::plusDays)
+        .mapToObj(nowMonthStartDate::plusDays)
         .filter(scheduleDate -> weekdaySettings.isContainWeekday(scheduleDate.getDayOfWeek()))
         .flatMap(scheduleDate -> timeSettings.createFacilitySchedules(scheduleDate).stream())
         .forEach(facilitySchedules::add);
 
     return new FacilitySchedules(facilitySchedules);
-  }
-
-  public void clear() {
-    facilitySchedules.clear();
-  }
-
-  public void setFacility(Facility facility) {
-    for (FacilitySchedule facilitySchedule : facilitySchedules) {
-      facilitySchedule.setFacility(facility);
-    }
   }
 
   public boolean isOpen(LocalDateTime startDateTime, LocalDateTime endDateTime) {
@@ -70,15 +62,22 @@ public class FacilitySchedules {
         .allMatch(FacilitySchedule::is24TimeRange); // 시간 범위가 24시간인지 체크
   }
 
+  public void update(FacilitySchedules facilitySchedules, Facility facility) {
+    this.facilitySchedules.clear();
+    this.facilitySchedules.addAll(facilitySchedules.getFacilitySchedules());
+    facilitySchedules.setFacility(facility);
+  }
+
+  private void setFacility(Facility facility) {
+    for (FacilitySchedule facilitySchedule : facilitySchedules) {
+      facilitySchedule.setFacility(facility);
+    }
+  }
+
   @Override
   public String toString() {
     return "FacilitySchedules{" +
         "facilitySchedules=" + facilitySchedules +
         '}';
-  }
-
-  public void update(FacilitySchedules facilitySchedules) {
-    this.facilitySchedules.clear();
-    this.facilitySchedules.addAll(facilitySchedules.getFacilitySchedules());
   }
 }

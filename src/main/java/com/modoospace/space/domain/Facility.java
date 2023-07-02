@@ -97,16 +97,14 @@ public class Facility extends BaseTimeEntity {
     if (!facility.getTimeSettings().isEmpty() || !facility.getWeekdaySettings().isEmpty()) {
       FacilitySchedules facilitySchedules = FacilitySchedules
           .createFacilitySchedules(this.timeSettings, this.weekdaySettings);
-      this.facilitySchedules.update(facilitySchedules);
+      this.facilitySchedules.update(facilitySchedules, this);
     }
   }
 
   public void updateSchedules(Facility facility, Member loginMember) {
     verifyManagementPermission(loginMember);
 
-    this.facilitySchedules.clear();
-    this.facilitySchedules = facility.getFacilitySchedules();
-    facility.getFacilitySchedules().setFacility(this);
+    this.facilitySchedules.update(facility.getFacilitySchedules(), this);
   }
 
   public void verifyManagementPermission(Member loginMember) {
