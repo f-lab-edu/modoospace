@@ -37,3 +37,9 @@ jobs:
       - name: Build with Gradle
         run: ./gradlew build
         shell: bash
+      # DockerFile 이미지 작성 및 Docker Repository 업로드
+      - name: Docker build & Docker push
+        run: |
+         docker login -u ${{ secrets.USERNAME }} -p ${{ secrets.PASSWORD }}
+         docker build -f Dockerfile -t ${{ secrets.USER_NAME }}/modoospace .
+         docker push ${{ secrets.USER_NAME }}/modoospace
