@@ -10,5 +10,3 @@ insert into category(CREATED_TIME, UPDATED_TIME, NAME) values (now(), now(), '�
 insert into space(CREATED_TIME, UPDATED_TIME, DEPTH_FIRST, DEPTH_SECOND, DEPTH_THIRD, DETAIL_ADDRESS, NAME, DESCRIPTION, CATEGORY_ID, HOST_ID) values (now(), now(), '서울', '강남구', '역삼동', '817-36 5층', '에프랩', '상위1%어쩌고', 1, 2);
 insert into space(CREATED_TIME, UPDATED_TIME, DEPTH_FIRST, DEPTH_SECOND, DEPTH_THIRD, DETAIL_ADDRESS, NAME, DESCRIPTION, CATEGORY_ID, HOST_ID) values (now(), now(), '서울', '강남구', '역삼동', '827-3 1~6층', '토즈 강남역토즈타워점', '쾌적상쾌스터디카페', 1, 2);
 
-insert into facility (CREATED_TIME, UPDATED_TIME, DESCRIPTION, FACILITY_TYPE, NAME, RESERVATION_ENABLE , SPACE_ID) values (now(), now(), '스터디 룸', 'ROOM', 'facilityRoom', true, 1);
-
