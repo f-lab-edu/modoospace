@@ -31,7 +31,7 @@ jobs:
         run: |
           cd ./src/main/resources
           touch ./application.yml
-          echo "${{ secrets.APPLICATION }}" > ./application.yml
+          echo "${{ secrets.APPLICATION_YAML }}" | base64 --decode > ./application.yml
         shell: bash
       # Gradle 빌드
       - name: Build with Gradle
