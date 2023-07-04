@@ -1,4 +1,4 @@
-package com.modoospace.space.controller.dto;
+package com.modoospace.space.controller.dto.space;
 
 import javax.validation.constraints.NotEmpty;
 import lombok.Builder;

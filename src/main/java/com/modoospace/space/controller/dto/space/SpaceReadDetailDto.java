@@ -1,6 +1,8 @@
-package com.modoospace.space.controller.dto;
+package com.modoospace.space.controller.dto.space;
 
 import com.modoospace.member.controller.dto.MemberReadDto;
+import com.modoospace.space.controller.dto.category.CategoryReadDto;
+import com.modoospace.space.controller.dto.facility.FacilityReadDto;
 import com.modoospace.space.domain.Address;
 import com.modoospace.space.domain.Space;
 import java.util.ArrayList;

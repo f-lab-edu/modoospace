@@ -41,11 +41,6 @@ public class ReservationService {
     return ReservationReadDto.toDto(reservation);
   }
 
-  private Reservation findReservationById(Long reservationId) {
-    return reservationRepository.findById(reservationId)
-        .orElseThrow(() -> new NotFoundEntityException("예약", reservationId));
-  }
-
   @Transactional
   public void updateStatus(Long reservationId) {
     Reservation reservation = findReservationById(reservationId);
@@ -67,10 +62,11 @@ public class ReservationService {
     return reservationRepository.findByVisitor(loginMember);
   }
 
-
-  private Facility findFacilityById(Long facilityId) {
-    return facilityRepository.findById(facilityId)
-        .orElseThrow();
+  @Transactional
+  public void cancelReservation(Long reservationId, String loginEmail) {
+    Member loginMember = findMemberByEmail(loginEmail);
+    Reservation reservation = findReservationById(reservationId);
+    reservation.updateStatusToCanceled(loginMember);
   }
 
   private Member findMemberByEmail(String email) {
@@ -78,10 +74,14 @@ public class ReservationService {
         .orElseThrow(() -> new NotFoundEntityException("사용자", email));
   }
 
-  @Transactional
-  public void cancelReservation(Long reservationId, String loginEmail) {
-    Member loginMember = findMemberByEmail(loginEmail);
-    Reservation reservation = findReservationById(reservationId);
-    reservation.updateStatusToCanceled(loginMember);
+  private Reservation findReservationById(Long reservationId) {
+    return reservationRepository.findById(reservationId)
+        .orElseThrow(() -> new NotFoundEntityException("예약", reservationId));
+  }
+
+  private Facility findFacilityById(Long facilityId) {
+    Facility facility = facilityRepository.findById(facilityId)
+        .orElseThrow(() -> new NotFoundEntityException("시설", facilityId));
+    return facility;
   }
 }

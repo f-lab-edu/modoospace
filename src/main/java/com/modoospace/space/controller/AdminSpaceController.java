@@ -1,7 +1,7 @@
 package com.modoospace.space.controller;
 
 import com.modoospace.config.auth.LoginEmail;
-import com.modoospace.space.controller.dto.SpaceCreateUpdateDto;
+import com.modoospace.space.controller.dto.space.SpaceCreateUpdateDto;
 import com.modoospace.space.sevice.SpaceService;
 import javax.validation.Valid;
 import lombok.RequiredArgsConstructor;

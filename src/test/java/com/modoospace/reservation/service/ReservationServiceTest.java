@@ -14,7 +14,8 @@ import com.modoospace.reservation.domain.Reservation;
 import com.modoospace.reservation.domain.ReservationRepository;
 import com.modoospace.reservation.domain.ReservationStatus;
 import com.modoospace.reservation.serivce.ReservationService;
-import com.modoospace.space.controller.dto.SpaceCreateUpdateDto;
+import com.modoospace.space.controller.dto.facility.FacilityCreateDto;
+import com.modoospace.space.controller.dto.space.SpaceCreateUpdateDto;
 import com.modoospace.space.domain.Address;
 import com.modoospace.space.domain.Category;
 import com.modoospace.space.domain.CategoryRepository;
@@ -66,8 +67,10 @@ public class ReservationServiceTest {
     createAddress();
     createCategory();
     createFacilities();
-    reservationService = new ReservationService(reservationRepository, facilityRepository, memberRepository);
-    reservationCreateDto = createReservationDto(LocalDateTime.now(), LocalDateTime.now().plusHours(3));
+    reservationService = new ReservationService(reservationRepository, facilityRepository,
+        memberRepository);
+    reservationCreateDto = createReservationDto(LocalDateTime.now(),
+        LocalDateTime.now().plusHours(3));
   }
 
   @DisplayName("로그인한 멤버가 비지터일 경우 예약을 생성할 수 있다.")
@@ -135,10 +138,11 @@ public class ReservationServiceTest {
 
 
   private void createFacilities() {
-    SpaceService spaceService = new SpaceService(memberRepository, spaceRepository, categoryRepository);
+    SpaceService spaceService = new SpaceService(memberRepository, spaceRepository,
+        categoryRepository);
     SpaceCreateUpdateDto createDto = createSpaceDto(address);
     Long spaceId = spaceService.createSpace(category.getId(), createDto, hostMember.getEmail());
-    Space space = spaceService.findSpaceById(spaceId);
+    Space space = spaceRepository.findById(spaceId).get();
     room = createFacility(FacilityType.ROOM, "스터디 룸", space, "facilityRoom");
     seat = createFacility(FacilityType.SEAT, "좌석", space, "facilitySeat");
   }
@@ -183,13 +187,14 @@ public class ReservationServiceTest {
 
   private Facility createFacility(FacilityType facilityType,
       String description, Space space, String name) {
-    Facility facility = Facility.builder()
-        .facilityType(facilityType)
-        .reservationEnable(true)
-        .description(description)
-        .space(space)
+    FacilityCreateDto createDto = FacilityCreateDto.builder()
         .name(name)
+        .facilityType(facilityType)
+        .description(description)
+        .reservationEnable(true)
         .build();
+
+    Facility facility = createDto.toEntity(space);
     return facilityRepository.save(facility);
   }
 
@@ -200,5 +205,4 @@ public class ReservationServiceTest {
         .reservationEnd(reservationEnd)
         .build();
   }
-
 }

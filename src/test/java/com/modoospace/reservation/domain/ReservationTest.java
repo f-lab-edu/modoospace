@@ -10,7 +10,15 @@ import com.modoospace.member.domain.Role;
 import com.modoospace.space.domain.Facility;
 import com.modoospace.space.domain.FacilityType;
 import com.modoospace.space.domain.Space;
+import com.modoospace.space.domain.TimeSetting;
+import com.modoospace.space.domain.TimeSettings;
+import com.modoospace.space.domain.WeekdaySetting;
+import com.modoospace.space.domain.WeekdaySettings;
+import java.time.DayOfWeek;
 import java.time.LocalDateTime;
+import java.time.LocalTime;
+import java.util.Arrays;
+import java.util.List;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -51,12 +59,37 @@ public class ReservationTest {
         .host(hostMember)
         .build();
 
+    List<TimeSetting> timeSettings = Arrays.asList(TimeSetting.builder()
+            .startTime(LocalTime.of(0, 0))
+            .endTime(LocalTime.of(23, 59, 59))
+            .build());
+
+    List<WeekdaySetting> weekdaySettings = Arrays.asList(
+        WeekdaySetting.builder()
+            .weekday(DayOfWeek.MONDAY)
+            .build(),
+        WeekdaySetting.builder()
+            .weekday(DayOfWeek.TUESDAY)
+            .build(),
+        WeekdaySetting.builder()
+            .weekday(DayOfWeek.WEDNESDAY)
+            .build(),
+        WeekdaySetting.builder()
+            .weekday(DayOfWeek.THURSDAY)
+            .build(),
+        WeekdaySetting.builder()
+            .weekday(DayOfWeek.FRIDAY)
+            .build());
+
     facilityRoom = Facility.builder()
         .name("룸")
         .facilityType(FacilityType.ROOM)
         .reservationEnable(true)
         .description("설명")
-        .space(space).build();
+        .timeSettings(new TimeSettings(timeSettings))
+        .weekdaySettings(new WeekdaySettings(weekdaySettings))
+        .space(space)
+        .build();
   }
 
   @DisplayName("방문자는 룸을 예약할 수 있다.")
