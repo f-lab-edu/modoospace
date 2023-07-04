@@ -31,7 +31,7 @@ public class FacilityController {
       @LoginEmail String loginEmail) {
     Long facilityId = facilityService.createFacility(spaceId, createDto, loginEmail);
     return ResponseEntity
-        .created(URI.create("/api/v1/spaces/" + spaceId + "/facilities" + facilityId)).build();
+        .created(URI.create("/api/v1/spaces/" + spaceId + "/facilities/" + facilityId)).build();
   }
 
   @GetMapping("/{facilityId}")
