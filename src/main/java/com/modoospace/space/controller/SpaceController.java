@@ -1,9 +1,9 @@
 package com.modoospace.space.controller;
 
 import com.modoospace.config.auth.LoginEmail;
-import com.modoospace.space.controller.dto.SpaceCreateUpdateDto;
-import com.modoospace.space.controller.dto.SpaceReadDetailDto;
-import com.modoospace.space.controller.dto.SpaceReadDto;
+import com.modoospace.space.controller.dto.space.SpaceCreateUpdateDto;
+import com.modoospace.space.controller.dto.space.SpaceReadDetailDto;
+import com.modoospace.space.controller.dto.space.SpaceReadDto;
 import com.modoospace.space.sevice.SpaceService;
 import java.net.URI;
 import java.util.List;

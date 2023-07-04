@@ -3,9 +3,9 @@ package com.modoospace.space.sevice;
 import com.modoospace.exception.NotFoundEntityException;
 import com.modoospace.member.domain.Member;
 import com.modoospace.member.domain.MemberRepository;
-import com.modoospace.space.controller.dto.SpaceCreateUpdateDto;
-import com.modoospace.space.controller.dto.SpaceReadDetailDto;
-import com.modoospace.space.controller.dto.SpaceReadDto;
+import com.modoospace.space.controller.dto.space.SpaceCreateUpdateDto;
+import com.modoospace.space.controller.dto.space.SpaceReadDetailDto;
+import com.modoospace.space.controller.dto.space.SpaceReadDto;
 import com.modoospace.space.domain.Category;
 import com.modoospace.space.domain.CategoryRepository;
 import com.modoospace.space.domain.Space;
@@ -60,8 +60,9 @@ public class SpaceService {
   public void updateSpace(Long spaceId, SpaceCreateUpdateDto updateDto, String email) {
     Member loginMember = findMemberByEmail(email);
     Space space = findSpaceById(spaceId);
+    Space updatedSpace = updateDto.toEntity(space.getCategory(), space.getHost());
 
-    space.update(updateDto.toEntity(space.getCategory(), space.getHost()), loginMember);
+    space.update(updatedSpace, loginMember);
   }
 
   @Transactional
@@ -81,7 +82,7 @@ public class SpaceService {
     return member;
   }
 
-  public Space findSpaceById(Long spaceId) {
+  private Space findSpaceById(Long spaceId) {
     Space space = spaceRepository.findById(spaceId)
         .orElseThrow(() -> new NotFoundEntityException("공간", spaceId));
     return space;
