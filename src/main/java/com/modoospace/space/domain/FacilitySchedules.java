@@ -50,16 +50,46 @@ public class FacilitySchedules {
             facilitySchedule -> facilitySchedule.isIncludedTimeRange(startDateTime, endDateTime))
         .collect(Collectors.toList());
 
+    if (facilitySchedules.isEmpty()) {
+      return false;
+    }
+
     // 같은 날짜의 시간을 체크하는 경우
     if (startDateTime.toLocalDate().isEqual(endDateTime.toLocalDate())) {
       return facilitySchedules.stream()
-          .allMatch(facilitySchedule -> facilitySchedule
-              .isIncludingTimeRange(startDateTime, endDateTime)); // 시간 범위를 전부 포함하고있는지 체크
+          .allMatch(facilitySchedule -> facilitySchedule.isEndTimeAfterOrEquals(startDateTime)
+              && facilitySchedule.isEndTimeAfterOrEquals(endDateTime)); // 시간 범위를 전부 포함하고있는지 체크
     }
 
     // 다른 날짜의 시간을 체크하는 경우
-    return facilitySchedules.stream()
-        .allMatch(FacilitySchedule::is24TimeRange); // 시간 범위가 24시간인지 체크
+    // 첫번째 스케줄 시작시간, 종료시간(23:59:59) 체크
+    FacilitySchedule startDaySchedule = facilitySchedules.get(0);
+    LocalDateTime startDateEndTime = LocalDateTime
+        .of(startDateTime.getYear(), startDateTime.getMonthValue(), startDateTime.getDayOfMonth(),
+            23, 59, 59);
+    if (!startDaySchedule.isStartTimeBeforeOrEquals(startDateTime) || !startDaySchedule
+        .isEndTimeAfterOrEquals(startDateEndTime)) {
+      return false;
+    }
+
+    // 중간 스케줄 24시간 여부 체크
+    if (!IntStream.range(1, facilitySchedules.size() - 1)
+        .mapToObj(i -> facilitySchedules.get(i))
+        .allMatch(FacilitySchedule::is24TimeRange)) {
+      return false;
+    }
+
+    // 마지막 스케줄 시작시간(0:0:0), 종료시간 체크
+    FacilitySchedule endDaySchedule = facilitySchedules.get(facilitySchedules.size() - 1);
+    LocalDateTime endDateStartTime = LocalDateTime
+        .of(endDateTime.getYear(), endDateTime.getMonthValue(), endDateTime.getDayOfMonth(),
+            0, 0, 0);
+    if (!endDaySchedule.isStartTimeBeforeOrEquals(endDateStartTime) || !endDaySchedule
+        .isEndTimeAfterOrEquals(endDateTime)) {
+      return false;
+    }
+
+    return true;
   }
 
   public void update(FacilitySchedules facilitySchedules, Facility facility) {

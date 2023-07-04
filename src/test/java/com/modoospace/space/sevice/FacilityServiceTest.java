@@ -49,7 +49,7 @@ class FacilityServiceTest {
 
   private Member hostMember;
   private Space space;
-  private LocalDate testDate;
+  private LocalDate nowDate;
 
   @BeforeEach
   public void setUp() {
@@ -73,12 +73,12 @@ class FacilityServiceTest {
     space = spaceCreateDto.toEntity(category, hostMember);
     spaceRepository.save(space);
 
-    testDate = LocalDate.now();
-    if(testDate.getDayOfWeek().equals(DayOfWeek.SUNDAY)){
-      testDate = testDate.plusDays(1);
+    nowDate = LocalDate.now();
+    if(nowDate.getDayOfWeek().equals(DayOfWeek.SUNDAY)){
+      nowDate = nowDate.plusDays(1);
     }
-    if(testDate.getDayOfWeek().equals(DayOfWeek.SATURDAY)){
-      testDate = testDate.plusDays(2);
+    if(nowDate.getDayOfWeek().equals(DayOfWeek.SATURDAY)){
+      nowDate = nowDate.plusDays(2);
     }
   }
 
@@ -102,10 +102,10 @@ class FacilityServiceTest {
         () -> assertThat(facility.getFacilityType()).isEqualTo(FacilityType.ROOM),
         () -> assertThat(facility.getDescription()).isEqualTo("1~4인실 입니다."),
         () -> assertThat(facility.getReservationEnable()).isFalse(),
-        () -> assertThat(facility.isOpen(LocalDateTime.of(LocalDate.now(), LocalTime.of(0, 0, 0)),
-            LocalDateTime.of(LocalDate.now(), LocalTime.of(23, 59, 59)))).isTrue(),
-        () -> assertThat(facility.isOpen(LocalDateTime.of(LocalDate.now(), LocalTime.of(0, 0, 0)),
-            LocalDateTime.of(LocalDate.now().plusDays(2), LocalTime.of(23, 59, 59)))).isTrue()
+        () -> assertThat(facility.isOpen(LocalDateTime.of(nowDate, LocalTime.of(0, 0, 0)),
+            LocalDateTime.of(nowDate, LocalTime.of(23, 59, 59)))).isTrue(),
+        () -> assertThat(facility.isOpen(LocalDateTime.of(nowDate, LocalTime.of(0, 0, 0)),
+            LocalDateTime.of(nowDate.plusDays(2), LocalTime.of(23, 59, 59)))).isTrue()
     );
   }
 
@@ -140,10 +140,10 @@ class FacilityServiceTest {
         () -> assertThat(facility.getFacilityType()).isEqualTo(FacilityType.ROOM),
         () -> assertThat(facility.getDescription()).isEqualTo("1~4인실 입니다."),
         () -> assertThat(facility.getReservationEnable()).isFalse(),
-        () -> assertThat(facility.isOpen(LocalDateTime.of(testDate, LocalTime.of(9, 0, 0)),
-            LocalDateTime.of(testDate, LocalTime.of(20, 59, 59)))).isTrue(),
-        () -> assertThat(facility.isOpen(LocalDateTime.of(testDate, LocalTime.of(9, 0, 0)),
-            LocalDateTime.of(testDate.plusDays(1), LocalTime.of(20, 59, 59)))).isFalse()
+        () -> assertThat(facility.isOpen(LocalDateTime.of(nowDate, LocalTime.of(9, 0, 0)),
+            LocalDateTime.of(nowDate, LocalTime.of(20, 59, 59)))).isTrue(),
+        () -> assertThat(facility.isOpen(LocalDateTime.of(nowDate, LocalTime.of(9, 0, 0)),
+            LocalDateTime.of(nowDate.plusDays(1), LocalTime.of(20, 59, 59)))).isFalse()
     );
   }
 
@@ -174,10 +174,10 @@ class FacilityServiceTest {
         () -> assertThat(facility.getFacilityType()).isEqualTo(FacilityType.ROOM),
         () -> assertThat(facility.getDescription()).isEqualTo("설명업데이트"),
         () -> assertThat(facility.getReservationEnable()).isTrue(),
-        () -> assertThat(facility.isOpen(LocalDateTime.of(testDate, LocalTime.of(0, 0, 0)),
-            LocalDateTime.of(testDate, LocalTime.of(23, 59, 59)))).isTrue(),
-        () -> assertThat(facility.isOpen(LocalDateTime.of(testDate, LocalTime.of(0, 0, 0)),
-            LocalDateTime.of(testDate.plusDays(1), LocalTime.of(23, 59, 59)))).isTrue()
+        () -> assertThat(facility.isOpen(LocalDateTime.of(nowDate, LocalTime.of(0, 0, 0)),
+            LocalDateTime.of(nowDate, LocalTime.of(23, 59, 59)))).isTrue(),
+        () -> assertThat(facility.isOpen(LocalDateTime.of(nowDate, LocalTime.of(0, 0, 0)),
+            LocalDateTime.of(nowDate.plusDays(1), LocalTime.of(23, 59, 59)))).isTrue()
     );
   }
 
@@ -219,10 +219,10 @@ class FacilityServiceTest {
         () -> assertThat(facility.getFacilityType()).isEqualTo(FacilityType.ROOM),
         () -> assertThat(facility.getDescription()).isEqualTo("설명업데이트"),
         () -> assertThat(facility.getReservationEnable()).isTrue(),
-        () -> assertThat(facility.isOpen(LocalDateTime.of(testDate, LocalTime.of(9, 0, 0)),
-            LocalDateTime.of(testDate, LocalTime.of(20, 59, 59)))).isTrue(),
-        () -> assertThat(facility.isOpen(LocalDateTime.of(testDate, LocalTime.of(9, 0, 0)),
-            LocalDateTime.of(testDate.plusDays(1), LocalTime.of(20, 59, 59)))).isFalse()
+        () -> assertThat(facility.isOpen(LocalDateTime.of(nowDate, LocalTime.of(9, 0, 0)),
+            LocalDateTime.of(nowDate, LocalTime.of(20, 59, 59)))).isTrue(),
+        () -> assertThat(facility.isOpen(LocalDateTime.of(nowDate, LocalTime.of(9, 0, 0)),
+            LocalDateTime.of(nowDate.plusDays(1), LocalTime.of(20, 59, 59)))).isFalse()
     );
   }
 }

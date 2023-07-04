@@ -61,14 +61,22 @@ public class FacilitySchedule {
     return !this.endDateTime.isBefore(startDateTime) && !this.startDateTime.isAfter(endDateTime);
   }
 
-  public boolean isIncludingTimeRange(LocalDateTime startDateTime, LocalDateTime endDateTime) {
-    return (this.startDateTime.isBefore(startDateTime) || this.startDateTime.isEqual(startDateTime))
-        && (this.endDateTime.isAfter(endDateTime) || this.endDateTime.isEqual(endDateTime));
+  public boolean isStartTimeBeforeOrEquals(LocalDateTime startDateTime) {
+    return this.startDateTime.isBefore(startDateTime) || this.startDateTime.isEqual(startDateTime);
+  }
+
+  public boolean isEndTimeAfterOrEquals(LocalDateTime endDateTime) {
+    return this.endDateTime.isAfter(endDateTime) || this.endDateTime.isEqual(endDateTime);
   }
 
   public boolean is24TimeRange() {
     return this.startDateTime.toLocalTime().equals(LocalTime.of(0, 0, 0))
         && this.endDateTime.toLocalTime().equals(LocalTime.of(23, 59, 59));
+  }
+
+  public void update(FacilitySchedule facilitySchedule){
+    startDateTime = facilitySchedule.getStartDateTime();
+    endDateTime = facilitySchedule.getEndDateTime();
   }
 
   @Override
