@@ -1,16 +1,14 @@
-name: CICD
+name: CD
 
 on:
   push:
     branches: [ "master" ]
-  pull_request:
-    branches: [ "develop" ]
 
 permissions:
   contents: read
 
 jobs:
-  CI:
+  CD:
     runs-on: ubuntu-latest
     # 작업 실행단계
     steps:
@@ -33,9 +31,9 @@ jobs:
           touch ./application.yml
           echo "${{ secrets.APPLICATION_YAML }}" | base64 --decode > ./application.yml
         shell: bash
-      # Gradle 빌드
+      # Gradle 빌드 (테스트 제외)
       - name: Build with Gradle
-        run: ./gradlew build
+        run: ./gradlew clean build -x test
         shell: bash
       # DockerFile 이미지 작성 및 Docker Repository 업로드
       - name: Docker build & Docker push
@@ -43,3 +41,16 @@ jobs:
          docker login -u ${{ secrets.USERNAME }} -p ${{ secrets.PASSWORD }}
          docker build -f Dockerfile -t ${{ secrets.USERNAME }}/modoospace .
          docker push ${{ secrets.USERNAME }}/modoospace
+      # 서버 접속 및 애플리케이션 실행
+      - name: WAS access & deploy
+        uses: appleboy/ssh-action@master
+        with:
+          host: ${{ secrets.WAS_HOST }}
+          username: ${{ secrets.WAS_USERNAME }}
+          key: ${{ secrets.WAS_PASSWORD }}
+          port: ${{ secrets.WAS_SSH_PORT }}
+          script: |
+            docker stop $(docker ps -qa) 
+            docker rm $(docker ps -qa) 
+            docker pull ${{ secrets.USERNAME }}/modoospace
+            docker run -d -p 8080:8080 --name modoocontainer ${{ secrets.USERNAME }}/modoospace
