@@ -33,5 +33,5 @@ jobs:
         shell: bash
       # Gradle 빌드
       - name: Build with Gradle
-        run: ./gradlew build
+        run: ./gradlew clean build
         shell: bash

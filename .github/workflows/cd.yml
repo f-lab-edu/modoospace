@@ -31,9 +31,9 @@ jobs:
           touch ./application.yml
           echo "${{ secrets.APPLICATION_YAML }}" | base64 --decode > ./application.yml
         shell: bash
-      # Gradle 빌드
+      # Gradle 빌드 (테스트 제외)
       - name: Build with Gradle
-        run: ./gradlew build
+        run: ./gradlew clean build -x test
         shell: bash
       # DockerFile 이미지 작성 및 Docker Repository 업로드
       - name: Docker build & Docker push
@@ -53,4 +53,4 @@ jobs:
             docker stop $(docker ps -qa) 
             docker rm $(docker ps -qa) 
             docker pull ${{ secrets.USERNAME }}/modoospace
-            docker run -d -p 8080:8080 --name modoospace ${{ secrets.USERNAME }}/modoospace
+            docker run -d -p 8080:8080 --name modoocontainer ${{ secrets.USERNAME }}/modoospace
