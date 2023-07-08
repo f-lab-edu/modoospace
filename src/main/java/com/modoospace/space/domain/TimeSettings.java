@@ -33,10 +33,8 @@ public class TimeSettings {
 
     for (int i = 0; i < timeSettings.size() - 1; i++) {
       TimeSetting timeSetting = timeSettings.get(i);
-      for (int j = i + 1; j < timeSettings.size(); j++) {
-        TimeSetting compareTimeSetting = timeSettings.get(j);
-        timeSetting.verifyConflicting(compareTimeSetting);
-      }
+      TimeSetting compareTimeSetting = timeSettings.get(i + 1);
+      timeSetting.verifyConflicting(compareTimeSetting);
     }
   }
 
