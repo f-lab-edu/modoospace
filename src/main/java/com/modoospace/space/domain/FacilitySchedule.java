@@ -1,6 +1,7 @@
 package com.modoospace.space.domain;
 
 import com.modoospace.exception.InvalidTimeRangeException;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import javax.persistence.Column;
@@ -53,6 +54,29 @@ public class FacilitySchedule {
     }
   }
 
+  public static FacilitySchedule mergeFacilitySchedule(FacilitySchedule facilitySchedule1,
+      FacilitySchedule facilitySchedule2) {
+    if (facilitySchedule1
+        .isStartDateTimeEquals(facilitySchedule2.getEndDateTime().plusSeconds(1))) {
+      return FacilitySchedule.builder()
+          .startDateTime(facilitySchedule2.getStartDateTime())
+          .endDateTime(facilitySchedule1.getEndDateTime())
+          .facility(facilitySchedule1.getFacility())
+          .build();
+    }
+
+    if (facilitySchedule1
+        .isEndDateTimeEquals(facilitySchedule2.getStartDateTime().minusSeconds(1))) {
+      return FacilitySchedule.builder()
+          .startDateTime(facilitySchedule1.getStartDateTime())
+          .endDateTime(facilitySchedule2.getEndDateTime())
+          .facility(facilitySchedule1.getFacility())
+          .build();
+    }
+
+    return null;
+  }
+
   public void setFacility(Facility facility) {
     this.facility = facility;
   }
@@ -61,20 +85,51 @@ public class FacilitySchedule {
     return !this.endDateTime.isBefore(startDateTime) && !this.startDateTime.isAfter(endDateTime);
   }
 
-  public boolean isStartTimeBeforeOrEquals(LocalDateTime startDateTime) {
-    return this.startDateTime.isBefore(startDateTime) || this.startDateTime.isEqual(startDateTime);
+  public boolean isIncludingTimeRange(LocalDateTime startDateTime, LocalDateTime endDateTime) {
+    return (this.startDateTime.isBefore(startDateTime) || isStartDateTimeEquals(startDateTime))
+        && (this.endDateTime.isAfter(endDateTime) || isEndDateTimeEquals(endDateTime));
   }
 
-  public boolean isEndTimeAfterOrEquals(LocalDateTime endDateTime) {
-    return this.endDateTime.isAfter(endDateTime) || this.endDateTime.isEqual(endDateTime);
+  public boolean isStartEndDateEquals(FacilitySchedule facilitySchedule) {
+    LocalDate startDate = facilitySchedule.getStartDateTime().toLocalDate();
+    LocalDate endDate = facilitySchedule.getEndDateTime().toLocalDate();
+    return isStartEndDateEquals(startDate, endDate);
+  }
+
+  public boolean isStartEndDateEquals(LocalDate startDate, LocalDate endDate) {
+    return isStartDateEquals(startDate) && isEndDateEquals(endDate);
+  }
+
+  public boolean isStartDateEquals(LocalDate startDate) {
+    return this.startDateTime.toLocalDate().equals(startDate);
+  }
+
+  public boolean isStartTimeEquals(LocalTime startTime) {
+    return this.startDateTime.toLocalTime().equals(startTime);
+  }
+
+  public boolean isStartDateTimeEquals(LocalDateTime startDateTime) {
+    return this.startDateTime.isEqual(startDateTime);
+  }
+
+  public boolean isEndDateEquals(LocalDate endDate) {
+    return this.endDateTime.toLocalDate().equals(endDate);
+  }
+
+  public boolean isEndTimeEquals(LocalTime endTime) {
+    return this.endDateTime.toLocalTime().equals(endTime);
+  }
+
+  public boolean isEndDateTimeEquals(LocalDateTime endDateTime) {
+    return this.endDateTime.isEqual(endDateTime);
   }
 
   public boolean is24TimeRange() {
-    return this.startDateTime.toLocalTime().equals(LocalTime.of(0, 0, 0))
-        && this.endDateTime.toLocalTime().equals(LocalTime.of(23, 59, 59));
+    return isStartTimeEquals(LocalTime.of(0, 0, 0))
+        && isEndTimeEquals(LocalTime.of(23, 59, 59));
   }
 
-  public void update(FacilitySchedule facilitySchedule){
+  public void update(FacilitySchedule facilitySchedule) {
     startDateTime = facilitySchedule.getStartDateTime();
     endDateTime = facilitySchedule.getEndDateTime();
   }

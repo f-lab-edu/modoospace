@@ -101,7 +101,24 @@ public class Facility extends BaseTimeEntity {
     }
   }
 
-  public void updateSchedules(Facility facility, Member loginMember) {
+  public void addFacilitySchedule(FacilitySchedule createSchedule, Member loginMember){
+    verifyManagementPermission(loginMember);
+
+    this.facilitySchedules.addFacilitySchedule(createSchedule);
+  }
+
+  public void updateFacilitySchedule(FacilitySchedule updateSchedule, FacilitySchedule schedule, Member loginMember){
+    verifyManagementPermission(loginMember);
+
+    this.facilitySchedules.updateFacilitySchedule(updateSchedule, schedule);
+  }
+
+  /**
+   * 배치성 update 로직
+   * @param facility
+   * @param loginMember
+   */
+  public void updateFacilitySchedules(Facility facility, Member loginMember) {
     verifyManagementPermission(loginMember);
 
     this.facilitySchedules.update(facility.getFacilitySchedules(), this);

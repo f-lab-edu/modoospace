@@ -1,10 +1,14 @@
 package com.modoospace.space.domain;
 
+import com.modoospace.exception.ConflictingTimeException;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 import javax.persistence.CascadeType;
@@ -57,8 +61,7 @@ public class FacilitySchedules {
     // 같은 날짜의 시간을 체크하는 경우
     if (startDateTime.toLocalDate().isEqual(endDateTime.toLocalDate())) {
       return facilitySchedules.stream()
-          .allMatch(facilitySchedule -> facilitySchedule.isEndTimeAfterOrEquals(startDateTime)
-              && facilitySchedule.isEndTimeAfterOrEquals(endDateTime)); // 시간 범위를 전부 포함하고있는지 체크
+          .allMatch(facilitySchedule -> facilitySchedule.isIncludingTimeRange(startDateTime, endDateTime)); // 시간 범위를 전부 포함하고있는지 체크
     }
 
     // 다른 날짜의 시간을 체크하는 경우
@@ -67,8 +70,7 @@ public class FacilitySchedules {
     LocalDateTime startDateEndTime = LocalDateTime
         .of(startDateTime.getYear(), startDateTime.getMonthValue(), startDateTime.getDayOfMonth(),
             23, 59, 59);
-    if (!startDaySchedule.isStartTimeBeforeOrEquals(startDateTime) || !startDaySchedule
-        .isEndTimeAfterOrEquals(startDateEndTime)) {
+    if (!startDaySchedule.isIncludingTimeRange(startDateTime, startDateEndTime)) {
       return false;
     }
 
@@ -84,8 +86,7 @@ public class FacilitySchedules {
     LocalDateTime endDateStartTime = LocalDateTime
         .of(endDateTime.getYear(), endDateTime.getMonthValue(), endDateTime.getDayOfMonth(),
             0, 0, 0);
-    if (!endDaySchedule.isStartTimeBeforeOrEquals(endDateStartTime) || !endDaySchedule
-        .isEndTimeAfterOrEquals(endDateTime)) {
+    if (!endDaySchedule.isIncludingTimeRange(endDateStartTime, endDateTime)) {
       return false;
     }
 
@@ -101,6 +102,82 @@ public class FacilitySchedules {
   private void setFacility(Facility facility) {
     for (FacilitySchedule facilitySchedule : facilitySchedules) {
       facilitySchedule.setFacility(facility);
+    }
+  }
+
+  public void addFacilitySchedule(FacilitySchedule createSchedule) {
+    // 1. create하는 날짜에 해당하는 스케줄 데이터 필터링 (쿼리로 가져올지 고민해보기)
+    List<FacilitySchedule> oneDayFacilitySchedules = isEqualsLocalDate(createSchedule);
+
+    // 2. create하려는 스케줄과 conflict 되는지 검증
+    verifyConflict(createSchedule, oneDayFacilitySchedules);
+
+    // 3. 스케줄 추가
+    oneDayFacilitySchedules.add(createSchedule);
+
+    // 4. 해당 날짜에서 시간범위가 연속적인 Schedule끼리 합쳐서 저장하기
+    mergeAndUpdateSchedules(oneDayFacilitySchedules);
+  }
+
+  public void updateFacilitySchedule(FacilitySchedule updateSchedule, FacilitySchedule schedule) {
+    // 1. update 하는 날짜에 해당하는 스케줄 데이터 필터링 (쿼리로 가져올지 고민해보기)
+    List<FacilitySchedule> oneDayFacilitySchedules = isEqualsLocalDate(updateSchedule);
+
+    // 2. update 하려는 스케줄과 conflict 되는지 검증
+    List<FacilitySchedule> targetExceptedSchedules = oneDayFacilitySchedules.stream()
+        .filter(facilitySchedule -> facilitySchedule != schedule)
+        .collect(Collectors.toList());
+    verifyConflict(updateSchedule, targetExceptedSchedules);
+
+    // 3. 스케줄 업데이트
+    schedule.update(updateSchedule);
+
+    // 4. 해당 날짜에서 시간범위가 연속적인 Schedule끼리 합쳐서 저장하기
+    mergeAndUpdateSchedules(oneDayFacilitySchedules);
+  }
+
+  public List<FacilitySchedule> isEqualsLocalDate(FacilitySchedule targetFacilitySchedule) {
+    return this.facilitySchedules.stream()
+        .filter(facilitySchedule -> facilitySchedule.isStartEndDateEquals(targetFacilitySchedule))
+        .collect(Collectors.toList());
+  }
+
+  private void verifyConflict(FacilitySchedule targetSchedule,
+      List<FacilitySchedule> oneDayFacilitySchedules) {
+    Optional<FacilitySchedule> conflictSchedule = oneDayFacilitySchedules.stream()
+        .filter(facilitySchedule -> facilitySchedule.isIncludedTimeRange(
+            targetSchedule.getStartDateTime(), targetSchedule.getEndDateTime()
+        )).findAny();
+    if (conflictSchedule.isPresent()) {
+      throw new ConflictingTimeException(targetSchedule, conflictSchedule.get());
+    }
+  }
+
+  private void mergeAndUpdateSchedules(List<FacilitySchedule> facilitySchedules) {
+    facilitySchedules
+        .forEach(schedule -> this.facilitySchedules.remove(schedule));
+    mergeSchedules(facilitySchedules);
+    this.facilitySchedules.addAll(facilitySchedules);
+  }
+
+  private void mergeSchedules(List<FacilitySchedule> facilitySchedules) {
+    boolean mergeOccurred = true;
+    while (mergeOccurred) {
+      mergeOccurred = false;
+      Collections.sort(facilitySchedules, Comparator.comparing(FacilitySchedule::getStartDateTime));
+      for (int i = 0; i < facilitySchedules.size() - 1; i++) {
+        FacilitySchedule facilitySchedule1 = facilitySchedules.get(i);
+        FacilitySchedule facilitySchedule2 = facilitySchedules.get(i + 1);
+        FacilitySchedule mergeFacilitySchedule = FacilitySchedule
+            .mergeFacilitySchedule(facilitySchedule1, facilitySchedule2);
+        if (mergeFacilitySchedule != null) {
+          facilitySchedules.remove(facilitySchedule1);
+          facilitySchedules.remove(facilitySchedule2);
+          facilitySchedules.add(mergeFacilitySchedule);
+          mergeOccurred = true;
+          break;
+        }
+      }
     }
   }
 
