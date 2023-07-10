@@ -12,6 +12,10 @@ import com.modoospace.space.domain.FacilityScheduleRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDate;
+import java.util.List;
+import java.util.stream.Collectors;
+
 @RequiredArgsConstructor
 @Service
 public class FacilityScheduleService {
@@ -33,6 +37,16 @@ public class FacilityScheduleService {
     FacilitySchedule schedule = findFacilityScheduleById(facilityScheduleId);
 
     return FacilityScheduleReadDto.toDto(schedule);
+  }
+
+  public List<FacilityScheduleReadDto> findFacilityScheduleByLocalDate(Long facilityId, LocalDate date) {
+    Facility facility = findFacilityById(facilityId);
+    List<FacilitySchedule> facilitySchedules = facilityScheduleRepository
+        .findByFacilityAndStartDateTimeContainingAndEndDateTimeContaining(facility, date, date);
+
+    return facilitySchedules.stream()
+        .map(facilitySchedule -> FacilityScheduleReadDto.toDto(facilitySchedule))
+        .collect(Collectors.toList());
   }
 
   public void updateFacilitySchedule(Long facilityScheduleId,

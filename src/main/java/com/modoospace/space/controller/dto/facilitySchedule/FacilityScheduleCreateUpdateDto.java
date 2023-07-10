@@ -18,7 +18,6 @@ public class FacilityScheduleCreateUpdateDto {
   @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ss", timezone = "Asia/Seoul")
   private LocalDateTime endDateTime;
 
-  @Builder
   public FacilityScheduleCreateUpdateDto(LocalDateTime startDateTime, LocalDateTime endDateTime) {
     this.startDateTime = startDateTime;
     this.endDateTime = endDateTime;
