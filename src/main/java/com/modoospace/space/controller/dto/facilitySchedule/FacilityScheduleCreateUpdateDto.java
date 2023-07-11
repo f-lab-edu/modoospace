@@ -4,7 +4,6 @@ import com.fasterxml.jackson.annotation.JsonFormat;
 import com.modoospace.space.domain.Facility;
 import com.modoospace.space.domain.FacilitySchedule;
 import java.time.LocalDateTime;
-import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 

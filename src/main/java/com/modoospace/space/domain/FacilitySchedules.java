@@ -61,16 +61,17 @@ public class FacilitySchedules {
     // 같은 날짜의 시간을 체크하는 경우
     if (startDateTime.toLocalDate().isEqual(endDateTime.toLocalDate())) {
       return facilitySchedules.stream()
-          .allMatch(facilitySchedule -> facilitySchedule.isIncludingTimeRange(startDateTime, endDateTime)); // 시간 범위를 전부 포함하고있는지 체크
+          .allMatch(facilitySchedule -> facilitySchedule
+              .isIncludingTimeRange(startDateTime, endDateTime)); // 시간 범위를 전부 포함하고있는지 체크
     }
 
     // 다른 날짜의 시간을 체크하는 경우
     // 첫번째 스케줄 시작시간, 종료시간(23:59:59) 체크
     FacilitySchedule startDaySchedule = facilitySchedules.get(0);
-    LocalDateTime startDateEndTime = LocalDateTime
+    LocalDateTime startDayEndTime = LocalDateTime
         .of(startDateTime.getYear(), startDateTime.getMonthValue(), startDateTime.getDayOfMonth(),
             23, 59, 59);
-    if (!startDaySchedule.isIncludingTimeRange(startDateTime, startDateEndTime)) {
+    if (!startDaySchedule.isIncludingTimeRange(startDateTime, startDayEndTime)) {
       return false;
     }
 
@@ -81,12 +82,12 @@ public class FacilitySchedules {
       return false;
     }
 
-    // 마지막 스케줄 시작시간(0:0:0), 종료시간 체크
+    // 마지막 스케줄 시작시간(00:00:00), 종료시간 체크
     FacilitySchedule endDaySchedule = facilitySchedules.get(facilitySchedules.size() - 1);
-    LocalDateTime endDateStartTime = LocalDateTime
+    LocalDateTime endDayStartTime = LocalDateTime
         .of(endDateTime.getYear(), endDateTime.getMonthValue(), endDateTime.getDayOfMonth(),
             0, 0, 0);
-    if (!endDaySchedule.isIncludingTimeRange(endDateStartTime, endDateTime)) {
+    if (!endDaySchedule.isIncludingTimeRange(endDayStartTime, endDateTime)) {
       return false;
     }
 
@@ -137,8 +138,14 @@ public class FacilitySchedules {
   }
 
   public List<FacilitySchedule> isEqualsLocalDate(FacilitySchedule targetFacilitySchedule) {
+    LocalDate startDate = targetFacilitySchedule.getStartDateTime().toLocalDate();
+    LocalDate endDate = targetFacilitySchedule.getEndDateTime().toLocalDate();
+    return isEqualsLocalDate(startDate, endDate);
+  }
+
+  public List<FacilitySchedule> isEqualsLocalDate(LocalDate startDate, LocalDate endDate) {
     return this.facilitySchedules.stream()
-        .filter(facilitySchedule -> facilitySchedule.isStartEndDateEquals(targetFacilitySchedule))
+        .filter(facilitySchedule -> facilitySchedule.isStartEndDateEquals(startDate, endDate))
         .collect(Collectors.toList());
   }
 

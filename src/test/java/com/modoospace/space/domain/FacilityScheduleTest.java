@@ -98,27 +98,6 @@ class FacilityScheduleTest {
     assertThat(facilitySchedule.isIncludingTimeRange(startDateTime, endDateTime)).isFalse();
   }
 
-  @DisplayName("스케줄 데이터가 해당 날짜와 같다면 True를 반환한다.")
-  @Test
-  public void isStartEndDateEquals_returnTrue() {
-    FacilitySchedule facilitySchedule = FacilitySchedule.builder()
-        .startDateTime(LocalDateTime.of(nowDate, LocalTime.of(9, 0, 0)))
-        .endDateTime(LocalDateTime.of(nowDate, LocalTime.of(14, 59, 59)))
-        .build();
-
-    FacilitySchedule targetFacilitySchedule = FacilitySchedule.builder()
-        .startDateTime(LocalDateTime.of(nowDate, LocalTime.of(11, 0, 0)))
-        .endDateTime(LocalDateTime.of(nowDate, LocalTime.of(14, 59, 59)))
-        .build();
-    assertThat(facilitySchedule.isStartEndDateEquals(targetFacilitySchedule)).isTrue();
-
-    targetFacilitySchedule = FacilitySchedule.builder()
-        .startDateTime(LocalDateTime.of(nowDate.plusDays(1), LocalTime.of(11, 0, 0)))
-        .endDateTime(LocalDateTime.of(nowDate.plusDays(1), LocalTime.of(14, 59, 59)))
-        .build();
-    assertThat(facilitySchedule.isStartEndDateEquals(targetFacilitySchedule)).isFalse();
-  }
-
   @DisplayName("스케줄 데이터가 24시간 범위를 가지면 True를 반환한다.")
   @Test
   public void is24TimeRange() {

@@ -15,6 +15,7 @@ import org.springframework.stereotype.Service;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.stream.Collectors;
+import org.springframework.transaction.annotation.Transactional;
 
 @RequiredArgsConstructor
 @Service
@@ -24,6 +25,7 @@ public class FacilityScheduleService {
   private final FacilityRepository facilityRepository;
   private final MemberRepository memberRepository;
 
+  @Transactional
   public void createFacilitySchedule(Long facilityId, FacilityScheduleCreateUpdateDto createDto,
       String loginEmail) {
     Member loginMember = findMemberByEmail(loginEmail);
@@ -41,14 +43,15 @@ public class FacilityScheduleService {
 
   public List<FacilityScheduleReadDto> findFacilityScheduleByLocalDate(Long facilityId, LocalDate date) {
     Facility facility = findFacilityById(facilityId);
-    List<FacilitySchedule> facilitySchedules = facilityScheduleRepository
-        .findByFacilityAndStartDateTimeContainingAndEndDateTimeContaining(facility, date, date);
+    // TODO : QueryDSL 개선 필요
+    List<FacilitySchedule> facilitySchedules = facility.getFacilitySchedules().isEqualsLocalDate(date, date);
 
     return facilitySchedules.stream()
         .map(facilitySchedule -> FacilityScheduleReadDto.toDto(facilitySchedule))
         .collect(Collectors.toList());
   }
 
+  @Transactional
   public void updateFacilitySchedule(Long facilityScheduleId,
       FacilityScheduleCreateUpdateDto updateDto,
       String loginEmail) {
@@ -60,6 +63,7 @@ public class FacilityScheduleService {
     facility.updateFacilitySchedule(updateSchedule, schedule, loginMember);
   }
 
+  @Transactional
   public void deleteFacilitySchedule(Long facilityScheduleId, String loginEmail) {
     Member loginMember = findMemberByEmail(loginEmail);
     FacilitySchedule schedule = findFacilityScheduleById(facilityScheduleId);

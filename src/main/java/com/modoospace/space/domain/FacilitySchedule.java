@@ -56,25 +56,27 @@ public class FacilitySchedule {
 
   public static FacilitySchedule mergeFacilitySchedule(FacilitySchedule facilitySchedule1,
       FacilitySchedule facilitySchedule2) {
-    if (facilitySchedule1
-        .isStartDateTimeEquals(facilitySchedule2.getEndDateTime().plusSeconds(1))) {
-      return FacilitySchedule.builder()
-          .startDateTime(facilitySchedule2.getStartDateTime())
-          .endDateTime(facilitySchedule1.getEndDateTime())
-          .facility(facilitySchedule1.getFacility())
-          .build();
-    }
 
     if (facilitySchedule1
         .isEndDateTimeEquals(facilitySchedule2.getStartDateTime().minusSeconds(1))) {
-      return FacilitySchedule.builder()
-          .startDateTime(facilitySchedule1.getStartDateTime())
-          .endDateTime(facilitySchedule2.getEndDateTime())
-          .facility(facilitySchedule1.getFacility())
-          .build();
+      return createMergedSchedule(facilitySchedule1, facilitySchedule2);
+    }
+
+    if (facilitySchedule1
+        .isStartDateTimeEquals(facilitySchedule2.getEndDateTime().plusSeconds(1))) {
+      return createMergedSchedule(facilitySchedule2, facilitySchedule1);
     }
 
     return null;
+  }
+
+  private static FacilitySchedule createMergedSchedule(FacilitySchedule startSchedule,
+      FacilitySchedule endSchedule) {
+    return FacilitySchedule.builder()
+        .startDateTime(startSchedule.getStartDateTime())
+        .endDateTime(endSchedule.getEndDateTime())
+        .facility(startSchedule.getFacility())
+        .build();
   }
 
   public void setFacility(Facility facility) {
@@ -88,12 +90,6 @@ public class FacilitySchedule {
   public boolean isIncludingTimeRange(LocalDateTime startDateTime, LocalDateTime endDateTime) {
     return (this.startDateTime.isBefore(startDateTime) || isStartDateTimeEquals(startDateTime))
         && (this.endDateTime.isAfter(endDateTime) || isEndDateTimeEquals(endDateTime));
-  }
-
-  public boolean isStartEndDateEquals(FacilitySchedule facilitySchedule) {
-    LocalDate startDate = facilitySchedule.getStartDateTime().toLocalDate();
-    LocalDate endDate = facilitySchedule.getEndDateTime().toLocalDate();
-    return isStartEndDateEquals(startDate, endDate);
   }
 
   public boolean isStartEndDateEquals(LocalDate startDate, LocalDate endDate) {

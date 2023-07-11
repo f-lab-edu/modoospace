@@ -196,7 +196,7 @@ class FacilitySchedulesTest {
     );
   }
 
-  @DisplayName("시설 스케줄을 업데이트 한다.하지만 범위가 연속적이므로 합쳐서 저장된다.")
+  @DisplayName("시설 스케줄을 업데이트 한다. 하지만 범위가 연속적이므로 합쳐서 저장된다.")
   @Test
   public void updateFacilitySchedule_Merge() {
     FacilitySchedule createFacilitySchedule = FacilitySchedule.builder()
