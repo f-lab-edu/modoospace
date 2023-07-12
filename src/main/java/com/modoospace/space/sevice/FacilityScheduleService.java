@@ -9,12 +9,14 @@ import com.modoospace.space.domain.Facility;
 import com.modoospace.space.domain.FacilityRepository;
 import com.modoospace.space.domain.FacilitySchedule;
 import com.modoospace.space.domain.FacilityScheduleRepository;
-import lombok.RequiredArgsConstructor;
-import org.springframework.stereotype.Service;
-
 import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.LocalTime;
+import java.time.YearMonth;
 import java.util.List;
 import java.util.stream.Collectors;
+import lombok.RequiredArgsConstructor;
+import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 @RequiredArgsConstructor
@@ -26,13 +28,16 @@ public class FacilityScheduleService {
   private final MemberRepository memberRepository;
 
   @Transactional
-  public void createFacilitySchedule(Long facilityId, FacilityScheduleCreateUpdateDto createDto,
+  public Long createFacilitySchedule(Long facilityId, FacilityScheduleCreateUpdateDto createDto,
       String loginEmail) {
     Member loginMember = findMemberByEmail(loginEmail);
     Facility facility = findFacilityById(facilityId);
 
-    FacilitySchedule createSchedule = createDto.toEntity(facility);
-    facility.addFacilitySchedule(createSchedule, loginMember);
+    FacilitySchedule facilitySchedule = facility
+        .addFacilitySchedule(createDto.toEntity(facility), loginMember);
+    facilityScheduleRepository.flush();
+
+    return facilitySchedule.getId();
   }
 
   public FacilityScheduleReadDto findFacilitySchedule(Long facilityScheduleId) {
@@ -41,10 +46,10 @@ public class FacilityScheduleService {
     return FacilityScheduleReadDto.toDto(schedule);
   }
 
-  public List<FacilityScheduleReadDto> findFacilityScheduleByLocalDate(Long facilityId, LocalDate date) {
+  public List<FacilityScheduleReadDto> find1DayFacilitySchedules(Long facilityId,
+      LocalDate findDate) {
     Facility facility = findFacilityById(facilityId);
-    // TODO : QueryDSL 개선 필요
-    List<FacilitySchedule> facilitySchedules = facility.getFacilitySchedules().isEqualsLocalDate(date, date);
+    List<FacilitySchedule> facilitySchedules = find1DayFacilitySchedules(facility, findDate);
 
     return facilitySchedules.stream()
         .map(facilitySchedule -> FacilityScheduleReadDto.toDto(facilitySchedule))
@@ -52,15 +57,18 @@ public class FacilityScheduleService {
   }
 
   @Transactional
-  public void updateFacilitySchedule(Long facilityScheduleId,
+  public Long updateFacilitySchedule(Long facilityScheduleId,
       FacilityScheduleCreateUpdateDto updateDto,
       String loginEmail) {
     Member loginMember = findMemberByEmail(loginEmail);
     FacilitySchedule schedule = findFacilityScheduleById(facilityScheduleId);
     Facility facility = schedule.getFacility();
 
-    FacilitySchedule updateSchedule = updateDto.toEntity(facility);
-    facility.updateFacilitySchedule(updateSchedule, schedule, loginMember);
+    FacilitySchedule facilitySchedule = facility
+        .updateFacilitySchedule(updateDto.toEntity(facility), schedule, loginMember);
+    facilityScheduleRepository.flush();
+
+    return facilitySchedule.getId();
   }
 
   @Transactional
@@ -71,6 +79,47 @@ public class FacilityScheduleService {
 
     facility.verifyManagementPermission(loginMember);
     facilityScheduleRepository.delete(schedule);
+  }
+
+  @Transactional
+  public void create1MonthDefaultFacilitySchedules(Long facilityId, YearMonth createYearMonth,
+      String loginEmail) {
+    Member loginMember = findMemberByEmail(loginEmail);
+    Facility facility = findFacilityById(facilityId);
+
+    delete1MonthFacilitySchedules(facility, createYearMonth, loginMember);
+    facility.create1MonthDefaultFacilitySchedules(createYearMonth, loginMember);
+  }
+
+  public List<FacilityScheduleReadDto> find1MonthFacilitySchedules(Long facilityId,
+      YearMonth findYearMonth) {
+    Facility facility = findFacilityById(facilityId);
+    List<FacilitySchedule> facilitySchedules = find1MonthFacilitySchedules(facility, findYearMonth);
+
+    return facilitySchedules.stream()
+        .map(facilitySchedule -> FacilityScheduleReadDto.toDto(facilitySchedule))
+        .collect(Collectors.toList());
+  }
+
+  @Transactional
+  public void delete1MonthFacilitySchedules(Long facilityId, YearMonth deleteYearMonth,
+      String loginEmail) {
+    Member loginMember = findMemberByEmail(loginEmail);
+    Facility facility = findFacilityById(facilityId);
+
+    delete1MonthFacilitySchedules(facility, deleteYearMonth, loginMember);
+  }
+
+  private void delete1MonthFacilitySchedules(Facility facility, YearMonth deleteYearMonth,
+      Member loginMember) {
+    facility.verifyManagementPermission(loginMember);
+
+    List<FacilitySchedule> facilitySchedules = find1MonthFacilitySchedules(facility,
+        deleteYearMonth);
+    if (!facilitySchedules.isEmpty()) {
+      facilityScheduleRepository
+          .deleteAllInBatch(facilitySchedules); // deleteAll 과 deleteAllInBatch의 차이점 공부필요.
+    }
   }
 
   private Member findMemberByEmail(String email) {
@@ -89,5 +138,33 @@ public class FacilityScheduleService {
     FacilitySchedule facilitySchedule = facilityScheduleRepository.findById(facilityScheduleId)
         .orElseThrow(() -> new NotFoundEntityException("시설스케줄", facilityScheduleId));
     return facilitySchedule;
+  }
+
+  private List<FacilitySchedule> find1DayFacilitySchedules(Facility facility,
+      LocalDate findDate) {
+    LocalDateTime startDateTime = LocalDateTime
+        .of(findDate, LocalTime.of(0, 0, 0))
+        .minusSeconds(1);
+    LocalDateTime endDateTime = LocalDateTime
+        .of(findDate, LocalTime.of(23, 59, 59))
+        .plusSeconds(1);
+
+    return facilityScheduleRepository
+        .findByFacilityAndStartDateTimeAfterAndEndDateTimeBefore(facility, startDateTime,
+            endDateTime);
+  }
+
+  private List<FacilitySchedule> find1MonthFacilitySchedules(Facility facility,
+      YearMonth findYearMonth) {
+    LocalDateTime startDateTime = LocalDateTime
+        .of(findYearMonth.atDay(1), LocalTime.of(0, 0, 0))
+        .minusSeconds(1);
+    LocalDateTime endDateTime = LocalDateTime
+        .of(findYearMonth.atEndOfMonth(), LocalTime.of(23, 59, 59))
+        .plusSeconds(1);
+
+    return facilityScheduleRepository
+        .findByFacilityAndStartDateTimeAfterAndEndDateTimeBefore(facility, startDateTime,
+            endDateTime);
   }
 }

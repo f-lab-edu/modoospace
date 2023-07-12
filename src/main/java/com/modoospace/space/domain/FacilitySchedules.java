@@ -3,7 +3,7 @@ package com.modoospace.space.domain;
 import com.modoospace.exception.ConflictingTimeException;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.time.temporal.ChronoUnit;
+import java.time.YearMonth;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
@@ -31,16 +31,29 @@ public class FacilitySchedules {
     this.facilitySchedules = facilitySchedules;
   }
 
-  public static FacilitySchedules createFacilitySchedules(TimeSettings timeSettings,
-      WeekdaySettings weekdaySettings) {
-    LocalDate nowMonthStartDate = LocalDate
-        .of(LocalDate.now().getYear(), LocalDate.now().getMonth(), 1);
-    int daysBetween = (int) ChronoUnit.DAYS
-        .between(nowMonthStartDate, nowMonthStartDate.plusMonths(3));
+  public static FacilitySchedules create3MonthFacilitySchedules(TimeSettings timeSettings,
+      WeekdaySettings weekdaySettings, YearMonth createYearMonth) {
+    LocalDate startDate = createYearMonth.atDay(1);
+    int daysBetween = startDate.lengthOfMonth()
+        + startDate.plusMonths(1).lengthOfMonth()
+        + startDate.plusMonths(2).lengthOfMonth();
 
+    return createFacilitySchedules(timeSettings, weekdaySettings, startDate, daysBetween);
+  }
+
+  public static FacilitySchedules create1MonthFacilitySchedules(TimeSettings timeSettings,
+      WeekdaySettings weekdaySettings, YearMonth createYearMonth) {
+    LocalDate startDate = createYearMonth.atDay(1);
+    int daysBetween = startDate.lengthOfMonth();
+
+    return createFacilitySchedules(timeSettings, weekdaySettings, startDate, daysBetween);
+  }
+
+  private static FacilitySchedules createFacilitySchedules(TimeSettings timeSettings,
+      WeekdaySettings weekdaySettings, LocalDate startDate, int daysBetween) {
     List<FacilitySchedule> facilitySchedules = new ArrayList<>();
     IntStream.range(0, daysBetween)
-        .mapToObj(nowMonthStartDate::plusDays)
+        .mapToObj(startDate::plusDays)
         .filter(scheduleDate -> weekdaySettings.isContainWeekday(scheduleDate.getDayOfWeek()))
         .flatMap(scheduleDate -> timeSettings.createFacilitySchedules(scheduleDate).stream())
         .forEach(facilitySchedules::add);
@@ -100,13 +113,18 @@ public class FacilitySchedules {
     facilitySchedules.setFacility(facility);
   }
 
+  public void addAll(FacilitySchedules facilitySchedules, Facility facility) {
+    this.facilitySchedules.addAll(facilitySchedules.getFacilitySchedules());
+    facilitySchedules.setFacility(facility);
+  }
+
   private void setFacility(Facility facility) {
     for (FacilitySchedule facilitySchedule : facilitySchedules) {
       facilitySchedule.setFacility(facility);
     }
   }
 
-  public void addFacilitySchedule(FacilitySchedule createSchedule) {
+  public FacilitySchedule addFacilitySchedule(FacilitySchedule createSchedule) {
     // 1. create하는 날짜에 해당하는 스케줄 데이터 필터링 (쿼리로 가져올지 고민해보기)
     List<FacilitySchedule> oneDayFacilitySchedules = isEqualsLocalDate(createSchedule);
 
@@ -117,10 +135,13 @@ public class FacilitySchedules {
     oneDayFacilitySchedules.add(createSchedule);
 
     // 4. 해당 날짜에서 시간범위가 연속적인 Schedule끼리 합쳐서 저장하기
-    mergeAndUpdateSchedules(oneDayFacilitySchedules);
+    FacilitySchedule mergedSchedule = mergeAndUpdateSchedules(oneDayFacilitySchedules);
+
+    return mergedSchedule != null ? mergedSchedule : createSchedule;
   }
 
-  public void updateFacilitySchedule(FacilitySchedule updateSchedule, FacilitySchedule schedule) {
+  public FacilitySchedule updateFacilitySchedule(FacilitySchedule updateSchedule,
+      FacilitySchedule schedule) {
     // 1. update 하는 날짜에 해당하는 스케줄 데이터 필터링 (쿼리로 가져올지 고민해보기)
     List<FacilitySchedule> oneDayFacilitySchedules = isEqualsLocalDate(updateSchedule);
 
@@ -134,7 +155,9 @@ public class FacilitySchedules {
     schedule.update(updateSchedule);
 
     // 4. 해당 날짜에서 시간범위가 연속적인 Schedule끼리 합쳐서 저장하기
-    mergeAndUpdateSchedules(oneDayFacilitySchedules);
+    FacilitySchedule mergedSchedule = mergeAndUpdateSchedules(oneDayFacilitySchedules);
+
+    return mergedSchedule != null ? mergedSchedule : schedule;
   }
 
   public List<FacilitySchedule> isEqualsLocalDate(FacilitySchedule targetFacilitySchedule) {
@@ -160,14 +183,16 @@ public class FacilitySchedules {
     }
   }
 
-  private void mergeAndUpdateSchedules(List<FacilitySchedule> facilitySchedules) {
+  private FacilitySchedule mergeAndUpdateSchedules(List<FacilitySchedule> facilitySchedules) {
     facilitySchedules
         .forEach(schedule -> this.facilitySchedules.remove(schedule));
-    mergeSchedules(facilitySchedules);
+    FacilitySchedule mergedSchedule = mergeSchedules(facilitySchedules);
     this.facilitySchedules.addAll(facilitySchedules);
+    return mergedSchedule;
   }
 
-  private void mergeSchedules(List<FacilitySchedule> facilitySchedules) {
+  private FacilitySchedule mergeSchedules(List<FacilitySchedule> facilitySchedules) {
+    FacilitySchedule mergedSchedule = null;
     boolean mergeOccurred = true;
     while (mergeOccurred) {
       mergeOccurred = false;
@@ -181,11 +206,13 @@ public class FacilitySchedules {
           facilitySchedules.remove(facilitySchedule1);
           facilitySchedules.remove(facilitySchedule2);
           facilitySchedules.add(mergeFacilitySchedule);
+          mergedSchedule = mergeFacilitySchedule;
           mergeOccurred = true;
           break;
         }
       }
     }
+    return mergedSchedule;
   }
 
   @Override
