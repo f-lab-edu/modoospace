@@ -1,9 +1,13 @@
 package com.modoospace.space.controller;
 
 import com.modoospace.config.auth.LoginEmail;
+import com.modoospace.space.controller.dto.facilitySchedule.FacilitySchedule1DayDto;
+import com.modoospace.space.controller.dto.facilitySchedule.FacilitySchedule1MonthDto;
 import com.modoospace.space.controller.dto.facilitySchedule.FacilityScheduleCreateUpdateDto;
 import com.modoospace.space.controller.dto.facilitySchedule.FacilityScheduleReadDto;
 import com.modoospace.space.sevice.FacilityScheduleService;
+import java.net.URI;
+import java.util.List;
 import javax.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -27,8 +31,11 @@ public class FacilityScheduleController {
   public ResponseEntity<Void> create(@PathVariable Long facilityId,
       @RequestBody @Valid FacilityScheduleCreateUpdateDto createDto,
       @LoginEmail String loginEmail) {
-    facilityScheduleService.createFacilitySchedule(facilityId, createDto, loginEmail);
-    return ResponseEntity.noContent().build();
+    Long scheduleId = facilityScheduleService
+        .createFacilitySchedule(facilityId, createDto, loginEmail);
+    return ResponseEntity
+        .created(URI.create("/api/v1/facilities/" + facilityId + "/schedules/" + scheduleId))
+        .build();
   }
 
   @GetMapping("/{scheduleId}")
@@ -50,6 +57,40 @@ public class FacilityScheduleController {
   public ResponseEntity<Void> delete(@PathVariable Long scheduleId,
       @LoginEmail String loginEmail) {
     facilityScheduleService.deleteFacilitySchedule(scheduleId, loginEmail);
+    return ResponseEntity.noContent().build();
+  }
+
+  @GetMapping("/day")
+  public ResponseEntity<List<FacilityScheduleReadDto>> find1Day(@PathVariable Long facilityId,
+      @RequestBody @Valid FacilitySchedule1DayDto searchDto) {
+    List<FacilityScheduleReadDto> facilityScheduleReadDtos = facilityScheduleService
+        .find1DayFacilitySchedules(facilityId, searchDto.getDate());
+    return ResponseEntity.ok().body(facilityScheduleReadDtos);
+  }
+
+  @PostMapping("/month")
+  public ResponseEntity<Void> create1MonthDefault(@PathVariable Long facilityId,
+      @RequestBody @Valid FacilitySchedule1MonthDto createDto,
+      @LoginEmail String loginEmail) {
+    facilityScheduleService
+        .create1MonthDefaultFacilitySchedules(facilityId, createDto.getYearMonth(), loginEmail);
+    return ResponseEntity.noContent().build();
+  }
+
+  @GetMapping("/month")
+  public ResponseEntity<List<FacilityScheduleReadDto>> find1Month(@PathVariable Long facilityId,
+      @RequestBody @Valid FacilitySchedule1MonthDto searchDto) {
+    List<FacilityScheduleReadDto> facilityScheduleReadDtos = facilityScheduleService
+        .find1MonthFacilitySchedules(facilityId, searchDto.getYearMonth());
+    return ResponseEntity.ok().body(facilityScheduleReadDtos);
+  }
+
+  @DeleteMapping("/month")
+  public ResponseEntity<Void> delete1Month(@PathVariable Long facilityId,
+      @RequestBody @Valid FacilitySchedule1MonthDto deleteDto,
+      @LoginEmail String loginEmail) {
+    facilityScheduleService
+        .delete1MonthFacilitySchedules(facilityId, deleteDto.getYearMonth(), loginEmail);
     return ResponseEntity.noContent().build();
   }
 }

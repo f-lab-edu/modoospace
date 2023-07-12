@@ -46,16 +46,6 @@ public class FacilityScheduleService {
     return FacilityScheduleReadDto.toDto(schedule);
   }
 
-  public List<FacilityScheduleReadDto> find1DayFacilitySchedules(Long facilityId,
-      LocalDate findDate) {
-    Facility facility = findFacilityById(facilityId);
-    List<FacilitySchedule> facilitySchedules = find1DayFacilitySchedules(facility, findDate);
-
-    return facilitySchedules.stream()
-        .map(facilitySchedule -> FacilityScheduleReadDto.toDto(facilitySchedule))
-        .collect(Collectors.toList());
-  }
-
   @Transactional
   public Long updateFacilitySchedule(Long facilityScheduleId,
       FacilityScheduleCreateUpdateDto updateDto,
@@ -79,6 +69,16 @@ public class FacilityScheduleService {
 
     facility.verifyManagementPermission(loginMember);
     facilityScheduleRepository.delete(schedule);
+  }
+
+  public List<FacilityScheduleReadDto> find1DayFacilitySchedules(Long facilityId,
+      LocalDate findDate) {
+    Facility facility = findFacilityById(facilityId);
+    List<FacilitySchedule> facilitySchedules = find1DayFacilitySchedules(facility, findDate);
+
+    return facilitySchedules.stream()
+        .map(facilitySchedule -> FacilityScheduleReadDto.toDto(facilitySchedule))
+        .collect(Collectors.toList());
   }
 
   @Transactional
@@ -150,7 +150,7 @@ public class FacilityScheduleService {
         .plusSeconds(1);
 
     return facilityScheduleRepository
-        .findByFacilityAndStartDateTimeAfterAndEndDateTimeBefore(facility, startDateTime,
+        .findByFacilityAndStartDateTimeAfterAndEndDateTimeBeforeOrderByStartDateTime(facility, startDateTime,
             endDateTime);
   }
 
@@ -164,7 +164,7 @@ public class FacilityScheduleService {
         .plusSeconds(1);
 
     return facilityScheduleRepository
-        .findByFacilityAndStartDateTimeAfterAndEndDateTimeBefore(facility, startDateTime,
+        .findByFacilityAndStartDateTimeAfterAndEndDateTimeBeforeOrderByStartDateTime(facility, startDateTime,
             endDateTime);
   }
 }
