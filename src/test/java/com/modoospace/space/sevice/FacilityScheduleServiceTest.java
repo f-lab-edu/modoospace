@@ -18,7 +18,6 @@ import com.modoospace.space.domain.Category;
 import com.modoospace.space.domain.CategoryRepository;
 import com.modoospace.space.domain.Facility;
 import com.modoospace.space.domain.FacilityRepository;
-import com.modoospace.space.domain.FacilitySchedule;
 import com.modoospace.space.domain.FacilityScheduleRepository;
 import com.modoospace.space.domain.FacilityType;
 import com.modoospace.space.domain.Space;
@@ -26,6 +25,7 @@ import com.modoospace.space.domain.SpaceRepository;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
+import java.time.YearMonth;
 import java.util.Arrays;
 import java.util.List;
 import org.junit.jupiter.api.BeforeEach;
@@ -62,6 +62,8 @@ public class FacilityScheduleServiceTest {
 
   private LocalDate nowDate;
 
+  private YearMonth nowYearMonth;
+
   @BeforeEach
   public void setUp() {
     facilityScheduleService = new FacilityScheduleService(facilityScheduleRepository,
@@ -97,6 +99,7 @@ public class FacilityScheduleServiceTest {
     facilityRepository.save(facility);
 
     nowDate = LocalDate.now();
+    nowYearMonth = YearMonth.now();
   }
 
   @DisplayName("시설 스케줄 데이터를 생성한다.")
@@ -106,16 +109,16 @@ public class FacilityScheduleServiceTest {
         LocalDateTime.of(nowDate, LocalTime.of(19, 0, 0)),
         (LocalDateTime.of(nowDate, LocalTime.of(23, 59, 59))));
 
-    facilityScheduleService
+    Long createdId = facilityScheduleService
         .createFacilitySchedule(facility.getId(), createDto, hostMember.getEmail());
 
-    List<FacilitySchedule> facilitySchedules = facility.getFacilitySchedules()
-        .isEqualsLocalDate(nowDate, nowDate);
+    FacilityScheduleReadDto retReadDto = facilityScheduleService
+        .findFacilitySchedule(createdId);
     assertAll(
-        () -> assertThat(facilitySchedules.get(0).isStartTimeEquals(LocalTime.of(9, 0, 0))),
-        () -> assertThat(facilitySchedules.get(0).isEndTimeEquals(LocalTime.of(17, 59, 59))),
-        () -> assertThat(facilitySchedules.get(1).isStartTimeEquals(LocalTime.of(19, 0, 0))),
-        () -> assertThat(facilitySchedules.get(1).isEndTimeEquals(LocalTime.of(23, 59, 59)))
+        () -> assertThat(retReadDto.getStartDateTime().toLocalTime())
+            .isEqualTo(LocalTime.of(19, 0, 0)),
+        () -> assertThat(retReadDto.getEndDateTime().toLocalTime())
+            .isEqualTo(LocalTime.of(23, 59, 59))
     );
   }
 
@@ -126,14 +129,16 @@ public class FacilityScheduleServiceTest {
         LocalDateTime.of(nowDate, LocalTime.of(18, 0, 0)),
         (LocalDateTime.of(nowDate, LocalTime.of(23, 59, 59))));
 
-    facilityScheduleService
+    Long createdId = facilityScheduleService
         .createFacilitySchedule(facility.getId(), createDto, hostMember.getEmail());
 
-    List<FacilitySchedule> facilitySchedules = facility.getFacilitySchedules()
-        .isEqualsLocalDate(nowDate, nowDate);
+    FacilityScheduleReadDto retReadDto = facilityScheduleService
+        .findFacilitySchedule(createdId);
     assertAll(
-        () -> assertThat(facilitySchedules.get(0).isStartTimeEquals(LocalTime.of(9, 0, 0))),
-        () -> assertThat(facilitySchedules.get(0).isEndTimeEquals(LocalTime.of(23, 59, 59)))
+        () -> assertThat(retReadDto.getStartDateTime().toLocalTime())
+            .isEqualTo(LocalTime.of(9, 0, 0)),
+        () -> assertThat(retReadDto.getEndDateTime().toLocalTime())
+            .isEqualTo(LocalTime.of(23, 59, 59))
     );
   }
 
@@ -155,18 +160,19 @@ public class FacilityScheduleServiceTest {
     FacilityScheduleCreateUpdateDto updateDto = new FacilityScheduleCreateUpdateDto(
         LocalDateTime.of(nowDate, LocalTime.of(0, 0, 0)),
         (LocalDateTime.of(nowDate, LocalTime.of(23, 59, 59))));
-    List<FacilitySchedule> facilitySchedules = facility.getFacilitySchedules()
-        .isEqualsLocalDate(nowDate, nowDate);
-    FacilitySchedule targetSchedule = facilitySchedules.get(0);
+    FacilityScheduleReadDto targetSchedule = facilityScheduleService
+        .find1DayFacilitySchedules(facility.getId(), nowDate).get(0);
 
-    facilityScheduleService
+    Long updatedId = facilityScheduleService
         .updateFacilitySchedule(targetSchedule.getId(), updateDto, hostMember.getEmail());
 
-    FacilitySchedule retSchedule = facilityScheduleRepository.findById(targetSchedule.getId())
-        .get();
+    FacilityScheduleReadDto retReadDto = facilityScheduleService
+        .findFacilitySchedule(updatedId);
     assertAll(
-        () -> assertThat(retSchedule.isStartTimeEquals(LocalTime.of(0, 0, 0))),
-        () -> assertThat(retSchedule.isEndTimeEquals(LocalTime.of(23, 59, 59)))
+        () -> assertThat(retReadDto.getStartDateTime().toLocalTime())
+            .isEqualTo(LocalTime.of(0, 0, 0)),
+        () -> assertThat(retReadDto.getEndDateTime().toLocalTime())
+            .isEqualTo(LocalTime.of(23, 59, 59))
     );
   }
 
@@ -176,23 +182,22 @@ public class FacilityScheduleServiceTest {
     FacilityScheduleCreateUpdateDto createDto = new FacilityScheduleCreateUpdateDto(
         LocalDateTime.of(nowDate, LocalTime.of(20, 0, 0)),
         (LocalDateTime.of(nowDate, LocalTime.of(23, 59, 59))));
-    facilityScheduleService
+    Long createdId = facilityScheduleService
         .createFacilitySchedule(facility.getId(), createDto, hostMember.getEmail());
-    facilityRepository.flush(); // flush 하지 않으면 id가 null임. 왜일까?
     FacilityScheduleCreateUpdateDto updateDto = new FacilityScheduleCreateUpdateDto(
         LocalDateTime.of(nowDate, LocalTime.of(18, 0, 0)),
         (LocalDateTime.of(nowDate, LocalTime.of(23, 59, 59))));
-    FacilityScheduleReadDto targetSchedule = facilityScheduleService
-        .findFacilityScheduleByLocalDate(facility.getId(), nowDate).get(1);
 
-    facilityScheduleService
-        .updateFacilitySchedule(targetSchedule.getId(), updateDto, hostMember.getEmail());
+    Long updatedId = facilityScheduleService
+        .updateFacilitySchedule(createdId, updateDto, hostMember.getEmail());
 
-    List<FacilitySchedule> retSchedules = facility.getFacilitySchedules()
-        .isEqualsLocalDate(nowDate, nowDate);
+    FacilityScheduleReadDto retReadDto = facilityScheduleService
+        .findFacilitySchedule(updatedId);
     assertAll(
-        () -> assertThat(retSchedules.get(0).isStartTimeEquals(LocalTime.of(0, 0, 0))),
-        () -> assertThat(retSchedules.get(0).isEndTimeEquals(LocalTime.of(23, 59, 59)))
+        () -> assertThat(retReadDto.getStartDateTime().toLocalTime())
+            .isEqualTo(LocalTime.of(9, 0, 0)),
+        () -> assertThat(retReadDto.getEndDateTime().toLocalTime())
+            .isEqualTo(LocalTime.of(23, 59, 59))
     );
   }
 
@@ -202,17 +207,14 @@ public class FacilityScheduleServiceTest {
     FacilityScheduleCreateUpdateDto createDto = new FacilityScheduleCreateUpdateDto(
         LocalDateTime.of(nowDate, LocalTime.of(20, 0, 0)),
         (LocalDateTime.of(nowDate, LocalTime.of(23, 59, 59))));
-    facilityScheduleService
+    Long createdId = facilityScheduleService
         .createFacilitySchedule(facility.getId(), createDto, hostMember.getEmail());
-    facilityRepository.flush(); // flush 하지 않으면 id가 null임. 왜일까?
     FacilityScheduleCreateUpdateDto updateDto = new FacilityScheduleCreateUpdateDto(
         LocalDateTime.of(nowDate, LocalTime.of(16, 0, 0)),
         (LocalDateTime.of(nowDate, LocalTime.of(23, 59, 59))));
-    FacilityScheduleReadDto facilityScheduleReadDto = facilityScheduleService
-        .findFacilityScheduleByLocalDate(facility.getId(), nowDate).get(1);
 
     assertThatThrownBy(() -> facilityScheduleService
-        .updateFacilitySchedule(facilityScheduleReadDto.getId(), updateDto, hostMember.getEmail()))
+        .updateFacilitySchedule(createdId, updateDto, hostMember.getEmail()))
         .isInstanceOf(ConflictingTimeException.class);
   }
 
@@ -220,11 +222,64 @@ public class FacilityScheduleServiceTest {
   @Test
   public void deleteFacilitySchedule() {
     FacilityScheduleReadDto targetSchedule = facilityScheduleService
-        .findFacilityScheduleByLocalDate(facility.getId(), nowDate).get(0);
+        .find1DayFacilitySchedules(facility.getId(), nowDate).get(0);
 
     facilityScheduleService.deleteFacilitySchedule(targetSchedule.getId(), hostMember.getEmail());
 
     assertThatThrownBy(() -> facilityScheduleService.findFacilitySchedule(targetSchedule.getId()))
         .isInstanceOf(NotFoundEntityException.class);
+  }
+
+  @DisplayName("1달 치 기본 스케줄을 생성한다.")
+  @Test
+  public void create1MonthDefaultFacilitySchedules_plus3Month() {
+    YearMonth createYearMonth = nowYearMonth.plusMonths(3);
+
+    facilityScheduleService
+        .create1MonthDefaultFacilitySchedules(facility.getId(), createYearMonth,
+            hostMember.getEmail());
+
+    List<FacilityScheduleReadDto> retReadDtos = facilityScheduleService
+        .find1MonthFacilitySchedules(facility.getId(), createYearMonth);
+    assertAll(
+        () -> assertThat(retReadDtos.size()).isEqualTo(createYearMonth.lengthOfMonth()),
+        () -> assertThat(retReadDtos.get(0).getStartDateTime().toLocalDate())
+            .isEqualTo(createYearMonth.atDay(1)),
+        () -> assertThat(retReadDtos.get(retReadDtos.size() - 1).getStartDateTime().toLocalDate())
+            .isEqualTo(createYearMonth.atEndOfMonth())
+    );
+  }
+
+  @DisplayName("이미 생성되어있는 1달 치 스케줄을 지우고 새로 생성한다.")
+  @Test
+  public void create1MonthDefaultFacilitySchedules_plus2Month() {
+    YearMonth createYearMonth = nowYearMonth.plusMonths(2);
+
+    facilityScheduleService
+        .create1MonthDefaultFacilitySchedules(facility.getId(), createYearMonth,
+            hostMember.getEmail());
+
+    List<FacilityScheduleReadDto> retReadDtos = facilityScheduleService
+        .find1MonthFacilitySchedules(facility.getId(), createYearMonth);
+    assertAll(
+        () -> assertThat(retReadDtos.size()).isEqualTo(createYearMonth.lengthOfMonth()),
+        () -> assertThat(retReadDtos.get(0).getStartDateTime().toLocalDate())
+            .isEqualTo(createYearMonth.atDay(1)),
+        () -> assertThat(retReadDtos.get(retReadDtos.size() - 1).getStartDateTime().toLocalDate())
+            .isEqualTo(createYearMonth.atEndOfMonth())
+    );
+  }
+
+  @DisplayName("1달 치 스케줄을 삭제한다.")
+  @Test
+  public void delete1MonthFacilitySchedules() {
+    YearMonth deleteYearMonth = nowYearMonth.plusMonths(2);
+
+    facilityScheduleService
+        .delete1MonthFacilitySchedules(facility.getId(), deleteYearMonth, hostMember.getEmail());
+
+    List<FacilityScheduleReadDto> retReadDtos = facilityScheduleService
+        .find1MonthFacilitySchedules(facility.getId(), deleteYearMonth);
+    assertThat(retReadDtos).isEmpty();
   }
 }

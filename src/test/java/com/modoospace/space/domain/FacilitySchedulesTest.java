@@ -9,6 +9,7 @@ import java.time.DayOfWeek;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
+import java.time.YearMonth;
 import java.util.Arrays;
 import java.util.List;
 import org.junit.jupiter.api.BeforeEach;
@@ -55,8 +56,8 @@ class FacilitySchedulesTest {
             .weekday(DayOfWeek.FRIDAY)
             .build());
     facilitySchedules = FacilitySchedules
-        .createFacilitySchedules(new TimeSettings(timeSettings),
-            new WeekdaySettings(weekdaySettings));
+        .create3MonthFacilitySchedules(new TimeSettings(timeSettings),
+            new WeekdaySettings(weekdaySettings), YearMonth.now());
 
     List<TimeSetting> timeSettings24 = Arrays.asList(
         TimeSetting.builder()
@@ -86,14 +87,14 @@ class FacilitySchedulesTest {
             .weekday(DayOfWeek.SUNDAY)
             .build());
     allDayFacilitySchedules = FacilitySchedules
-        .createFacilitySchedules(new TimeSettings(timeSettings24),
-            new WeekdaySettings(weekdaySettingsAll));
+        .create3MonthFacilitySchedules(new TimeSettings(timeSettings24),
+            new WeekdaySettings(weekdaySettingsAll), YearMonth.now());
   }
 
   @DisplayName("TimeSettings과 WeekdaySettings으로 현재 날짜부터 3개월간의 데이터를 생성한다.")
   @Test
   public void createFacilitySchedules() {
-    System.out.println(facilitySchedules);
+    System.out.println(allDayFacilitySchedules);
   }
 
   @DisplayName("해당 시간범위에 시설이 Open했는지 여부를 반환한다.")
@@ -134,15 +135,12 @@ class FacilitySchedulesTest {
         .startDateTime(LocalDateTime.of(nowDate, LocalTime.of(19, 0, 0)))
         .endDateTime(LocalDateTime.of(nowDate, LocalTime.of(23, 59, 59)))
         .build();
-    facilitySchedules.addFacilitySchedule(createFacilitySchedule);
 
-    List<FacilitySchedule> retFacilitySchedules = facilitySchedules
-        .isEqualsLocalDate(createFacilitySchedule);
+    FacilitySchedule retSchedule = facilitySchedules.addFacilitySchedule(createFacilitySchedule);
+
     assertAll(
-        () -> retFacilitySchedules.get(0).isStartTimeEquals(LocalTime.of(9, 0, 0)),
-        () -> retFacilitySchedules.get(0).isEndTimeEquals(LocalTime.of(17, 59, 59)),
-        () -> retFacilitySchedules.get(1).isStartTimeEquals(LocalTime.of(19, 0, 0)),
-        () -> retFacilitySchedules.get(1).isEndTimeEquals(LocalTime.of(23, 59, 59))
+        () -> retSchedule.isStartTimeEquals(LocalTime.of(19, 0, 0)),
+        () -> retSchedule.isEndTimeEquals(LocalTime.of(23, 59, 59))
     );
   }
 
@@ -153,13 +151,12 @@ class FacilitySchedulesTest {
         .startDateTime(LocalDateTime.of(nowDate, LocalTime.of(18, 0, 0)))
         .endDateTime(LocalDateTime.of(nowDate, LocalTime.of(23, 59, 59)))
         .build();
-    facilitySchedules.addFacilitySchedule(createFacilitySchedule);
 
-    List<FacilitySchedule> retFacilitySchedules = facilitySchedules
-        .isEqualsLocalDate(createFacilitySchedule);
+    FacilitySchedule retSchedule = facilitySchedules.addFacilitySchedule(createFacilitySchedule);
+
     assertAll(
-        () -> retFacilitySchedules.get(0).isStartTimeEquals(LocalTime.of(0, 0, 0)),
-        () -> retFacilitySchedules.get(0).isEndTimeEquals(LocalTime.of(23, 59, 59))
+        () -> retSchedule.isStartTimeEquals(LocalTime.of(0, 0, 0)),
+        () -> retSchedule.isEndTimeEquals(LocalTime.of(23, 59, 59))
     );
   }
 
@@ -186,13 +183,12 @@ class FacilitySchedulesTest {
         .isEqualsLocalDate(updateFacilitySchedule);
     FacilitySchedule targetSchedule = equalsLocalDate.get(0);
 
-    facilitySchedules.updateFacilitySchedule(updateFacilitySchedule, targetSchedule);
+    FacilitySchedule retSchedule = facilitySchedules
+        .updateFacilitySchedule(updateFacilitySchedule, targetSchedule);
 
-    List<FacilitySchedule> retFacilitySchedules = facilitySchedules
-        .isEqualsLocalDate(updateFacilitySchedule);
     assertAll(
-        () -> retFacilitySchedules.get(0).isStartTimeEquals(LocalTime.of(0, 0, 0)),
-        () -> retFacilitySchedules.get(0).isEndTimeEquals(LocalTime.of(23, 59, 59))
+        () -> retSchedule.isStartTimeEquals(LocalTime.of(0, 0, 0)),
+        () -> retSchedule.isEndTimeEquals(LocalTime.of(23, 59, 59))
     );
   }
 
@@ -203,18 +199,18 @@ class FacilitySchedulesTest {
         .startDateTime(LocalDateTime.of(nowDate, LocalTime.of(19, 0, 0)))
         .endDateTime(LocalDateTime.of(nowDate, LocalTime.of(23, 59, 59)))
         .build();
-    facilitySchedules.addFacilitySchedule(createFacilitySchedule);
+    FacilitySchedule targetSchedule = facilitySchedules.addFacilitySchedule(createFacilitySchedule);
     FacilitySchedule updateFacilitySchedule = FacilitySchedule.builder()
         .startDateTime(LocalDateTime.of(nowDate, LocalTime.of(18, 0, 0)))
         .endDateTime(LocalDateTime.of(nowDate, LocalTime.of(22, 59, 59)))
         .build();
-    facilitySchedules.updateFacilitySchedule(updateFacilitySchedule, createFacilitySchedule);
 
-    List<FacilitySchedule> retFacilitySchedules = facilitySchedules
-        .isEqualsLocalDate(updateFacilitySchedule);
+    FacilitySchedule retSchedule = facilitySchedules
+        .updateFacilitySchedule(updateFacilitySchedule, targetSchedule);
+
     assertAll(
-        () -> retFacilitySchedules.get(0).isStartTimeEquals(LocalTime.of(0, 0, 0)),
-        () -> retFacilitySchedules.get(0).isEndTimeEquals(LocalTime.of(22, 59, 59))
+        () -> retSchedule.isStartTimeEquals(LocalTime.of(0, 0, 0)),
+        () -> retSchedule.isEndTimeEquals(LocalTime.of(22, 59, 59))
     );
   }
 
@@ -225,14 +221,14 @@ class FacilitySchedulesTest {
         .startDateTime(LocalDateTime.of(nowDate, LocalTime.of(19, 0, 0)))
         .endDateTime(LocalDateTime.of(nowDate, LocalTime.of(23, 59, 59)))
         .build();
-    facilitySchedules.addFacilitySchedule(createFacilitySchedule);
+    FacilitySchedule targetSchedule = facilitySchedules.addFacilitySchedule(createFacilitySchedule);
     FacilitySchedule updateFacilitySchedule = FacilitySchedule.builder()
         .startDateTime(LocalDateTime.of(nowDate, LocalTime.of(16, 0, 0)))
         .endDateTime(LocalDateTime.of(nowDate, LocalTime.of(22, 59, 59)))
         .build();
 
     assertThatThrownBy(() -> facilitySchedules
-        .updateFacilitySchedule(updateFacilitySchedule, createFacilitySchedule))
+        .updateFacilitySchedule(updateFacilitySchedule, targetSchedule))
         .isInstanceOf(ConflictingTimeException.class);
   }
 }
