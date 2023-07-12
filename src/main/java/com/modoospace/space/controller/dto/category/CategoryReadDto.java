@@ -3,7 +3,6 @@ package com.modoospace.space.controller.dto.category;
 import com.modoospace.space.domain.Category;
 import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.NotNull;
-import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
@@ -17,16 +16,12 @@ public class CategoryReadDto {
   @NotEmpty
   private String name;
 
-  @Builder
   public CategoryReadDto(Long id, String name) {
     this.id = id;
     this.name = name;
   }
 
   public static CategoryReadDto toDto(Category category) {
-    return CategoryReadDto.builder()
-        .id(category.getId())
-        .name(category.getName())
-        .build();
+    return new CategoryReadDto(category.getId(), category.getName());
   }
 }

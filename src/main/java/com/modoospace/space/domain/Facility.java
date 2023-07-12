@@ -4,7 +4,9 @@ import static javax.persistence.FetchType.LAZY;
 
 import com.modoospace.common.BaseTimeEntity;
 import com.modoospace.member.domain.Member;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.YearMonth;
 import javax.persistence.Column;
 import javax.persistence.Embedded;
 import javax.persistence.Entity;
@@ -75,7 +77,7 @@ public class Facility extends BaseTimeEntity {
     this.facilitySchedules = facilitySchedules;
     if (facilitySchedules == null) {
       this.facilitySchedules = FacilitySchedules
-          .createFacilitySchedules(timeSettings, weekdaySettings);
+          .create3MonthFacilitySchedules(timeSettings, weekdaySettings, YearMonth.now());
     }
   }
 
@@ -96,15 +98,30 @@ public class Facility extends BaseTimeEntity {
 
     if (!facility.getTimeSettings().isEmpty() || !facility.getWeekdaySettings().isEmpty()) {
       FacilitySchedules facilitySchedules = FacilitySchedules
-          .createFacilitySchedules(this.timeSettings, this.weekdaySettings);
+          .create3MonthFacilitySchedules(this.timeSettings, this.weekdaySettings, YearMonth.now());
       this.facilitySchedules.update(facilitySchedules, this);
     }
   }
 
-  public void updateSchedules(Facility facility, Member loginMember) {
+  public FacilitySchedule addFacilitySchedule(FacilitySchedule createSchedule, Member loginMember) {
     verifyManagementPermission(loginMember);
 
-    this.facilitySchedules.update(facility.getFacilitySchedules(), this);
+    return this.facilitySchedules.addFacilitySchedule(createSchedule);
+  }
+
+  public FacilitySchedule updateFacilitySchedule(FacilitySchedule updateSchedule, FacilitySchedule schedule,
+      Member loginMember) {
+    verifyManagementPermission(loginMember);
+
+    return this.facilitySchedules.updateFacilitySchedule(updateSchedule, schedule);
+  }
+
+  public void create1MonthDefaultFacilitySchedules(YearMonth createYearMonth, Member loginMember) {
+    verifyManagementPermission(loginMember);
+
+    FacilitySchedules facilitySchedules = FacilitySchedules
+        .create1MonthFacilitySchedules(this.timeSettings, this.weekdaySettings, createYearMonth);
+    this.facilitySchedules.addAll(facilitySchedules, this);
   }
 
   public void verifyManagementPermission(Member loginMember) {

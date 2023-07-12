@@ -45,7 +45,7 @@ public class WeekdaySetting {
     this.facility = facility;
   }
 
-  public void isDuplicatedWeekday(WeekdaySetting compareWeekdaySetting) {
+  public void verifyDuplicated(WeekdaySetting compareWeekdaySetting) {
     if (weekday.equals(compareWeekdaySetting.getWeekday())) {
       throw new DuplicatedWeekdayException(weekday);
     }

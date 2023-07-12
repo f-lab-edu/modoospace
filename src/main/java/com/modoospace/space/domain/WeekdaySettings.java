@@ -31,10 +31,8 @@ public class WeekdaySettings {
 
     for (int i = 0; i < weekdaySettings.size() - 1; i++) {
       WeekdaySetting weekdaySetting = weekdaySettings.get(i);
-      for (int j = i + 1; j < weekdaySettings.size(); j++) {
-        WeekdaySetting compareWeekdaySetting = weekdaySettings.get(j);
-        weekdaySetting.isDuplicatedWeekday(compareWeekdaySetting);
-      }
+      WeekdaySetting compareWeekdaySetting = weekdaySettings.get(i + 1);
+      weekdaySetting.verifyDuplicated(compareWeekdaySetting);
     }
   }
 
