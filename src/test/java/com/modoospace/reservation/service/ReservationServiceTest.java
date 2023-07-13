@@ -62,6 +62,15 @@ public class ReservationServiceTest {
     member = getMember();
   }
 
+  @DisplayName("visitor는 선택한 시설의 예약가능한 날짜를 조회할 수 있다.")
+  @Test
+  public void checkAvailable(){
+    Optional<Facility> optionalFacility = facilityRepository.findById(1L);
+    Facility facility = optionalFacility.orElseThrow(() -> new NotFoundEntityException("시설"));
+
+
+  }
+
   @DisplayName("로그인한 멤버가 비지터일 경우 예약을 생성할 수 있다.")
   @Test
   public void createReservation_IfVisitor() {

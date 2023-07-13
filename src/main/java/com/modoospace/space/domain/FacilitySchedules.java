@@ -84,12 +84,8 @@ public class FacilitySchedules {
     LocalDateTime endDateStartTime = LocalDateTime
         .of(endDateTime.getYear(), endDateTime.getMonthValue(), endDateTime.getDayOfMonth(),
             0, 0, 0);
-    if (!endDaySchedule.isStartTimeBeforeOrEquals(endDateStartTime) || !endDaySchedule
-        .isEndTimeAfterOrEquals(endDateTime)) {
-      return false;
-    }
-
-    return true;
+    return endDaySchedule.isStartTimeBeforeOrEquals(endDateStartTime) && endDaySchedule
+        .isEndTimeAfterOrEquals(endDateTime);
   }
 
   public void update(FacilitySchedules facilitySchedules, Facility facility) {
