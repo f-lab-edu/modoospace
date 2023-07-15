@@ -16,12 +16,16 @@ import com.modoospace.reservation.domain.ReservationStatus;
 import com.modoospace.reservation.repository.ReservationQueryRepository;
 import com.modoospace.reservation.serivce.ReservationService;
 import com.modoospace.space.controller.dto.facility.FacilityReadDetailDto;
+import com.modoospace.space.controller.dto.facilitySchedule.FacilityScheduleReadDto;
 import com.modoospace.space.domain.Facility;
 import com.modoospace.space.domain.FacilityRepository;
+import com.modoospace.space.domain.FacilitySchedule;
 import com.modoospace.space.sevice.FacilityService;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -50,6 +54,7 @@ public class ReservationServiceTest {
 
   @Autowired
   private ReservationQueryRepository reservationQueryRepository;
+
   private ReservationCreateDto reservationCreateDto;
 
   private Member member;
@@ -60,6 +65,43 @@ public class ReservationServiceTest {
     LocalDateTime requestStart = LocalDateTime.of(2023, 7, 1, 10, 0);
     reservationCreateDto = createReservationDto(requestStart, requestStart.plusHours(3));
     member = getMember();
+  }
+
+  @DisplayName("방문자는 선택한 시설과 날짜에 대한 예약 가능 여부를 확인할 수 있다.")
+  @Test
+  public void checkAvailableDate(){
+    FacilityReadDetailDto facility = facilityService.findFacility(2L);
+    List<FacilityScheduleReadDto> schedules = facility.getFacilitySchedules();
+
+    LocalDate requestDate = LocalDate.of(2023,7,3);
+
+    boolean hasMatchingDate = schedules.stream()
+        .anyMatch(schedule -> schedule.getStartDateTime().toLocalDate().equals(requestDate));
+
+    assertThat(hasMatchingDate).isTrue();
+  }
+
+  @DisplayName("visitor는 선택한 시설, 날짜에 예약가능한 여부조회할 수 있다.")
+  @Test
+  public void checkAvailableTime(){
+    /*
+    유저가 시설을 선택한다.
+    유저가 날짜를 선택한다.
+    예약가능 한시간을 노출한다.
+
+  - 유저가 요청한 시설아이디, 날짜에 해당하는 시설스케줄을 조회한다.
+  - 기존 예약리스트와 비교해서 차집합을 노출한다.
+
+     */
+    FacilityReadDetailDto facility = facilityService.findFacility(2L);
+    List<FacilityScheduleReadDto> schedules = facility.getFacilitySchedules();
+
+    LocalDate requestDate = LocalDate.of(2023,7,3);
+
+    boolean hasMatchingDate = schedules.stream()
+        .anyMatch(schedule -> schedule.getStartDateTime().toLocalDate().equals(requestDate));
+
+    assertThat(hasMatchingDate).isTrue();
   }
 
   @DisplayName("로그인한 멤버가 비지터일 경우 예약을 생성할 수 있다.")

@@ -17,6 +17,7 @@ insert into facility (facility_id, created_time, updated_time, description, faci
 insert into facility_schedule (facility_schedule_id, end_date_time, facility_id, start_date_time) values (default, '2023-07-01T23:59:59', 1, '2023-07-01T00:00');
 insert into facility_schedule (facility_schedule_id, end_date_time, facility_id, start_date_time) values (default, '2023-07-01T23:59:59', 2, '2023-07-01T00:00');
 insert into facility_schedule (facility_schedule_id, end_date_time, facility_id, start_date_time) values (default, '2023-07-02T23:59:59', 2, '2023-07-02T00:00');
+insert into facility_schedule (facility_schedule_id, end_date_time, facility_id, start_date_time) values (default, '2023-07-03T23:59:59', 2, '2023-07-03T00:00');
 
 
 insert into reservation (reservation_id, created_time, updated_time, facility_id, reservation_start, reservation_end, status, visitor_id) values (default, now(), now(), 2, '2023-07-14T10:00:00', '2023-07-14T12:59:59','COMPLETED', 1);
