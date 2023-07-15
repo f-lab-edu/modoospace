@@ -4,6 +4,7 @@ import com.modoospace.exception.InvalidTimeRangeException;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
+import java.util.Optional;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
@@ -54,20 +55,20 @@ public class FacilitySchedule {
     }
   }
 
-  public static FacilitySchedule mergeFacilitySchedule(FacilitySchedule facilitySchedule1,
+  public static Optional<FacilitySchedule> mergeFacilitySchedule(FacilitySchedule facilitySchedule1,
       FacilitySchedule facilitySchedule2) {
 
     if (facilitySchedule1
         .isEndDateTimeEquals(facilitySchedule2.getStartDateTime().minusSeconds(1))) {
-      return createMergedSchedule(facilitySchedule1, facilitySchedule2);
+      return Optional.of(createMergedSchedule(facilitySchedule1, facilitySchedule2));
     }
 
     if (facilitySchedule1
         .isStartDateTimeEquals(facilitySchedule2.getEndDateTime().plusSeconds(1))) {
-      return createMergedSchedule(facilitySchedule2, facilitySchedule1);
+      return Optional.of(createMergedSchedule(facilitySchedule2, facilitySchedule1));
     }
 
-    return null;
+    return Optional.empty();
   }
 
   private static FacilitySchedule createMergedSchedule(FacilitySchedule startSchedule,

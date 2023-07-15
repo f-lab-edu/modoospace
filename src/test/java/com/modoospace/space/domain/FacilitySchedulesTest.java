@@ -160,6 +160,32 @@ class FacilitySchedulesTest {
     );
   }
 
+  @DisplayName("시설 스케줄을 추가한다. 하지만 범위가 연속적이므로 합쳐서 저장된다. (merge가 총 2번일어난다)")
+  @Test
+  public void addFacilitySchedule_Merge2() {
+    FacilitySchedule createFacilitySchedule = FacilitySchedule.builder()
+        .startDateTime(LocalDateTime.of(nowDate, LocalTime.of(20, 0, 0)))
+        .endDateTime(LocalDateTime.of(nowDate, LocalTime.of(21, 59, 59)))
+        .build();
+    facilitySchedules.addFacilitySchedule(createFacilitySchedule);
+    FacilitySchedule createFacilitySchedule2 = FacilitySchedule.builder()
+        .startDateTime(LocalDateTime.of(nowDate, LocalTime.of(23, 0, 0)))
+        .endDateTime(LocalDateTime.of(nowDate, LocalTime.of(23, 59, 59)))
+        .build();
+    facilitySchedules.addFacilitySchedule(createFacilitySchedule2);
+
+    FacilitySchedule createFacilitySchedule3 = FacilitySchedule.builder()
+        .startDateTime(LocalDateTime.of(nowDate, LocalTime.of(18, 0, 0)))
+        .endDateTime(LocalDateTime.of(nowDate, LocalTime.of(19, 59, 59)))
+        .build();
+    FacilitySchedule retSchedule = facilitySchedules.addFacilitySchedule(createFacilitySchedule3);
+
+    assertAll(
+        () -> retSchedule.isStartTimeEquals(LocalTime.of(0, 0, 0)),
+        () -> retSchedule.isEndTimeEquals(LocalTime.of(21, 59, 59))
+    );
+  }
+
   @DisplayName("시설 스케줄을 추가 시 기존 스케줄과 겹친다면 예외를 던진다.")
   @Test
   public void addFacilitySchedule_throwException_ifConflict() {

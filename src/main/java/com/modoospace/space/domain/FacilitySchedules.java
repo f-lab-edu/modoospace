@@ -135,9 +135,9 @@ public class FacilitySchedules {
     oneDayFacilitySchedules.add(createSchedule);
 
     // 4. 해당 날짜에서 시간범위가 연속적인 Schedule끼리 합쳐서 저장하기
-    FacilitySchedule mergedSchedule = mergeAndUpdateSchedules(oneDayFacilitySchedules);
+    Optional<FacilitySchedule> mergedSchedule = mergeAndUpdateSchedules(oneDayFacilitySchedules);
 
-    return mergedSchedule != null ? mergedSchedule : createSchedule;
+    return mergedSchedule.orElse(createSchedule);
   }
 
   public FacilitySchedule updateFacilitySchedule(FacilitySchedule updateSchedule,
@@ -155,9 +155,9 @@ public class FacilitySchedules {
     schedule.update(updateSchedule);
 
     // 4. 해당 날짜에서 시간범위가 연속적인 Schedule끼리 합쳐서 저장하기
-    FacilitySchedule mergedSchedule = mergeAndUpdateSchedules(oneDayFacilitySchedules);
+    Optional<FacilitySchedule> mergedSchedule = mergeAndUpdateSchedules(oneDayFacilitySchedules);
 
-    return mergedSchedule != null ? mergedSchedule : schedule;
+    return mergedSchedule.orElse(schedule);
   }
 
   public List<FacilitySchedule> isEqualsLocalDate(FacilitySchedule targetFacilitySchedule) {
@@ -183,36 +183,42 @@ public class FacilitySchedules {
     }
   }
 
-  private FacilitySchedule mergeAndUpdateSchedules(List<FacilitySchedule> facilitySchedules) {
-    facilitySchedules
-        .forEach(schedule -> this.facilitySchedules.remove(schedule));
-    FacilitySchedule mergedSchedule = mergeSchedules(facilitySchedules);
+  private Optional<FacilitySchedule> mergeAndUpdateSchedules(
+      List<FacilitySchedule> facilitySchedules) {
+    this.facilitySchedules.removeAll(facilitySchedules);
+    Optional<FacilitySchedule> mergedSchedule = mergeAllSchedules(facilitySchedules);
     this.facilitySchedules.addAll(facilitySchedules);
     return mergedSchedule;
   }
 
-  private FacilitySchedule mergeSchedules(List<FacilitySchedule> facilitySchedules) {
-    FacilitySchedule mergedSchedule = null;
-    boolean mergeOccurred = true;
-    while (mergeOccurred) {
-      mergeOccurred = false;
+  private Optional<FacilitySchedule> mergeAllSchedules(List<FacilitySchedule> facilitySchedules) {
+    Optional<FacilitySchedule> retMergedSchedule = Optional.empty();
+    while (true) {
       Collections.sort(facilitySchedules, Comparator.comparing(FacilitySchedule::getStartDateTime));
-      for (int i = 0; i < facilitySchedules.size() - 1; i++) {
-        FacilitySchedule facilitySchedule1 = facilitySchedules.get(i);
-        FacilitySchedule facilitySchedule2 = facilitySchedules.get(i + 1);
-        FacilitySchedule mergeFacilitySchedule = FacilitySchedule
-            .mergeFacilitySchedule(facilitySchedule1, facilitySchedule2);
-        if (mergeFacilitySchedule != null) {
-          facilitySchedules.remove(facilitySchedule1);
-          facilitySchedules.remove(facilitySchedule2);
-          facilitySchedules.add(mergeFacilitySchedule);
-          mergedSchedule = mergeFacilitySchedule;
-          mergeOccurred = true;
-          break;
-        }
+      Optional<FacilitySchedule> mergedSchedule = mergeSchedules(facilitySchedules);
+      if (mergedSchedule.isEmpty()) {
+        break;
+      }
+      retMergedSchedule = mergedSchedule;
+    }
+    return retMergedSchedule;
+  }
+
+  private Optional<FacilitySchedule> mergeSchedules(List<FacilitySchedule> facilitySchedules) {
+    for (int i = 0; i < facilitySchedules.size() - 1; i++) {
+      FacilitySchedule facilitySchedule1 = facilitySchedules.get(i);
+      FacilitySchedule facilitySchedule2 = facilitySchedules.get(i + 1);
+      Optional<FacilitySchedule> mergeFacilitySchedule = FacilitySchedule
+          .mergeFacilitySchedule(facilitySchedule1, facilitySchedule2);
+
+      if (mergeFacilitySchedule.isPresent()) {
+        facilitySchedules.removeAll(List.of(facilitySchedule1, facilitySchedule2));
+        facilitySchedules.add(mergeFacilitySchedule.get());
+        return mergeFacilitySchedule;
       }
     }
-    return mergedSchedule;
+
+    return Optional.empty();
   }
 
   @Override
