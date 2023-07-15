@@ -89,7 +89,7 @@ class FacilityServiceTest {
         .name("스터디룸1")
         .facilityType(FacilityType.ROOM)
         .description("1~4인실 입니다.")
-        .reservationEnable(true)
+        .reservationEnable(false)
         .build();
 
     Long facilityId = facilityService
@@ -101,11 +101,11 @@ class FacilityServiceTest {
         () -> assertThat(facility.getName()).isEqualTo("스터디룸1"),
         () -> assertThat(facility.getFacilityType()).isEqualTo(FacilityType.ROOM),
         () -> assertThat(facility.getDescription()).isEqualTo("1~4인실 입니다."),
-        () -> assertThat(facility.getReservationEnable()).isTrue(),
+        () -> assertThat(facility.getReservationEnable()).isFalse(),
         () -> assertThat(facility.isOpen(LocalDateTime.of(nowDate, LocalTime.of(0, 0, 0)),
-            LocalDateTime.of(nowDate, LocalTime.of(23, 59, 59)))),
+            LocalDateTime.of(nowDate, LocalTime.of(23, 59, 59)))).isTrue(),
         () -> assertThat(facility.isOpen(LocalDateTime.of(nowDate, LocalTime.of(0, 0, 0)),
-            LocalDateTime.of(nowDate.plusDays(2), LocalTime.of(23, 59, 59))))
+            LocalDateTime.of(nowDate.plusDays(2), LocalTime.of(23, 59, 59)))).isTrue()
     );
   }
 

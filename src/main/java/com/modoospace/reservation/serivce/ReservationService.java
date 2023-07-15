@@ -1,6 +1,5 @@
 package com.modoospace.reservation.serivce;
 
-import com.modoospace.exception.DuplicatedReservationException;
 import com.modoospace.exception.NotFoundEntityException;
 import com.modoospace.member.domain.Member;
 import com.modoospace.member.domain.MemberRepository;
@@ -11,8 +10,6 @@ import com.modoospace.reservation.domain.Reservation;
 import com.modoospace.reservation.domain.ReservationRepository;
 import com.modoospace.space.domain.Facility;
 import com.modoospace.space.domain.FacilityRepository;
-import com.modoospace.space.domain.FacilitySchedule;
-import java.time.LocalDateTime;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -27,37 +24,16 @@ public class ReservationService {
   private final MemberRepository memberRepository;
 
   @Transactional
-  public Reservation createReservation(ReservationCreateDto createDto, Long facilityId, String loginEmail) {
+  public Reservation createReservation(ReservationCreateDto createDto, Long facilityId,
+      String loginEmail) {
     Facility facility = findFacilityById(facilityId);
-    validateAvailability(createDto, facility);
+    //TODO : 시설이용이 가능한 상태인지 조회 필요
     Member visitor = findMemberByEmail(loginEmail);
+
     Reservation reservation = createDto.toEntity(facility, visitor);
     reservationRepository.save(reservation);
 
     return reservation;
-  }
-
-  private void validateAvailability(ReservationCreateDto createDto, Facility facility) {
-    facility.validateFacilityAvailability(createDto);
-    checkTimeOverlapWithFacilitySchedules(createDto, facility);
-  }
-
-  private void checkTimeOverlapWithFacilitySchedules(ReservationCreateDto createDto, Facility facility) {
-    LocalDateTime reservationStart = createDto.getReservationStart();
-    LocalDateTime reservationEnd = createDto.getReservationEnd();
-
-    List<ReservationReadDto> existingReservations = reservationRepository.findByFacilityId(facility.getId());
-    boolean isOverlap = existingReservations.stream()
-        .anyMatch(existingReservation ->
-            isTimeOverlap(reservationStart, reservationEnd, existingReservation.getReservationStart(), existingReservation.getReservationEnd()));
-
-    if (isOverlap) {
-      throw new DuplicatedReservationException("해당 시간에 중복된 예약이 있습니다.");
-    }
-  }
-
-  private boolean isTimeOverlap(LocalDateTime start1, LocalDateTime end1, LocalDateTime start2, LocalDateTime end2) {
-    return start1.isBefore(end2) && end1.isAfter(start2);
   }
 
   public ReservationReadDto findReservation(Long reservationId) {
@@ -104,7 +80,8 @@ public class ReservationService {
   }
 
   private Facility findFacilityById(Long facilityId) {
-    return facilityRepository.findById(facilityId)
+    Facility facility = facilityRepository.findById(facilityId)
         .orElseThrow(() -> new NotFoundEntityException("시설", facilityId));
+    return facility;
   }
 }
