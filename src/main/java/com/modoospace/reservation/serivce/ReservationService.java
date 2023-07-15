@@ -109,7 +109,6 @@ public class ReservationService {
     }
   }
 
-  @Transactional
   public void cancelReservation(Long reservationId, String loginEmail) {
     Member loginMember = findMemberByEmail(loginEmail);
     Reservation reservation = findReservationById(reservationId);
