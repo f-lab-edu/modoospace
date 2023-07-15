@@ -24,7 +24,8 @@ public class VisitorsReservationController {
   private final ReservationService reservationService;
 
   @GetMapping
-  public ResponseEntity<List<ReservationReadDto>> findAll(@LoginEmail final String loginEmail) {
+  public ResponseEntity<List<ReservationReadDto>> findAll(
+      @LoginEmail final String loginEmail) {
 
     List<ReservationReadDto> reservationList = reservationService.findAll(loginEmail);
     return ResponseEntity.ok().body(reservationList);
@@ -39,8 +40,8 @@ public class VisitorsReservationController {
   }
 
   @GetMapping("/{reservationId}")
-  public ResponseEntity<ReservationReadDto> find(@PathVariable Long reservationId,@LoginEmail final String loginEmail){
-    ReservationReadDto reservationReadDto = reservationService.findReservation(reservationId, loginEmail);
+  public ResponseEntity<ReservationReadDto> find(@PathVariable Long reservationId){
+    ReservationReadDto reservationReadDto = reservationService.findReservation(reservationId);
     return ResponseEntity.ok().body(reservationReadDto);
   }
 

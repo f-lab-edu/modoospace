@@ -74,7 +74,7 @@ public class FacilitySchedules {
 
     // 중간 스케줄 24시간 여부 체크
     if (!IntStream.range(1, facilitySchedules.size() - 1)
-        .mapToObj(facilitySchedules::get)
+        .mapToObj(i -> facilitySchedules.get(i))
         .allMatch(FacilitySchedule::is24TimeRange)) {
       return false;
     }

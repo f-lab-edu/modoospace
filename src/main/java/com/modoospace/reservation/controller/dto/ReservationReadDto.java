@@ -1,11 +1,11 @@
 package com.modoospace.reservation.controller.dto;
 
-import com.modoospace.member.controller.dto.MemberReadDto;
+import com.modoospace.member.domain.Member;
 import com.modoospace.reservation.domain.Reservation;
 import com.modoospace.reservation.domain.ReservationStatus;
-import com.modoospace.space.controller.dto.facility.FacilityReadDto;
 import com.modoospace.space.domain.Facility;
 import java.time.LocalDateTime;
+import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.NotNull;
 import lombok.Builder;
@@ -19,40 +19,40 @@ public class ReservationReadDto {
   @NotNull
   private Long id;
 
-  @NotNull
+  @NotBlank
   private LocalDateTime reservationStart;
 
-  @NotNull
+  @NotBlank
   private LocalDateTime reservationEnd;
 
   @NotEmpty
   private ReservationStatus status;
 
   @NotEmpty
-  private FacilityReadDto facility;
+  private Facility facility;
 
   @NotEmpty
-  private MemberReadDto member;
+  private Member visitor;
 
   @Builder
   public ReservationReadDto(Long id, LocalDateTime reservationStart, LocalDateTime reservationEnd,
-      ReservationStatus status, FacilityReadDto facility, MemberReadDto member) {
+      ReservationStatus status, Facility facility, Member visitor) {
     this.id = id;
     this.reservationStart = reservationStart;
     this.reservationEnd = reservationEnd;
     this.status = status;
     this.facility = facility;
-    this.member = member;
+    this.visitor = visitor;
   }
 
   public static ReservationReadDto toDto(Reservation reservation){
     return ReservationReadDto.builder()
         .id(reservation.getId())
-        .facility(FacilityReadDto.toDto(reservation.getFacility()))
+        .facility(reservation.getFacility())
         .reservationStart(reservation.getReservationStart())
         .reservationEnd(reservation.getReservationEnd())
         .status(reservation.getStatus())
-        .member(MemberReadDto.toDto(reservation.getVisitor()))
+        .visitor(reservation.getVisitor())
         .build();
   }
 }

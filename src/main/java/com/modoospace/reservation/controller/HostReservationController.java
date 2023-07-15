@@ -25,7 +25,7 @@ public class HostReservationController {
 
   @GetMapping
   public ResponseEntity<List<ReservationReadDto>> findAll(@LoginEmail final String loginEmail) {
-    List<ReservationReadDto> reservationList = reservationService.findAllAsHost(loginEmail);
+    List<ReservationReadDto> reservationList = reservationService.findAll(loginEmail);
     return ResponseEntity.ok().body(reservationList);
   }
 
@@ -46,8 +46,8 @@ public class HostReservationController {
   }
 
   @GetMapping("/{reservationId}")
-  public ResponseEntity<ReservationReadDto> find(@PathVariable Long reservationId, @LoginEmail String loginEmail){
-    ReservationReadDto reservationReadDto = reservationService.findReservation(reservationId, loginEmail);
+  public ResponseEntity<ReservationReadDto> find(@PathVariable Long reservationId){
+    ReservationReadDto reservationReadDto = reservationService.findReservation(reservationId);
     return ResponseEntity.ok().body(reservationReadDto);
   }
 }
