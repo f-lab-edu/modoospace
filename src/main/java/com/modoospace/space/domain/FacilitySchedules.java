@@ -74,7 +74,7 @@ public class FacilitySchedules {
 
     // 중간 스케줄 24시간 여부 체크
     if (!IntStream.range(1, facilitySchedules.size() - 1)
-        .mapToObj(i -> facilitySchedules.get(i))
+        .mapToObj(facilitySchedules::get)
         .allMatch(FacilitySchedule::is24TimeRange)) {
       return false;
     }
@@ -84,12 +84,8 @@ public class FacilitySchedules {
     LocalDateTime endDateStartTime = LocalDateTime
         .of(endDateTime.getYear(), endDateTime.getMonthValue(), endDateTime.getDayOfMonth(),
             0, 0, 0);
-    if (!endDaySchedule.isStartTimeBeforeOrEquals(endDateStartTime) || !endDaySchedule
-        .isEndTimeAfterOrEquals(endDateTime)) {
-      return false;
-    }
-
-    return true;
+    return endDaySchedule.isStartTimeBeforeOrEquals(endDateStartTime) && endDaySchedule
+        .isEndTimeAfterOrEquals(endDateTime);
   }
 
   public void update(FacilitySchedules facilitySchedules, Facility facility) {
