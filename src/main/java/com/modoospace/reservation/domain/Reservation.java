@@ -7,6 +7,7 @@ import com.modoospace.member.domain.Role;
 import com.modoospace.space.domain.Facility;
 import com.modoospace.space.domain.FacilityType;
 import java.time.LocalDateTime;
+import java.util.Objects;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.EnumType;
@@ -20,6 +21,7 @@ import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import org.springframework.transaction.annotation.Transactional;
 
 @Entity
 @Getter
@@ -81,15 +83,15 @@ public class Reservation extends BaseTimeEntity {
     loginMember.verifyRolePermission(Role.ADMIN);
   }
 
+  @Transactional
   public void updateStatusToCanceled(Member loginMember) {
     verifySameVisitor(loginMember);
     this.status = ReservationStatus.CANCELED;
   }
 
   public void verifySameVisitor(Member loginMember) {
-    if (visitor.equals(loginMember)) {
-      return;
+    if (!Objects.equals(visitor.getEmail(), loginMember.getEmail())) {
+      throw new PermissionDeniedException();
     }
-    throw new PermissionDeniedException();
   }
 }

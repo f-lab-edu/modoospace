@@ -3,7 +3,7 @@ package com.modoospace.space.domain;
 import static javax.persistence.FetchType.LAZY;
 
 import com.modoospace.common.BaseTimeEntity;
-import com.modoospace.exception.DuplicatedReservationException;
+import com.modoospace.exception.InvalidTimeRangeException;
 import com.modoospace.member.domain.Member;
 import com.modoospace.reservation.controller.dto.ReservationCreateDto;
 import java.time.LocalDateTime;
@@ -114,14 +114,14 @@ public class Facility extends BaseTimeEntity {
   }
 
   public void validateFacilityAvailability(ReservationCreateDto createDto){
-    LocalDateTime reservationStart = createDto.getReservationStart();
-    LocalDateTime reservationEnd = createDto.getReservationEnd();
+    LocalDateTime requestStartTime = createDto.getReservationStart();
+    LocalDateTime requestEndTime = createDto.getReservationEnd();
 
-    boolean isFacilityOpen = this.isOpen(reservationStart,reservationEnd);
+    boolean isFacilityOpen = this.isOpen(requestStartTime,requestEndTime);
     boolean isReservationEnabled = this.getReservationEnable();
 
     if (!isReservationEnabled || !isFacilityOpen) {
-      throw new DuplicatedReservationException("해당 시간은 이용이 불가능한 시간입니다.");
+      throw new InvalidTimeRangeException("해당 시간은 이용이 불가능한 시간입니다.");
     }
   }
 

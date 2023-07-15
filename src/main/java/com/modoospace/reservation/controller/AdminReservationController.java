@@ -39,8 +39,8 @@ public class AdminReservationController {
   }
 
   @GetMapping("/{reservationId}")
-  public ResponseEntity<ReservationReadDto> find(@PathVariable Long reservationId){
-    ReservationReadDto reservationReadDto = reservationService.findReservation(reservationId);
+  public ResponseEntity<ReservationReadDto> find(@PathVariable Long reservationId, @LoginEmail final String loginEmail){
+    ReservationReadDto reservationReadDto = reservationService.findReservation(reservationId, loginEmail);
     return ResponseEntity.ok().body(reservationReadDto);
   }
 }

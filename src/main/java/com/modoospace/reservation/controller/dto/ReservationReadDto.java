@@ -1,11 +1,11 @@
 package com.modoospace.reservation.controller.dto;
 
-import com.modoospace.member.domain.Member;
+import com.modoospace.member.controller.dto.MemberReadDto;
 import com.modoospace.reservation.domain.Reservation;
 import com.modoospace.reservation.domain.ReservationStatus;
+import com.modoospace.space.controller.dto.facility.FacilityReadDto;
 import com.modoospace.space.domain.Facility;
 import java.time.LocalDateTime;
-import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.NotNull;
 import lombok.Builder;
@@ -19,40 +19,40 @@ public class ReservationReadDto {
   @NotNull
   private Long id;
 
-  @NotBlank
+  @NotNull
   private LocalDateTime reservationStart;
 
-  @NotBlank
+  @NotNull
   private LocalDateTime reservationEnd;
 
   @NotEmpty
   private ReservationStatus status;
 
   @NotEmpty
-  private Facility facility;
+  private FacilityReadDto facility;
 
   @NotEmpty
-  private Member visitor;
+  private MemberReadDto member;
 
   @Builder
   public ReservationReadDto(Long id, LocalDateTime reservationStart, LocalDateTime reservationEnd,
-      ReservationStatus status, Facility facility, Member visitor) {
+      ReservationStatus status, FacilityReadDto facility, MemberReadDto member) {
     this.id = id;
     this.reservationStart = reservationStart;
     this.reservationEnd = reservationEnd;
     this.status = status;
     this.facility = facility;
-    this.visitor = visitor;
+    this.member = member;
   }
 
   public static ReservationReadDto toDto(Reservation reservation){
     return ReservationReadDto.builder()
         .id(reservation.getId())
-        .facility(reservation.getFacility())
+        .facility(FacilityReadDto.toDto(reservation.getFacility()))
         .reservationStart(reservation.getReservationStart())
         .reservationEnd(reservation.getReservationEnd())
         .status(reservation.getStatus())
-        .visitor(reservation.getVisitor())
+        .member(MemberReadDto.toDto(reservation.getVisitor()))
         .build();
   }
 }
