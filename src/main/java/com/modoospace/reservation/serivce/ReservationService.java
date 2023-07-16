@@ -102,18 +102,37 @@ public class ReservationService {
         .collect(Collectors.toList());
   }
 
-  public List<LocalTime> getAvailableTimes(LocalDate requestDate,
-      List<FacilityScheduleReadDto> facilitySchedules) {
+  public List<LocalTime> getAvailableTimes(LocalDate requestDate, List<FacilityScheduleReadDto> facilitySchedules) {
     return facilitySchedules.stream()
-        .filter(schedule -> schedule.getStartDateTime().toLocalDate().equals(requestDate))
-        .flatMap(schedule -> {
-          LocalTime startTime = schedule.getStartDateTime().toLocalTime();
-          LocalTime endTime = schedule.getEndDateTime().toLocalTime();
-          return IntStream.range(startTime.getHour(), endTime.getHour() + 1)
-              .mapToObj(hour -> LocalTime.of(hour, 0));
-        })
+        .filter(schedule -> isMatchingDate(schedule, requestDate))
+        .flatMap(this::createHourlyTimeRange)
         .distinct()
         .collect(Collectors.toList());
+  }
+
+  private boolean isMatchingDate(FacilityScheduleReadDto schedule, LocalDate requestDate) {
+    LocalDateTime startDateTime = schedule.getStartDateTime();
+    return startDateTime.toLocalDate().equals(requestDate);
+  }
+
+  /**
+   * 주어진 schedule 기반으로 시간대 범위를 생성하는 메소드입니다.
+   *
+   * @param schedule 시간대 범위를 생성할 FacilityScheduleReadDto
+   * @return 시간대 범위
+   */
+  private Stream<LocalTime> createHourlyTimeRange(FacilityScheduleReadDto schedule) {
+    LocalDateTime startDateTime = schedule.getStartDateTime();
+    LocalDateTime endDateTime = schedule.getEndDateTime();
+
+    LocalTime startTime = startDateTime.toLocalTime();
+    LocalTime endTime = endDateTime.toLocalTime();
+
+    int startHour = startTime.getHour();
+    int endHour = endTime.getHour();
+
+    return IntStream.rangeClosed(startHour, endHour)
+        .mapToObj(hour -> LocalTime.of(hour, 0));
   }
 
   private void validateAvailability(ReservationCreateDto createDto, Facility facility) {

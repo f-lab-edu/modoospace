@@ -22,7 +22,6 @@ import com.modoospace.space.controller.dto.facilitySchedule.FacilityScheduleRead
 import com.modoospace.space.domain.Facility;
 import com.modoospace.space.domain.FacilityRepository;
 import com.modoospace.space.sevice.FacilityService;
-import java.time.Duration;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
@@ -115,10 +114,17 @@ public class ReservationServiceTest {
     // 결과
     AvailabilityTimeRequestDto requestDto = new AvailabilityTimeRequestDto(facilityId, requestDate);
     AvailabilityTimeResponseDto response = reservationService.getAvailabilityTime(facilityId,requestDto);
-    availableTimesWithoutReservation.forEach(time -> log.info("{}", time));
+
     // 결과 검증
     assertThat(response.getId()).isEqualTo(expectedResponse.getId());
     assertThat(expectedResponse.getAvailableTimes()).isEqualTo(response.getAvailableTimes());
+
+    // 결과 출력
+    log.info("==== 예약 가능한 시설 및 날짜 ====");
+    log.info("시설: {}", facility.getName());
+    log.info("날짜: {}", requestDate);
+    log.info("==== 예약 가능한 시간 (예약된 시간 제외) ====");
+    availableTimesWithoutReservation.forEach(time -> log.info("{}", time));
   }
 
   @DisplayName("특정 예약일에 예약상태가 완료, 대기중인 예약을 조회합니다.")
@@ -142,9 +148,9 @@ public class ReservationServiceTest {
     activeReservations.forEach(id -> log.info("{}", id));
   }
 
-  @DisplayName("선택한 시설, 날짜에 예약가능시간을 조회할 수 있다.")
+  @DisplayName("특정 날짜의 예약가능시간을 조회할 수 있다.")
   @Test
-  public void checkAvailableTimes() {
+  public void getAvailableTimes() {
     // 시설 선택
     Long facilityId = 2L;
     FacilityReadDetailDto facility = facilityService.findFacility(facilityId);
@@ -155,43 +161,32 @@ public class ReservationServiceTest {
 
     // 예약 가능한 시간들
     List<LocalTime> availableTimes = schedules.stream()
-        .filter(schedule -> schedule.getStartDateTime().toLocalDate().equals(requestDate))
-        .flatMap(schedule -> {
-          LocalTime startTime = schedule.getStartDateTime().toLocalTime();
-          LocalTime endTime = schedule.getEndDateTime().toLocalTime();
-          return IntStream.range(startTime.getHour(), endTime.getHour() + 1)
-              .mapToObj(hour -> LocalTime.of(hour, 0));
-        })
+        .filter(schedule -> isMatchingDate(schedule, requestDate))
+        .flatMap(this::createHourlyTimeRange)
         .distinct()
         .collect(Collectors.toList());
 
-    // 이미 예약된 시간
-    List<LocalTime> reservedTimes = reservationRepository.findAll().stream()
-        .filter(reservation ->
-            (ReservationStatus.COMPLETED.equals(reservation.getStatus()) ||
-                ReservationStatus.WAITING.equals(reservation.getStatus())) &&
-                reservation.getFacility().getId().equals(facilityId) &&
-                reservation.getReservationStart().toLocalDate().equals(requestDate))
-        .flatMap(reservation -> {
-          LocalTime startTime = reservation.getReservationStart().toLocalTime();
-          LocalTime endTime = reservation.getReservationEnd().toLocalTime();
-          return Stream.iterate(startTime, time -> time.plusHours(1))
-              .limit(Duration.between(startTime, endTime).toHours() + 1);
-        })
-        .distinct()
-        .collect(Collectors.toList());
+    Assertions.assertThat(availableTimes).isNotEmpty();
+    availableTimes.forEach(time -> log.info("{}", time));
+  }
 
-    // 예약 가능한 시간 (예약된 시간 제외)
-    List<LocalTime> finalAvailableTimes = availableTimes.stream()
-        .filter(time -> !reservedTimes.contains(time))
-        .collect(Collectors.toList());
+  private Stream<LocalTime> createHourlyTimeRange(FacilityScheduleReadDto schedule) {
+    LocalDateTime startDateTime = schedule.getStartDateTime();
+    LocalDateTime endDateTime = schedule.getEndDateTime();
 
-    // 결과 출력
-    log.info("==== 예약 가능한 시설 및 날짜 ====");
-    log.info("시설: {}", facility.getName());
-    log.info("날짜: {}", requestDate);
-    log.info("==== 예약 가능한 시간 (예약된 시간 제외) ====");
-    finalAvailableTimes.forEach(time -> log.info("{}", time));
+    LocalTime startTime = startDateTime.toLocalTime();
+    LocalTime endTime = endDateTime.toLocalTime();
+
+    int startHour = startTime.getHour();
+    int endHour = endTime.getHour();
+
+    return IntStream.rangeClosed(startHour, endHour)
+        .mapToObj(hour -> LocalTime.of(hour, 0));
+  }
+
+  private boolean isMatchingDate(FacilityScheduleReadDto schedule, LocalDate requestDate) {
+    LocalDateTime startDateTime = schedule.getStartDateTime();
+    return startDateTime.toLocalDate().equals(requestDate);
   }
 
 
