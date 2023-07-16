@@ -90,7 +90,8 @@ public class ReservationService {
     LocalDateTime startDateTime = requestDate.atStartOfDay();
     LocalDateTime endDateTime = requestDate.atTime(LocalTime.MAX);
     List<ReservationStatus> activeStatuses = ReservationStatus.getActiveStatuses();
-    return reservationRepository.findByReservationStartBetweenAndStatusInAndFacility_Id(startDateTime,endDateTime,activeStatuses, facilityId);
+    return reservationRepository.findByReservationStartBetweenAndStatusInAndFacility_Id(
+        startDateTime,endDateTime,activeStatuses, facilityId);
   }
 
   private List<LocalTime> getReservationTimes(Reservation reservation) {
