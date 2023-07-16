@@ -21,7 +21,9 @@ public class SecurityConfiguration {
         .and()
         .authorizeHttpRequests(request -> request
                 .antMatchers(HttpMethod.GET, "/", "/error", "/api/v1/spaces/**",
-                    "/api/v1/spaces/*/facilities/**").permitAll()
+                    "/api/v1/facilities/**", "/api/v1/spaces/*/facilities/**",
+                    "/api/v1/facilities/*/schedules/**", "/api/v1/facilities/*/schedules/*")
+                .permitAll()
 //            .antMatchers(HttpMethod.POST, "/api/v1/space").hasRole(Role.HOST.name())
                 .antMatchers("/api/v1/admin/**").hasRole(Role.ADMIN.name())
                 .anyRequest().authenticated()

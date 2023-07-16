@@ -3,7 +3,6 @@ package com.modoospace.space.sevice;
 import com.modoospace.exception.NotFoundEntityException;
 import com.modoospace.member.domain.Member;
 import com.modoospace.member.domain.MemberRepository;
-import com.modoospace.space.controller.dto.FacilitySchedulesUpdateDto;
 import com.modoospace.space.controller.dto.facility.FacilityCreateDto;
 import com.modoospace.space.controller.dto.facility.FacilityReadDetailDto;
 import com.modoospace.space.controller.dto.facility.FacilityUpdateDto;
@@ -60,23 +59,6 @@ public class FacilityService {
 
     facility.verifyManagementPermission(loginMember);
     facilityRepository.delete(facility);
-  }
-
-  /**
-   * 임시 메서드 (제거 예정)
-   *
-   * @param facilityId
-   * @param updateDto
-   * @param loginEmail
-   */
-  @Transactional
-  public void updateFacilitySchedules(Long facilityId, FacilitySchedulesUpdateDto updateDto,
-      String loginEmail) {
-    Member loginMember = findMemberByEmail(loginEmail);
-    Facility facility = findFacilityById(facilityId);
-    Facility updatedFacility = updateDto.toEntity();
-
-    facility.updateSchedules(updatedFacility, loginMember);
   }
 
   private Member findMemberByEmail(String email) {
