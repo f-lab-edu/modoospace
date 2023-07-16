@@ -127,7 +127,7 @@ public class ReservationServiceTest {
     availableTimesWithoutReservation.forEach(time -> log.info("{}", time));
   }
 
-  @DisplayName("특정 예약일에 예약상태가 완료, 대기중인 예약을 조회합니다.")
+  @DisplayName("특정 예약일에 예약상태가 완료, 대기중인 예약을 조회할 수 있다.")
   @Test
   public void findActiveReservations() {
     // Given
@@ -144,7 +144,12 @@ public class ReservationServiceTest {
         activeStatuses,
         facilityId
     );
+
     Assertions.assertThat(activeReservations).isNotEmpty();
+    activeReservations.forEach(reservation -> {
+      ReservationStatus status = reservation.getStatus();
+      Assertions.assertThat(status).isIn(ReservationStatus.COMPLETED, ReservationStatus.WAITING);
+    });
     activeReservations.forEach(id -> log.info("{}", id));
   }
 
