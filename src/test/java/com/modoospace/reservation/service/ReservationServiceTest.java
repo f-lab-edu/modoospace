@@ -18,6 +18,7 @@ import com.modoospace.reservation.domain.ReservationStatus;
 import com.modoospace.reservation.repository.ReservationQueryRepository;
 import com.modoospace.reservation.serivce.ReservationService;
 import com.modoospace.space.controller.dto.facility.FacilityReadDetailDto;
+import com.modoospace.space.controller.dto.facility.FacilityReadDto;
 import com.modoospace.space.controller.dto.facilitySchedule.FacilityScheduleReadDto;
 import com.modoospace.space.domain.Facility;
 import com.modoospace.space.domain.FacilityRepository;
@@ -95,6 +96,7 @@ public class ReservationServiceTest {
     Long facilityId = 2L;
     LocalDate requestDate = LocalDate.of(2023, 7, 2);
     FacilityReadDetailDto facility = facilityService.findFacility(facilityId);
+    FacilityReadDto facilityReadDto = FacilityReadDto.toDto(facility(facilityId));
 
     //시설의 미래 3개월치 스케줄 조회
     List<FacilityScheduleReadDto> facilitySchedules = facility.getFacilitySchedules();
@@ -109,14 +111,14 @@ public class ReservationServiceTest {
     List<LocalTime> availableTimesWithoutReservation = availableTimes.stream()
         .filter(time -> !reservedTimes.contains(time))
         .collect(Collectors.toList());
-    AvailabilityTimeResponseDto expectedResponse = new AvailabilityTimeResponseDto(facilityId, availableTimesWithoutReservation);
+    AvailabilityTimeResponseDto expectedResponse = new AvailabilityTimeResponseDto(facilityReadDto, availableTimesWithoutReservation);
 
     // 결과
     AvailabilityTimeRequestDto requestDto = new AvailabilityTimeRequestDto(facilityId, requestDate);
     AvailabilityTimeResponseDto response = reservationService.getAvailabilityTime(facilityId,requestDto);
 
     // 결과 검증
-    assertThat(response.getId()).isEqualTo(expectedResponse.getId());
+    assertThat(response.getFacility().getId()).isEqualTo(expectedResponse.getFacility().getId());
     assertThat(expectedResponse.getAvailableTimes()).isEqualTo(response.getAvailableTimes());
 
     // 결과 출력
@@ -279,5 +281,11 @@ public class ReservationServiceTest {
     Optional<Member> memberOptional = memberRepository.findByEmail("yh.kim@jr.naver.com");
     return memberOptional.orElseThrow(
         () -> new NotFoundEntityException("사용자", "yh.kim@jr.naver.com"));
+  }
+
+  private Facility facility(Long facilityId) {
+    Optional<Facility> facilityOptional = facilityRepository.findById(facilityId);
+    return facilityOptional.orElseThrow(
+        () -> new NotFoundEntityException("시설"));
   }
 }

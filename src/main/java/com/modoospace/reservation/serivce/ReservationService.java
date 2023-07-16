@@ -15,6 +15,7 @@ import com.modoospace.reservation.domain.ReservationRepository;
 import com.modoospace.reservation.domain.ReservationStatus;
 import com.modoospace.reservation.repository.ReservationQueryRepository;
 import com.modoospace.space.controller.dto.facility.FacilityReadDetailDto;
+import com.modoospace.space.controller.dto.facility.FacilityReadDto;
 import com.modoospace.space.controller.dto.facilitySchedule.FacilityScheduleReadDto;
 import com.modoospace.space.domain.Facility;
 import com.modoospace.space.domain.FacilityRepository;
@@ -55,24 +56,25 @@ public class ReservationService {
 
   public AvailabilityTimeResponseDto getAvailabilityTime(Long facilityId, AvailabilityTimeRequestDto requestDto) {
     LocalDate requestDate = requestDto.getRequestDate();
-    FacilityReadDetailDto facility = facilityService.findFacility(facilityId);
 
     //시설의 스케줄 조회
+    FacilityReadDetailDto facility = facilityService.findFacility(facilityId);
     List<FacilityScheduleReadDto> facilitySchedules = facility.getFacilitySchedules();
 
-    // 요청된 날짜에 대한 가능한 시간 가져오기
+    //예약가능한 시간 가져오기
     List<LocalTime> availableTimes = getAvailableTimes(requestDate, facilitySchedules);
 
-    // 요청된 날짜에 대한 예약된 시간 가져오기
-    List<LocalTime> reservedTimes = getReservedTimes(requestDate,facilityId);
+    //예악된 시간 가져오기
+    List<LocalTime> reservedTimes = getReservedTimes(requestDate, facilityId);
 
-    // 예약된 시간을 제외한 가능한 시간 필터링
+    //이미 예약된 시간을 제외한 예약 가능한 시간 필터링
     List<LocalTime> availableTimesWithoutReservation = availableTimes.stream()
         .filter(time -> !reservedTimes.contains(time))
         .collect(Collectors.toList());
 
-    // 가능한 시간 응답 DTO 생성 및 반환
-    return AvailabilityTimeResponseDto.from(facilityId, availableTimesWithoutReservation);
+    FacilityReadDto facilityReadDto = FacilityReadDto.toDto(findFacilityById(facilityId));
+
+    return AvailabilityTimeResponseDto.from(facilityReadDto, availableTimesWithoutReservation);
   }
 
   public List<LocalTime> getReservedTimes(LocalDate requestDate, Long facilityId) {
