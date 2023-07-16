@@ -103,7 +103,7 @@ public class ReservationServiceTest {
     List<LocalTime> availableTimes = reservationService.getAvailableTimes(requestDate, facilitySchedules);
 
     // 요청된 날짜에 대한 예약된 시간 가져오기
-    List<LocalTime> reservedTimes = reservationService.getReservedTimes(requestDate);
+    List<LocalTime> reservedTimes = reservationService.getReservedTimes(requestDate,facilityId);
 
     // 예약된 시간을 제외한 가능한 시간 필터링
     List<LocalTime> availableTimesWithoutReservation = availableTimes.stream()
@@ -124,7 +124,8 @@ public class ReservationServiceTest {
   @Test
   public void checkAvailableTimes() {
     // 시설 선택
-    FacilityReadDetailDto facility = facilityService.findFacility(2L);
+    Long facilityId = 2L;
+    FacilityReadDetailDto facility = facilityService.findFacility(facilityId);
     List<FacilityScheduleReadDto> schedules = facility.getFacilitySchedules();
 
     // 유저가 조회한 날짜
@@ -144,7 +145,11 @@ public class ReservationServiceTest {
 
     // 이미 예약된 시간
     List<LocalTime> reservedTimes = reservationRepository.findAll().stream()
-        .filter(reservation -> reservation.getReservationStart().toLocalDate().equals(requestDate))
+        .filter(reservation ->
+            (ReservationStatus.COMPLETED.equals(reservation.getStatus()) ||
+                ReservationStatus.WAITING.equals(reservation.getStatus())) &&
+                reservation.getFacility().getId().equals(facilityId) &&
+                reservation.getReservationStart().toLocalDate().equals(requestDate))
         .flatMap(reservation -> {
           LocalTime startTime = reservation.getReservationStart().toLocalTime();
           LocalTime endTime = reservation.getReservationEnd().toLocalTime();

@@ -12,6 +12,7 @@ import com.modoospace.reservation.controller.dto.ReservationReadDto;
 import com.modoospace.reservation.controller.dto.ReservationUpdateDto;
 import com.modoospace.reservation.domain.Reservation;
 import com.modoospace.reservation.domain.ReservationRepository;
+import com.modoospace.reservation.domain.ReservationStatus;
 import com.modoospace.reservation.repository.ReservationQueryRepository;
 import com.modoospace.space.controller.dto.facility.FacilityReadDetailDto;
 import com.modoospace.space.controller.dto.facilitySchedule.FacilityScheduleReadDto;
@@ -63,7 +64,7 @@ public class ReservationService {
     List<LocalTime> availableTimes = getAvailableTimes(requestDate, facilitySchedules);
 
     // 요청된 날짜에 대한 예약된 시간 가져오기
-    List<LocalTime> reservedTimes = getReservedTimes(requestDate);
+    List<LocalTime> reservedTimes = getReservedTimes(requestDate,facilityId);
 
     // 예약된 시간을 제외한 가능한 시간 필터링
     List<LocalTime> availableTimesWithoutReservation = availableTimes.stream()
@@ -74,9 +75,13 @@ public class ReservationService {
     return AvailabilityTimeResponseDto.from(facilityId, availableTimesWithoutReservation);
   }
 
-  public List<LocalTime> getReservedTimes(LocalDate requestDate) {
+  public List<LocalTime> getReservedTimes(LocalDate requestDate, Long facilityId) {
     return reservationRepository.findAll().stream()
-        .filter(reservation -> reservation.getReservationStart().toLocalDate().equals(requestDate))
+        .filter(reservation ->
+            (ReservationStatus.COMPLETED.equals(reservation.getStatus()) ||
+                ReservationStatus.WAITING.equals(reservation.getStatus())) &&
+                reservation.getFacility().getId().equals(facilityId) &&
+                reservation.getReservationStart().toLocalDate().equals(requestDate))
         .flatMap(reservation -> {
           LocalTime startTime = reservation.getReservationStart().toLocalTime();
           LocalTime endTime = reservation.getReservationEnd().toLocalTime();
