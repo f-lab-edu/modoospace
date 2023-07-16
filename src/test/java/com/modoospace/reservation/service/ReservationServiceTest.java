@@ -32,6 +32,7 @@ import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
 import lombok.extern.slf4j.Slf4j;
+import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -96,7 +97,7 @@ public class ReservationServiceTest {
     LocalDate requestDate = LocalDate.of(2023, 7, 2);
     FacilityReadDetailDto facility = facilityService.findFacility(facilityId);
 
-    //시설의 스케줄 조회
+    //시설의 미래 3개월치 스케줄 조회
     List<FacilityScheduleReadDto> facilitySchedules = facility.getFacilitySchedules();
 
     // 요청된 날짜에 대한 가능한 시간 가져오기
@@ -114,10 +115,31 @@ public class ReservationServiceTest {
     // 결과
     AvailabilityTimeRequestDto requestDto = new AvailabilityTimeRequestDto(facilityId, requestDate);
     AvailabilityTimeResponseDto response = reservationService.getAvailabilityTime(facilityId,requestDto);
-
+    availableTimesWithoutReservation.forEach(time -> log.info("{}", time));
     // 결과 검증
     assertThat(response.getId()).isEqualTo(expectedResponse.getId());
     assertThat(expectedResponse.getAvailableTimes()).isEqualTo(response.getAvailableTimes());
+  }
+
+  @DisplayName("특정 예약일에 예약상태가 완료, 대기중인 예약을 조회합니다.")
+  @Test
+  public void findActiveReservations() {
+    // Given
+    Long facilityId = 2L;
+    LocalDate requestDate = LocalDate.of(2023, 7, 2);
+    LocalDateTime startDateTime = requestDate.atStartOfDay();
+    LocalDateTime endDateTime = requestDate.atTime(LocalTime.MAX);
+    List<ReservationStatus> activeStatuses = ReservationStatus.getActiveStatuses();
+
+    // When
+    List<Reservation> activeReservations = reservationRepository.findByReservationStartBetweenAndStatusInAndFacility_Id(
+        startDateTime,
+        endDateTime,
+        activeStatuses,
+        facilityId
+    );
+    Assertions.assertThat(activeReservations).isNotEmpty();
+    activeReservations.forEach(id -> log.info("{}", id));
   }
 
   @DisplayName("선택한 시설, 날짜에 예약가능시간을 조회할 수 있다.")

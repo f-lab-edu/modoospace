@@ -34,7 +34,7 @@ public class VisitorsReservationController {
 
   @GetMapping("facilities/{facilityId}/availability")
   public ResponseEntity<AvailabilityTimeResponseDto> getAvailabilityTime(@PathVariable Long facilityId,
-      @RequestBody AvailabilityTimeRequestDto requestDto) {
+      @RequestBody @Valid AvailabilityTimeRequestDto requestDto) {
     AvailabilityTimeResponseDto availableTimes = reservationService.getAvailabilityTime(facilityId,
         requestDto);
     return ResponseEntity.ok().body(availableTimes);
@@ -56,8 +56,7 @@ public class VisitorsReservationController {
   }
 
   @PostMapping("/{reservationId}/cancel")
-  public ResponseEntity<Void> cancelReservation(@PathVariable Long reservationId,
-      @LoginEmail String loginEmail) {
+  public ResponseEntity<Void> cancelReservation(@PathVariable Long reservationId, @LoginEmail String loginEmail) {
     reservationService.cancelReservation(reservationId, loginEmail);
     return ResponseEntity.ok().build();
   }

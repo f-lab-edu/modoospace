@@ -76,19 +76,29 @@ public class ReservationService {
   }
 
   public List<LocalTime> getReservedTimes(LocalDate requestDate, Long facilityId) {
-    return reservationRepository.findAll().stream()
-        .filter(reservation ->
-            (ReservationStatus.COMPLETED.equals(reservation.getStatus()) ||
-                ReservationStatus.WAITING.equals(reservation.getStatus())) &&
-                reservation.getFacility().getId().equals(facilityId) &&
-                reservation.getReservationStart().toLocalDate().equals(requestDate))
-        .flatMap(reservation -> {
-          LocalTime startTime = reservation.getReservationStart().toLocalTime();
-          LocalTime endTime = reservation.getReservationEnd().toLocalTime();
-          return Stream.iterate(startTime, time -> time.plusHours(1))
-              .limit(Duration.between(startTime, endTime).toHours() + 1);
-        })
-        .distinct()
+    //시설의 요청 날짜로 기존 예약리스트 조회
+    List<Reservation> activeReservations = findActiveReservations(requestDate, facilityId);
+
+    return activeReservations.stream()
+        .flatMap(reservation -> getReservationTimes(reservation).stream())
+        .collect(Collectors.toList());
+  }
+
+  private List<Reservation> findActiveReservations(LocalDate requestDate, Long facilityId) {
+    LocalDateTime startDateTime = requestDate.atStartOfDay();
+    LocalDateTime endDateTime = requestDate.atTime(LocalTime.MAX);
+    List<ReservationStatus> activeStatuses = ReservationStatus.getActiveStatuses();
+    return reservationRepository.findByReservationStartBetweenAndStatusInAndFacility_Id(startDateTime,endDateTime,activeStatuses, facilityId);
+  }
+
+  private List<LocalTime> getReservationTimes(Reservation reservation) {
+    // 예약 객체에서 시작 시간과 종료 시간
+    LocalTime startTime = reservation.getReservationStart().toLocalTime();
+    LocalTime endTime = reservation.getReservationEnd().toLocalTime();
+
+    // 시작 시간부터 종료 시간까지 1시간 간격으로 반복
+    return Stream.iterate(startTime, time -> time.plusHours(1))
+        .limit(Duration.between(startTime, endTime).toHours() + 1)
         .collect(Collectors.toList());
   }
 
