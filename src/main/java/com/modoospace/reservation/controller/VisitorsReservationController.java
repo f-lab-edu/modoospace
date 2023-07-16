@@ -1,6 +1,8 @@
 package com.modoospace.reservation.controller;
 
 import com.modoospace.config.auth.LoginEmail;
+import com.modoospace.reservation.controller.dto.AvailabilityTimeRequestDto;
+import com.modoospace.reservation.controller.dto.AvailabilityTimeResponseDto;
 import com.modoospace.reservation.controller.dto.ReservationCreateDto;
 import com.modoospace.reservation.controller.dto.ReservationReadDto;
 import com.modoospace.reservation.domain.Reservation;
@@ -30,23 +32,33 @@ public class VisitorsReservationController {
     return ResponseEntity.ok().body(reservationList);
   }
 
+  @GetMapping("facilities/{facilityId}/availability")
+  public ResponseEntity<AvailabilityTimeResponseDto> getAvailabilityTime(@PathVariable Long facilityId,
+      @RequestBody AvailabilityTimeRequestDto requestDto) {
+    AvailabilityTimeResponseDto availableTimes = reservationService.getAvailabilityTime(facilityId,
+        requestDto);
+    return ResponseEntity.ok().body(availableTimes);
+  }
+
   @PostMapping("/facilities/{facilityId}")
-  public ResponseEntity<Reservation> createReservation(@PathVariable Long facilityId,@LoginEmail String loginEmail,
+  public ResponseEntity<Reservation> createReservation(@PathVariable Long facilityId, @LoginEmail String loginEmail,
       @RequestBody @Valid ReservationCreateDto createDto) {
 
-    Reservation reservation = reservationService.createReservation(createDto, facilityId, loginEmail);
+    Reservation reservation = reservationService.createReservation(createDto, facilityId,
+        loginEmail);
     return ResponseEntity.ok().body(reservation);
   }
 
   @GetMapping("/{reservationId}")
-  public ResponseEntity<ReservationReadDto> find(@PathVariable Long reservationId,@LoginEmail final String loginEmail){
+  public ResponseEntity<ReservationReadDto> find(@PathVariable Long reservationId, @LoginEmail final String loginEmail) {
     ReservationReadDto reservationReadDto = reservationService.findReservation(reservationId, loginEmail);
     return ResponseEntity.ok().body(reservationReadDto);
   }
 
   @PostMapping("/{reservationId}/cancel")
-  public ResponseEntity<Void> cancelReservation(@PathVariable Long reservationId,@LoginEmail String loginEmail) {
-    reservationService.cancelReservation(reservationId,loginEmail);
+  public ResponseEntity<Void> cancelReservation(@PathVariable Long reservationId,
+      @LoginEmail String loginEmail) {
+    reservationService.cancelReservation(reservationId, loginEmail);
     return ResponseEntity.ok().build();
   }
 }
