@@ -120,13 +120,6 @@ public class ReservationServiceTest {
     // 결과 검증
     assertThat(response.getFacility().getId()).isEqualTo(expectedResponse.getFacility().getId());
     assertThat(expectedResponse.getAvailableTimes()).isEqualTo(response.getAvailableTimes());
-
-    // 결과 출력
-    log.info("==== 예약 가능한 시설 및 날짜 ====");
-    log.info("시설: {}", facility.getName());
-    log.info("날짜: {}", requestDate);
-    log.info("==== 예약 가능한 시간 (예약된 시간 제외) ====");
-    availableTimesWithoutReservation.forEach(time -> log.info("{}", time));
   }
 
   @DisplayName("특정 예약일에 예약상태가 완료, 대기중인 예약을 조회할 수 있다.")
