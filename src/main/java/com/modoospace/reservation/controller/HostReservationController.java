@@ -30,8 +30,8 @@ public class HostReservationController {
   }
 
   @PostMapping("/{reservationId}/approve")
-  public ResponseEntity<Void> approveReservation(@PathVariable Long reservationId) {
-    reservationService.updateStatus(reservationId);
+  public ResponseEntity<Void> approveReservation(@PathVariable Long reservationId, @LoginEmail final String loginEmail) {
+    reservationService.updateStatus(reservationId, loginEmail);
     return ResponseEntity.noContent().build();
   }
 

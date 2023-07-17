@@ -4,6 +4,7 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 import static org.junit.jupiter.api.Assertions.assertAll;
 
+import com.modoospace.alarm.domain.AlarmRepository;
 import com.modoospace.exception.PermissionDeniedException;
 import com.modoospace.member.domain.Member;
 import com.modoospace.member.domain.MemberRepository;
@@ -52,6 +53,9 @@ public class ReservationServiceTest {
   @Autowired
   private FacilityRepository facilityRepository;
 
+  @Autowired
+  private AlarmRepository alarmRepository;
+
   private Member visitorMember;
   private Member hostMember;
   private Facility seat;
@@ -68,7 +72,7 @@ public class ReservationServiceTest {
     createCategory();
     createFacilities();
     reservationService = new ReservationService(reservationRepository, facilityRepository,
-        memberRepository);
+        memberRepository, alarmRepository);
     reservationCreateDto = createReservationDto(LocalDateTime.now(),
         LocalDateTime.now().plusHours(3));
   }

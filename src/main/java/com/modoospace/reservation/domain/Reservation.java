@@ -1,9 +1,10 @@
 package com.modoospace.reservation.domain;
 
+import com.modoospace.alarm.domain.Alarm;
+import com.modoospace.alarm.domain.AlarmType;
 import com.modoospace.common.BaseTimeEntity;
 import com.modoospace.exception.PermissionDeniedException;
 import com.modoospace.member.domain.Member;
-import com.modoospace.member.domain.Role;
 import com.modoospace.space.domain.Facility;
 import com.modoospace.space.domain.FacilityType;
 import java.time.LocalDateTime;
@@ -50,7 +51,8 @@ public class Reservation extends BaseTimeEntity {
   private Member visitor; // 방문자
 
   @Builder
-  public Reservation(LocalDateTime reservationStart, LocalDateTime reservationEnd, Facility facility, Member visitor) {
+  public Reservation(LocalDateTime reservationStart, LocalDateTime reservationEnd,
+      Facility facility, Member visitor) {
     this.reservationStart = reservationStart;
     this.reservationEnd = reservationEnd;
 
@@ -74,11 +76,8 @@ public class Reservation extends BaseTimeEntity {
     this.status = updateReservation.getStatus();
   }
 
-  public void verifyHostRole(Member loginMember) {
-    if (facility.getSpace().getHost() == loginMember) {
-      return;
-    }
-    loginMember.verifyRolePermission(Role.ADMIN);
+  private void verifyHostRole(Member loginMember) {
+    facility.verifyManagementPermission(loginMember);
   }
 
   public void updateStatusToCanceled(Member loginMember) {
@@ -91,5 +90,21 @@ public class Reservation extends BaseTimeEntity {
       return;
     }
     throw new PermissionDeniedException();
+  }
+
+  public Alarm createNewReservationAlarm() {
+    return Alarm.builder()
+        .member(facility.getSpace().getHost())
+        .reservation(this)
+        .alarmType(AlarmType.NEW_RESERVATION)
+        .build();
+  }
+
+  public Alarm createApprovedReservationAlarm() {
+    return Alarm.builder()
+        .member(visitor)
+        .reservation(this)
+        .alarmType(AlarmType.APPROVED_RESERVATION)
+        .build();
   }
 }

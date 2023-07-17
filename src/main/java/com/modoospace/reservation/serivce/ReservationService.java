@@ -1,5 +1,7 @@
 package com.modoospace.reservation.serivce;
 
+import com.modoospace.alarm.domain.Alarm;
+import com.modoospace.alarm.domain.AlarmRepository;
 import com.modoospace.exception.NotFoundEntityException;
 import com.modoospace.member.domain.Member;
 import com.modoospace.member.domain.MemberRepository;
@@ -22,6 +24,7 @@ public class ReservationService {
   private final ReservationRepository reservationRepository;
   private final FacilityRepository facilityRepository;
   private final MemberRepository memberRepository;
+  private final AlarmRepository alarmRepository;
 
   @Transactional
   public Reservation createReservation(ReservationCreateDto createDto, Long facilityId,
@@ -33,6 +36,9 @@ public class ReservationService {
     Reservation reservation = createDto.toEntity(facility, visitor);
     reservationRepository.save(reservation);
 
+    Alarm newReservationAlarm = reservation.createNewReservationAlarm();
+    alarmRepository.save(newReservationAlarm);
+
     return reservation;
   }
 
@@ -42,10 +48,14 @@ public class ReservationService {
   }
 
   @Transactional
-  public void updateStatus(Long reservationId) {
+  public void updateStatus(Long reservationId, String loginEmail) {
     Reservation reservation = findReservationById(reservationId);
-    Member host = reservation.getFacility().getSpace().getHost();
+    Member host = findMemberByEmail(loginEmail);
+
     reservation.approveReservation(host);
+
+    Alarm newReservationAlarm = reservation.createApprovedReservationAlarm();
+    alarmRepository.save(newReservationAlarm);
   }
 
   @Transactional
