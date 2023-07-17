@@ -43,7 +43,7 @@ public class ReservationService {
   private final FacilityService facilityService;
 
   @Transactional
-  public Reservation createReservation(ReservationCreateDto createDto, Long facilityId,
+  public Long createReservation(ReservationCreateDto createDto, Long facilityId,
       String loginEmail) {
     Facility facility = findFacilityById(facilityId);
     validateAvailability(createDto, facility);
@@ -51,7 +51,7 @@ public class ReservationService {
     Reservation reservation = createDto.toEntity(facility, visitor);
     reservationRepository.save(reservation);
 
-    return reservation;
+    return reservation.getId();
   }
 
   public AvailabilityTimeResponseDto getAvailabilityTime(Long facilityId, AvailabilityTimeRequestDto requestDto) {

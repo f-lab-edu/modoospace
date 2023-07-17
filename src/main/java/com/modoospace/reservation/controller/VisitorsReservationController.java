@@ -5,7 +5,6 @@ import com.modoospace.reservation.controller.dto.AvailabilityTimeRequestDto;
 import com.modoospace.reservation.controller.dto.AvailabilityTimeResponseDto;
 import com.modoospace.reservation.controller.dto.ReservationCreateDto;
 import com.modoospace.reservation.controller.dto.ReservationReadDto;
-import com.modoospace.reservation.domain.Reservation;
 import com.modoospace.reservation.serivce.ReservationService;
 import java.util.List;
 import javax.validation.Valid;
@@ -41,10 +40,10 @@ public class VisitorsReservationController {
   }
 
   @PostMapping("/facilities/{facilityId}")
-  public ResponseEntity<Reservation> createReservation(@PathVariable Long facilityId, @LoginEmail String loginEmail,
+  public ResponseEntity<Long> createReservation(@PathVariable Long facilityId, @LoginEmail String loginEmail,
       @RequestBody @Valid ReservationCreateDto createDto) {
 
-    Reservation reservation = reservationService.createReservation(createDto, facilityId,
+    Long reservation = reservationService.createReservation(createDto, facilityId,
         loginEmail);
     return ResponseEntity.ok().body(reservation);
   }
