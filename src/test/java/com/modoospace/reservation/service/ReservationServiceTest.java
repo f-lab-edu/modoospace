@@ -84,8 +84,6 @@ public class ReservationServiceTest {
 
   private Long facilityRoomId;
 
-  private Space space;
-
   @BeforeEach
   public void setUp() {
     facilityService = new FacilityService(memberRepository, spaceRepository, facilityRepository);
@@ -116,7 +114,7 @@ public class ReservationServiceTest {
         .name("공간이름")
         .description("설명")
         .build();
-    space = spaceCreateDto.toEntity(category, hostMember);
+    Space space = spaceCreateDto.toEntity(category, hostMember);
     spaceRepository.save(space);
 
     FacilityCreateDto createDto = FacilityCreateDto.builder()
