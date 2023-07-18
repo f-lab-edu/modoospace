@@ -5,7 +5,6 @@ import com.modoospace.exception.NotFoundEntityException;
 import com.modoospace.member.domain.Member;
 import com.modoospace.member.domain.MemberRepository;
 import com.modoospace.member.domain.Role;
-import com.modoospace.reservation.controller.dto.AvailabilityTimeRequestDto;
 import com.modoospace.reservation.controller.dto.AvailabilityTimeResponseDto;
 import com.modoospace.reservation.controller.dto.ReservationCreateDto;
 import com.modoospace.reservation.controller.dto.ReservationReadDto;
@@ -54,18 +53,17 @@ public class ReservationService {
     return reservation.getId();
   }
 
-  public AvailabilityTimeResponseDto getAvailabilityTime(Long facilityId, AvailabilityTimeRequestDto requestDto) {
-    LocalDate requestDate = requestDto.getRequestDate();
+  public AvailabilityTimeResponseDto getAvailabilityTime(Long facilityId, LocalDate searchDate) {
 
     //시설의 스케줄 조회
     FacilityReadDetailDto facility = facilityService.findFacility(facilityId);
     List<FacilityScheduleReadDto> facilitySchedules = facility.getFacilitySchedules();
 
     //예약가능한 시간 가져오기
-    List<LocalTime> availableTimes = getAvailableTimes(requestDate, facilitySchedules);
+    List<LocalTime> availableTimes = getAvailableTimes(searchDate, facilitySchedules);
 
     //예악된 시간 가져오기
-    List<LocalTime> reservedTimes = getReservedTimes(requestDate, facilityId);
+    List<LocalTime> reservedTimes = getReservedTimes(searchDate, facilityId);
 
     //이미 예약된 시간을 제외한 예약 가능한 시간 필터링
     List<LocalTime> availableTimesWithoutReservation = availableTimes.stream()

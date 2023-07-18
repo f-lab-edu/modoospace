@@ -1,20 +1,22 @@
 package com.modoospace.reservation.controller;
 
 import com.modoospace.config.auth.LoginEmail;
-import com.modoospace.reservation.controller.dto.AvailabilityTimeRequestDto;
 import com.modoospace.reservation.controller.dto.AvailabilityTimeResponseDto;
 import com.modoospace.reservation.controller.dto.ReservationCreateDto;
 import com.modoospace.reservation.controller.dto.ReservationReadDto;
 import com.modoospace.reservation.serivce.ReservationService;
+import java.time.LocalDate;
 import java.util.List;
 import javax.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 @RequiredArgsConstructor
@@ -23,7 +25,7 @@ import org.springframework.web.bind.annotation.RestController;
 public class VisitorsReservationController {
 
   private final ReservationService reservationService;
-
+  public static final String DATE_FORMAT = "yyyy-MM-dd";
   @GetMapping
   public ResponseEntity<List<ReservationReadDto>> findAll(@LoginEmail final String loginEmail) {
 
@@ -32,10 +34,10 @@ public class VisitorsReservationController {
   }
 
   @GetMapping("facilities/{facilityId}/availability")
-  public ResponseEntity<AvailabilityTimeResponseDto> getAvailabilityTime(@PathVariable Long facilityId,
-      @RequestBody @Valid AvailabilityTimeRequestDto requestDto) {
-    AvailabilityTimeResponseDto availableTimes = reservationService.getAvailabilityTime(facilityId,
-        requestDto);
+  public ResponseEntity<AvailabilityTimeResponseDto> getAvailabilityTime(
+      @PathVariable Long facilityId,
+      @RequestParam @DateTimeFormat(pattern = DATE_FORMAT) final LocalDate searchDate) {
+    AvailabilityTimeResponseDto availableTimes = reservationService.getAvailabilityTime(facilityId, searchDate);
     return ResponseEntity.ok().body(availableTimes);
   }
 

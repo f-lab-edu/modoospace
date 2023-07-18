@@ -9,7 +9,6 @@ import com.modoospace.exception.PermissionDeniedException;
 import com.modoospace.member.domain.Member;
 import com.modoospace.member.domain.MemberRepository;
 import com.modoospace.member.domain.Role;
-import com.modoospace.reservation.controller.dto.AvailabilityTimeRequestDto;
 import com.modoospace.reservation.controller.dto.AvailabilityTimeResponseDto;
 import com.modoospace.reservation.controller.dto.ReservationCreateDto;
 import com.modoospace.reservation.controller.dto.ReservationReadDto;
@@ -169,9 +168,8 @@ public class ReservationServiceTest {
         availableTimesWithoutReservation);
 
     // 결과
-    AvailabilityTimeRequestDto requestDto = new AvailabilityTimeRequestDto(facilityRoomId, requestDate);
     AvailabilityTimeResponseDto response = reservationService.getAvailabilityTime(facilityRoomId,
-        requestDto);
+        requestDate);
 
     // 결과 검증
     assertThat(response.getFacility().getId()).isEqualTo(expectedResponse.getFacility().getId());
