@@ -7,6 +7,7 @@ import com.modoospace.member.domain.Role;
 import com.modoospace.space.domain.Facility;
 import com.modoospace.space.domain.FacilityType;
 import java.time.LocalDateTime;
+import java.util.Objects;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.EnumType;
@@ -20,7 +21,10 @@ import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.ToString;
+import org.springframework.transaction.annotation.Transactional;
 
+@ToString
 @Entity
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
@@ -61,10 +65,9 @@ public class Reservation extends BaseTimeEntity {
     this.visitor = visitor;
   }
 
-  public Reservation approveReservation(Member loginMember) {
+  public void approveReservation(Member loginMember) {
     verifyHostRole(loginMember);
     this.status = ReservationStatus.COMPLETED;
-    return this;
   }
 
   public void updateAsHost(final Reservation updateReservation, Member loginMember) {
@@ -81,15 +84,15 @@ public class Reservation extends BaseTimeEntity {
     loginMember.verifyRolePermission(Role.ADMIN);
   }
 
+  @Transactional
   public void updateStatusToCanceled(Member loginMember) {
     verifySameVisitor(loginMember);
     this.status = ReservationStatus.CANCELED;
   }
 
   public void verifySameVisitor(Member loginMember) {
-    if (visitor.equals(loginMember)) {
-      return;
+    if (!Objects.equals(visitor.getEmail(), loginMember.getEmail())) {
+      throw new PermissionDeniedException();
     }
-    throw new PermissionDeniedException();
   }
 }

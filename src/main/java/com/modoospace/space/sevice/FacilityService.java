@@ -62,20 +62,17 @@ public class FacilityService {
   }
 
   private Member findMemberByEmail(String email) {
-    Member member = memberRepository.findByEmail(email)
+    return memberRepository.findByEmail(email)
         .orElseThrow(() -> new NotFoundEntityException("사용자", email));
-    return member;
   }
 
   private Space findSpaceById(Long spaceId) {
-    Space space = spaceRepository.findById(spaceId)
+    return spaceRepository.findById(spaceId)
         .orElseThrow(() -> new NotFoundEntityException("공간", spaceId));
-    return space;
   }
 
   private Facility findFacilityById(Long facilityId) {
-    Facility facility = facilityRepository.findById(facilityId)
+    return facilityRepository.findById(facilityId)
         .orElseThrow(() -> new NotFoundEntityException("시설", facilityId));
-    return facility;
   }
 }
