@@ -23,11 +23,15 @@ dependencies {
 	implementation 'org.springframework.boot:spring-boot-starter-security'
 	implementation 'org.springframework.boot:spring-boot-starter-oauth2-client'
 
+	// RabbitMQ
+	implementation 'org.springframework.boot:spring-boot-starter-amqp'
+
 	// Test
 	testImplementation 'org.springframework.boot:spring-boot-starter-test'
 
 	// Database
-	runtimeOnly 'com.h2database:h2'
+	// runtimeOnly 'com.h2database:h2'
+	implementation 'com.mysql:mysql-connector-j'
 
 	// Lombok
 	compileOnly 'org.projectlombok:lombok'
