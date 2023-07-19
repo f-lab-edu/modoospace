@@ -28,9 +28,12 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
+import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase.Replace;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 
 @DataJpaTest
+@AutoConfigureTestDatabase(replace = Replace.NONE)
 class FacilityServiceTest {
 
   private FacilityService facilityService;
@@ -89,7 +92,7 @@ class FacilityServiceTest {
         .name("스터디룸1")
         .facilityType(FacilityType.ROOM)
         .description("1~4인실 입니다.")
-        .reservationEnable(false)
+        .reservationEnable(true)
         .build();
 
     Long facilityId = facilityService
@@ -101,11 +104,11 @@ class FacilityServiceTest {
         () -> assertThat(facility.getName()).isEqualTo("스터디룸1"),
         () -> assertThat(facility.getFacilityType()).isEqualTo(FacilityType.ROOM),
         () -> assertThat(facility.getDescription()).isEqualTo("1~4인실 입니다."),
-        () -> assertThat(facility.getReservationEnable()).isFalse(),
+        () -> assertThat(facility.getReservationEnable()).isTrue(),
         () -> assertThat(facility.isOpen(LocalDateTime.of(nowDate, LocalTime.of(0, 0, 0)),
-            LocalDateTime.of(nowDate, LocalTime.of(23, 59, 59)))).isTrue(),
+            LocalDateTime.of(nowDate, LocalTime.of(23, 59, 59)))),
         () -> assertThat(facility.isOpen(LocalDateTime.of(nowDate, LocalTime.of(0, 0, 0)),
-            LocalDateTime.of(nowDate.plusDays(2), LocalTime.of(23, 59, 59)))).isTrue()
+            LocalDateTime.of(nowDate.plusDays(2), LocalTime.of(23, 59, 59))))
     );
   }
 

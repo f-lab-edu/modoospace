@@ -1,13 +1,13 @@
 package com.modoospace.reservation.domain;
 
-import com.modoospace.alarm.domain.Alarm;
-import com.modoospace.alarm.domain.AlarmType;
 import com.modoospace.common.BaseTimeEntity;
 import com.modoospace.exception.PermissionDeniedException;
 import com.modoospace.member.domain.Member;
+import com.modoospace.member.domain.Role;
 import com.modoospace.space.domain.Facility;
 import com.modoospace.space.domain.FacilityType;
 import java.time.LocalDateTime;
+import java.time.LocalTime;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.EnumType;
@@ -21,7 +21,9 @@ import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.ToString;
 
+@ToString
 @Entity
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
@@ -63,48 +65,46 @@ public class Reservation extends BaseTimeEntity {
     this.visitor = visitor;
   }
 
-  public Reservation approveReservation(Member loginMember) {
-    verifyHostRole(loginMember);
+  public void approveReservation(Member loginMember) {
+    verifyManagementPermission(loginMember);
     this.status = ReservationStatus.COMPLETED;
-    return this;
   }
 
   public void updateAsHost(final Reservation updateReservation, Member loginMember) {
-    verifyHostRole(loginMember);
+    verifyManagementPermission(loginMember);
     this.reservationStart = updateReservation.getReservationStart();
     this.reservationEnd = updateReservation.getReservationEnd();
     this.status = updateReservation.getStatus();
   }
 
-  private void verifyHostRole(Member loginMember) {
-    facility.verifyManagementPermission(loginMember);
-  }
-
-  public void updateStatusToCanceled(Member loginMember) {
+  public void cancelAsVisitor(Member loginMember) {
     verifySameVisitor(loginMember);
     this.status = ReservationStatus.CANCELED;
   }
 
-  public void verifySameVisitor(Member loginMember) {
-    if (visitor.equals(loginMember)) {
+  public void verifyReservationAccess(Member loginMember) {
+    if (loginMember.isSameRole(Role.VISITOR)) {
+      verifySameVisitor(loginMember);
       return;
     }
-    throw new PermissionDeniedException();
+    verifyManagementPermission(loginMember);
   }
 
-  public Alarm createNewReservationAlarm() {
-    return Alarm.builder()
-        .member(facility.getSpace().getHost())
-        .reservation(this)
-        .alarmType(AlarmType.NEW_RESERVATION)
-        .build();
+  public void verifySameVisitor(Member loginMember) {
+    if (visitor != loginMember) {
+      throw new PermissionDeniedException();
+    }
   }
 
-  public Alarm createApprovedReservationAlarm() {
-    return Alarm.builder()
-        .member(visitor)
-        .reservation(this)
-        .alarmType(AlarmType.APPROVED_RESERVATION)
-        .build();
+  public void verifyManagementPermission(Member loginMember) {
+    facility.verifyManagementPermission(loginMember);
+  }
+
+  public boolean isReservationBetween(LocalTime time) {
+    LocalTime startTime = reservationStart.toLocalTime();
+    LocalTime endTime = reservationEnd.toLocalTime();
+
+    return (startTime.isAfter(time) || startTime.equals(time))
+        && (endTime.isBefore(time) || endTime.equals(time));
   }
 }

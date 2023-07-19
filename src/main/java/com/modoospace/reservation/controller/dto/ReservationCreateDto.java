@@ -4,7 +4,7 @@ import com.modoospace.member.domain.Member;
 import com.modoospace.reservation.domain.Reservation;
 import com.modoospace.space.domain.Facility;
 import java.time.LocalDateTime;
-import javax.validation.constraints.NotBlank;
+import javax.validation.constraints.NotNull;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -13,10 +13,10 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 public class ReservationCreateDto {
 
-  @NotBlank
+  @NotNull
   private LocalDateTime reservationStart;
 
-  @NotBlank
+  @NotNull
   private LocalDateTime reservationEnd;
 
   @Builder

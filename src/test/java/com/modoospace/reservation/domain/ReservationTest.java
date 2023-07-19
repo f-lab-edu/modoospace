@@ -15,6 +15,7 @@ import com.modoospace.space.domain.TimeSettings;
 import com.modoospace.space.domain.WeekdaySetting;
 import com.modoospace.space.domain.WeekdaySettings;
 import java.time.DayOfWeek;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.Arrays;
@@ -60,9 +61,9 @@ public class ReservationTest {
         .build();
 
     List<TimeSetting> timeSettings = Arrays.asList(TimeSetting.builder()
-            .startTime(LocalTime.of(0, 0))
-            .endTime(LocalTime.of(23, 59, 59))
-            .build());
+        .startTime(LocalTime.of(0, 0))
+        .endTime(LocalTime.of(23, 59, 59))
+        .build());
 
     List<WeekdaySetting> weekdaySettings = Arrays.asList(
         WeekdaySetting.builder()
@@ -107,7 +108,7 @@ public class ReservationTest {
 
   @DisplayName("호스트 및 관리자는 예약을 변경할 수 있다.")
   @Test
-  public void updateAsHost(){
+  public void updateAsHost() {
     Reservation reservation = Reservation.builder()
         .reservationStart(LocalDateTime.now())
         .reservationEnd(LocalDateTime.now().plusHours(3))
@@ -116,14 +117,14 @@ public class ReservationTest {
         .build();
 
     assertAll(
-        () -> reservation.updateAsHost(reservation,hostMember),
-        () -> reservation.updateAsHost(reservation,adminMember)
+        () -> reservation.updateAsHost(reservation, hostMember),
+        () -> reservation.updateAsHost(reservation, adminMember)
     );
   }
 
   @DisplayName("예약 요청자와 방문자가 다를 경우 예외가 발생한다.")
   @Test
-  public void verifySameVisitor(){
+  public void verifySameVisitor() {
     Reservation reservation = Reservation.builder()
         .reservationStart(LocalDateTime.now())
         .reservationEnd(LocalDateTime.now().plusHours(3))
@@ -131,7 +132,22 @@ public class ReservationTest {
         .facility(facilityRoom)
         .build();
 
-    assertThatThrownBy(()->reservation.verifySameVisitor(visitorMember))
+    assertThatThrownBy(() -> reservation.verifySameVisitor(visitorMember))
         .isInstanceOf(PermissionDeniedException.class);
+  }
+
+  @DisplayName("예약이 해당 시간 사이에 있는지 체크한다.")
+  @Test
+  public void isReservationBetween() {
+    LocalDateTime start = LocalDateTime.of(LocalDate.now(), LocalTime.of(9, 0, 0));
+    Reservation reservation = Reservation.builder()
+        .reservationStart(start)
+        .reservationEnd(start.plusHours(3))
+        .visitor(hostMember)
+        .facility(facilityRoom)
+        .build();
+
+    assertThat(reservation.isReservationBetween(start.toLocalTime())).isTrue();
+    assertThat(reservation.isReservationBetween(start.toLocalTime().minusHours(2))).isFalse();
   }
 }
