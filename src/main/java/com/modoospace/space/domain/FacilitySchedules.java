@@ -61,11 +61,13 @@ public class FacilitySchedules {
     return new FacilitySchedules(facilitySchedules);
   }
 
+  // TODO : 쿼리로 가져와서 확인하는 로직이 필요해 보인다.
   public boolean isOpen(LocalDateTime startDateTime, LocalDateTime endDateTime) {
     List<FacilitySchedule> facilitySchedules = this.facilitySchedules.stream()
         .filter(
             facilitySchedule -> facilitySchedule.isIncludedTimeRange(startDateTime, endDateTime))
         .collect(Collectors.toList());
+    Collections.sort(facilitySchedules, Comparator.comparing(FacilitySchedule::getStartDateTime));
 
     if (facilitySchedules.isEmpty()) {
       return false;
@@ -74,16 +76,14 @@ public class FacilitySchedules {
     // 같은 날짜의 시간을 체크하는 경우
     if (startDateTime.toLocalDate().isEqual(endDateTime.toLocalDate())) {
       return facilitySchedules.stream()
-          .allMatch(facilitySchedule -> facilitySchedule
-              .isIncludingTimeRange(startDateTime, endDateTime)); // 시간 범위를 전부 포함하고있는지 체크
+          .anyMatch(facilitySchedule -> facilitySchedule
+              .isIncludingTimeRange(startDateTime, endDateTime));
     }
 
     // 다른 날짜의 시간을 체크하는 경우
     // 첫번째 스케줄 시작시간, 종료시간(23:59:59) 체크
     FacilitySchedule startDaySchedule = facilitySchedules.get(0);
-    LocalDateTime startDayEndTime = LocalDateTime
-        .of(startDateTime.getYear(), startDateTime.getMonthValue(), startDateTime.getDayOfMonth(),
-            23, 59, 59);
+    LocalDateTime startDayEndTime = startDateTime.toLocalDate().atTime(23, 59, 59);
     if (!startDaySchedule.isIncludingTimeRange(startDateTime, startDayEndTime)) {
       return false;
     }
@@ -97,9 +97,7 @@ public class FacilitySchedules {
 
     // 마지막 스케줄 시작시간(00:00:00), 종료시간 체크
     FacilitySchedule endDaySchedule = facilitySchedules.get(facilitySchedules.size() - 1);
-    LocalDateTime endDayStartTime = LocalDateTime
-        .of(endDateTime.getYear(), endDateTime.getMonthValue(), endDateTime.getDayOfMonth(),
-            0, 0, 0);
+    LocalDateTime endDayStartTime = endDateTime.toLocalDate().atTime(0, 0, 0);
     if (!endDaySchedule.isIncludingTimeRange(endDayStartTime, endDateTime)) {
       return false;
     }
