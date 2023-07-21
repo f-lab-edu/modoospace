@@ -104,7 +104,7 @@ public class Reservation extends BaseTimeEntity {
     LocalTime startTime = reservationStart.toLocalTime();
     LocalTime endTime = reservationEnd.toLocalTime();
 
-    return (startTime.isAfter(time) || startTime.equals(time))
-        && (endTime.isBefore(time) || endTime.equals(time));
+    return (startTime.isBefore(time) || startTime.equals(time))
+        && (endTime.isAfter(time) || endTime.equals(time));
   }
 }
