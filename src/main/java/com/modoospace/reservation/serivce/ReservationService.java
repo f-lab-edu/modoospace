@@ -1,5 +1,8 @@
 package com.modoospace.reservation.serivce;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.modoospace.alarm.controller.dto.AlarmEvent;
+import com.modoospace.alarm.producer.AlarmProducer;
 import com.modoospace.exception.ConflictingReservationException;
 import com.modoospace.exception.NotFoundEntityException;
 import com.modoospace.member.domain.Member;
@@ -38,6 +41,7 @@ public class ReservationService {
   private final MemberRepository memberRepository;
   private final ReservationQueryRepository reservationQueryRepository;
   private final FacilityScheduleService facilityScheduleService;
+  // private final AlarmProducer alarmProducer;
 
   @Transactional
   public Long createReservation(ReservationCreateDto createDto, Long facilityId,
@@ -48,6 +52,9 @@ public class ReservationService {
     Member visitor = findMemberByEmail(loginEmail);
     Reservation reservation = createDto.toEntity(facility, visitor);
     reservationRepository.save(reservation);
+
+    AlarmEvent alarmEvent = AlarmEvent.toNewReservationAlarm(reservation);
+    // alarmProducer.send(alarmEvent);
 
     return reservation.getId();
   }
@@ -133,6 +140,9 @@ public class ReservationService {
     Reservation reservation = findReservationById(reservationId);
     Member loginMember = findMemberByEmail(loginEmail);
     reservation.approveReservation(loginMember);
+
+    AlarmEvent alarmEvent = AlarmEvent.toApprovedReservationAlarm(reservation);
+    // alarmProducer.send(alarmEvent);
   }
 
   @Transactional

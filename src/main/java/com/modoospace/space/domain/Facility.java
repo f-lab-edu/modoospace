@@ -145,4 +145,8 @@ public class Facility extends BaseTimeEntity {
       throw new NotOpenedFacilityException();
     }
   }
+
+  public String getFacilityName() {
+    return name + "(" + facilityType.name() + ")";
+  }
 }

@@ -46,4 +46,8 @@ public class Alarm extends BaseTimeEntity {
     this.reservation = reservation;
     this.alarmType = alarmType;
   }
+
+  public String getAlarmMessage(){
+    return reservation.getFacility().getFacilityName() + alarmType.getAlarmText();
+  }
 }

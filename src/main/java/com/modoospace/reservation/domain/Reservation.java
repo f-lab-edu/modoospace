@@ -107,4 +107,8 @@ public class Reservation extends BaseTimeEntity {
     return (startTime.isBefore(time) || startTime.equals(time))
         && (endTime.isAfter(time) || endTime.equals(time));
   }
+
+  public Member getHost() {
+    return this.facility.getSpace().getHost();
+  }
 }
