@@ -1,16 +1,24 @@
 package com.modoospace.reservation.repository;
 
-import static com.modoospace.reservation.domain.QReservation.reservation;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import com.modoospace.TestConfig;
+import com.modoospace.member.domain.Member;
+import com.modoospace.member.domain.MemberRepository;
+import com.modoospace.member.domain.Role;
 import com.modoospace.reservation.domain.Reservation;
 import com.modoospace.reservation.domain.ReservationRepository;
-import com.querydsl.core.types.dsl.BooleanExpression;
-import com.querydsl.jpa.impl.JPAQueryFactory;
+import com.modoospace.space.controller.dto.facility.FacilityCreateDto;
+import com.modoospace.space.controller.dto.space.SpaceCreateUpdateDto;
+import com.modoospace.space.domain.Category;
+import com.modoospace.space.domain.CategoryRepository;
+import com.modoospace.space.domain.Facility;
+import com.modoospace.space.domain.FacilityRepository;
+import com.modoospace.space.domain.FacilityType;
+import com.modoospace.space.domain.Space;
+import com.modoospace.space.domain.SpaceRepository;
 import java.time.LocalDateTime;
-import java.util.List;
-import java.util.stream.Collectors;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -25,55 +33,94 @@ import org.springframework.context.annotation.Import;
 public class ReservationQueryRepositoryTest {
 
   @Autowired
-  private JPAQueryFactory jpaQueryFactory;
-
-  @Autowired
   private ReservationQueryRepository reservationQueryRepository;
 
   @Autowired
-  private ReservationRepository reservationRepository;
-  @Test
-  @DisplayName("기존 동일한 시설,시간에 예약이 없다면 빈 리스트를 반환한다.")
-  public void findOverlappingReservationIds_Success() {
-    LocalDateTime differentStart = LocalDateTime.of(2023, 7, 14, 3, 0);
-    LocalDateTime differentEnd = LocalDateTime.of(2023, 7, 14, 3, 0).plusHours(2);
-    List<Long> reservationIds = getReservationIds();
+  private MemberRepository memberRepository;
 
-    Boolean isExist = reservationQueryRepository.existOverlappingReservation(reservationIds, differentStart, differentEnd);
+  @Autowired
+  private CategoryRepository categoryRepository;
+
+  @Autowired
+  private SpaceRepository spaceRepository;
+
+  @Autowired
+  private FacilityRepository facilityRepository;
+
+  @Autowired
+  private ReservationRepository reservationRepository;
+
+  private Member visitorMember;
+
+  private Facility roomFacility;
+
+  private LocalDateTime now;
+
+  @BeforeEach
+  public void setUp() {
+    Member hostMember = Member.builder()
+        .email("host@email")
+        .name("host")
+        .role(Role.HOST)
+        .build();
+    memberRepository.save(hostMember);
+
+    visitorMember = Member.builder()
+        .email("visitor@email")
+        .name("visitor")
+        .role(Role.VISITOR)
+        .build();
+    memberRepository.save(visitorMember);
+
+    Category category = Category.builder()
+        .name("스터디 공간")
+        .build();
+    categoryRepository.save(category);
+
+    SpaceCreateUpdateDto spaceCreateDto = SpaceCreateUpdateDto.builder()
+        .name("공간이름")
+        .description("설명")
+        .build();
+    Space space = spaceCreateDto.toEntity(category, hostMember);
+    spaceRepository.save(space);
+
+    FacilityCreateDto createRoomDto = FacilityCreateDto.builder()
+        .name("스터디룸")
+        .facilityType(FacilityType.ROOM)
+        .description("1~4인실 입니다.")
+        .reservationEnable(true)
+        .build();
+    roomFacility = facilityRepository.save(createRoomDto.toEntity(space));
+
+    now = LocalDateTime.now();
+  }
+
+  @Test
+  @DisplayName("동일한 시설,시간에 기존 예약이 있다면 true를 반환한다.")
+  public void isOverlappingReservation_true() {
+    LocalDateTime reservationStart = now;
+    LocalDateTime reservationEnd = now.plusHours(3);
+    Reservation reservation = Reservation.builder()
+        .reservationStart(reservationStart)
+        .reservationEnd(reservationEnd)
+        .visitor(visitorMember)
+        .facility(roomFacility)
+        .build();
+    reservationRepository.save(reservation);
+
+    Boolean isExist = reservationQueryRepository
+        .isOverlappingReservation(roomFacility, now, now.plusHours(1));
+
+    assertThat(isExist).isTrue();
+  }
+
+
+  @Test
+  @DisplayName("동일한 시설,시간에 기존 예약이 없다면 false를 반환한다.")
+  public void isOverlappingReservation_false() {
+    Boolean isExist = reservationQueryRepository
+        .isOverlappingReservation(roomFacility, now, now.plusHours(1));
 
     assertThat(isExist).isFalse();
-  }
-
-  @Test
-  @DisplayName("기존 동일한 시설,시간에 예약이있다면 예약ID 리스트를 반환한다.")
-  public void findOverlappingReservationIds() {
-    // Given
-    LocalDateTime requestStart = LocalDateTime.of(2023, 7, 14, 10, 0);
-    LocalDateTime requestEnd = LocalDateTime.of(2023, 7, 14, 13, 59);
-    List<Long> reservationIds = getReservationIds();
-
-    BooleanExpression expression = overlappingReservation(reservationIds, requestStart, requestEnd);
-
-    Integer fetchOne = jpaQueryFactory
-        .selectOne()
-        .from(reservation)
-        .where(expression)
-        .fetchFirst();
-
-    assertThat(fetchOne).isGreaterThan(0);
-  }
-
-  private List<Long> getReservationIds() {
-    List<Reservation> reservations = reservationRepository.findAll();
-    return reservations.stream()
-        .map(Reservation::getId)
-        .collect(Collectors.toList());
-  }
-
-  private static BooleanExpression overlappingReservation(List<Long> reservationIds,
-      LocalDateTime start, LocalDateTime end) {
-    return reservation.id.in(reservationIds)
-        .and(reservation.reservationStart.before(end))
-        .and(reservation.reservationEnd.after(start));
   }
 }
