@@ -1,6 +1,6 @@
 package com.modoospace.reservation.serivce;
 
-import com.modoospace.exception.DuplicatedReservationException;
+import com.modoospace.exception.ConflictingReservationException;
 import com.modoospace.exception.NotFoundEntityException;
 import com.modoospace.member.domain.Member;
 import com.modoospace.member.domain.MemberRepository;
@@ -62,10 +62,10 @@ public class ReservationService {
     LocalDateTime end = createDto.getReservationEnd();
 
     Boolean isOverlappingReservation = reservationQueryRepository.isOverlappingReservation(
-        facility.getId(), start, end);
+        facility, start, end);
 
     if (isOverlappingReservation) {
-      throw new DuplicatedReservationException("동일한 시간대에 예약이 존재합니다.");
+      throw new ConflictingReservationException();
     }
   }
 
