@@ -6,6 +6,9 @@ import org.springframework.data.jpa.repository.JpaRepository;
 
 public interface FacilityScheduleRepository extends JpaRepository<FacilitySchedule, Long> {
 
-  List<FacilitySchedule> findByFacilityAndStartDateTimeAfterAndEndDateTimeBeforeOrderByStartDateTime(Facility facility,
-      LocalDateTime startDateTime, LocalDateTime endDateTime);
+  List<FacilitySchedule> findByFacilityAndStartDateTimeBetweenOrderByStartDateTime(
+      Facility facility, LocalDateTime start, LocalDateTime end);
+
+  List<FacilitySchedule> findByFacilityAndStartDateTimeBetween(
+      Facility facility, LocalDateTime start, LocalDateTime end);
 }

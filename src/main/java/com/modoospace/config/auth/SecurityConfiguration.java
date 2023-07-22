@@ -22,7 +22,7 @@ public class SecurityConfiguration {
         .authorizeHttpRequests(request -> request
                 .antMatchers(HttpMethod.GET, "/", "/error", "/api/v1/spaces/**",
                     "/api/v1/spaces/*/facilities/**",
-                    "/api/v1/visitors/reservations/facilities/*/availability").permitAll()
+                    "/api/v1/visitors/reservations/facilities/*/availability/**").permitAll()
 //            .antMatchers(HttpMethod.POST, "/api/v1/space").hasRole(Role.HOST.name())
                 .antMatchers("/api/v1/admin/**").hasRole(Role.ADMIN.name())
                 .anyRequest().authenticated()

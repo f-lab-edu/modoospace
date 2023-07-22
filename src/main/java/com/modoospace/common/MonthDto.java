@@ -1,18 +1,20 @@
-package com.modoospace.space.controller.dto.facilitySchedule;
+package com.modoospace.common;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 import java.time.YearMonth;
+import javax.validation.constraints.NotNull;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 @Getter
 @NoArgsConstructor
-public class FacilitySchedule1MonthDto {
+public class MonthDto {
 
+  @NotNull
   @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM")
   private YearMonth yearMonth;
 
-  public FacilitySchedule1MonthDto(YearMonth yearMonth) {
+  public MonthDto(YearMonth yearMonth) {
     this.yearMonth = yearMonth;
   }
 }

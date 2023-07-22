@@ -22,9 +22,19 @@ public class AdminReservationController {
 
   private final ReservationService reservationService;
 
-  @GetMapping
-  public ResponseEntity<List<ReservationReadDto>> findAll(@LoginEmail final String loginEmail) {
-    List<ReservationReadDto> reservationList = reservationService.findAll(loginEmail);
+   @GetMapping("/visitor/{memberId}")
+  public ResponseEntity<List<ReservationReadDto>> findAllAsMember(@PathVariable Long memberId,
+      @LoginEmail final String loginEmail) {
+    List<ReservationReadDto> reservationList = reservationService
+        .findAllAsVisitorByAdmin(memberId, loginEmail);
+    return ResponseEntity.ok().body(reservationList);
+  }
+
+  @GetMapping("/host/{memberId}")
+  public ResponseEntity<List<ReservationReadDto>> findAllAsHost(@PathVariable Long memberId,
+      @LoginEmail final String loginEmail) {
+    List<ReservationReadDto> reservationList = reservationService
+        .findAllAsHostByAdmin(memberId, loginEmail);
     return ResponseEntity.ok().body(reservationList);
   }
 
@@ -39,8 +49,10 @@ public class AdminReservationController {
   }
 
   @GetMapping("/{reservationId}")
-  public ResponseEntity<ReservationReadDto> find(@PathVariable Long reservationId, @LoginEmail final String loginEmail){
-    ReservationReadDto reservationReadDto = reservationService.findReservation(reservationId, loginEmail);
+  public ResponseEntity<ReservationReadDto> find(@PathVariable Long reservationId,
+      @LoginEmail final String loginEmail) {
+    ReservationReadDto reservationReadDto = reservationService
+        .findReservation(reservationId, loginEmail);
     return ResponseEntity.ok().body(reservationReadDto);
   }
 }

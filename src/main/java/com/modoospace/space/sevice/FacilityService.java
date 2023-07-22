@@ -34,7 +34,6 @@ public class FacilityService {
     return facility.getId();
   }
 
-
   public FacilityReadDetailDto findFacility(Long facilityId) {
     Facility facility = findFacilityById(facilityId);
 

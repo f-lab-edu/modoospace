@@ -4,6 +4,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.junit.jupiter.api.Assertions.assertAll;
 
+import com.modoospace.TestConfig;
 import com.modoospace.exception.ConflictingTimeException;
 import com.modoospace.exception.NotFoundEntityException;
 import com.modoospace.member.domain.Member;
@@ -32,21 +33,14 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
-import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase.Replace;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
+import org.springframework.context.annotation.Import;
+import org.springframework.test.context.ActiveProfiles;
 
 @DataJpaTest
-@AutoConfigureTestDatabase(replace = Replace.NONE)
+@Import(TestConfig.class)
+@ActiveProfiles("test")
 public class FacilityScheduleServiceTest {
-
-  private FacilityScheduleService facilityScheduleService;
-
-  @Autowired
-  private FacilityScheduleRepository facilityScheduleRepository;
-
-  @Autowired
-  private FacilityRepository facilityRepository;
 
   @Autowired
   private MemberRepository memberRepository;
@@ -56,6 +50,14 @@ public class FacilityScheduleServiceTest {
 
   @Autowired
   private SpaceRepository spaceRepository;
+
+  @Autowired
+  private FacilityRepository facilityRepository;
+
+  @Autowired
+  private FacilityScheduleRepository facilityScheduleRepository;
+
+  private FacilityScheduleService facilityScheduleService;
 
   private Member hostMember;
 
@@ -69,8 +71,8 @@ public class FacilityScheduleServiceTest {
 
   @BeforeEach
   public void setUp() {
-    facilityScheduleService = new FacilityScheduleService(facilityScheduleRepository,
-        facilityRepository, memberRepository);
+    facilityScheduleService = new FacilityScheduleService(memberRepository, facilityRepository,
+        facilityScheduleRepository);
 
     hostMember = Member.builder()
         .email("host@email")
@@ -233,6 +235,15 @@ public class FacilityScheduleServiceTest {
         .isInstanceOf(NotFoundEntityException.class);
   }
 
+  @DisplayName("하루 치 스케줄데이터를 조회한다.")
+  @Test
+  public void find1DayFacilitySchedules() {
+    List<FacilityScheduleReadDto> facilitySchedules = facilityScheduleService
+        .find1DayFacilitySchedules(facility.getId(), nowDate);
+
+    assertThat(facilitySchedules).hasSize(1);
+  }
+
   @DisplayName("1달 치 기본 스케줄을 생성한다.")
   @Test
   public void create1MonthDefaultFacilitySchedules_plus3Month() {
@@ -251,6 +262,15 @@ public class FacilityScheduleServiceTest {
         () -> assertThat(retReadDtos.get(retReadDtos.size() - 1).getStartDateTime().toLocalDate())
             .isEqualTo(createYearMonth.atEndOfMonth())
     );
+  }
+
+  @DisplayName("1달 치 스케줄데이터를 조회한다.")
+  @Test
+  public void find1MonthFacilitySchedules() {
+    List<FacilityScheduleReadDto> facilitySchedules = facilityScheduleService
+        .find1MonthFacilitySchedules(facility.getId(), nowYearMonth);
+
+    assertThat(facilitySchedules).hasSize(nowYearMonth.lengthOfMonth());
   }
 
   @DisplayName("이미 생성되어있는 1달 치 스케줄을 지우고 새로 생성한다.")

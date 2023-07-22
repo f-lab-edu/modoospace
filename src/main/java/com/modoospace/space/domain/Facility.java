@@ -3,11 +3,8 @@ package com.modoospace.space.domain;
 import static javax.persistence.FetchType.LAZY;
 
 import com.modoospace.common.BaseTimeEntity;
-import com.modoospace.exception.InvalidTimeRangeException;
+import com.modoospace.exception.NotOpenedFacilityException;
 import com.modoospace.member.domain.Member;
-import java.time.LocalDate;
-import com.modoospace.reservation.controller.dto.ReservationCreateDto;
-import java.time.LocalDateTime;
 import java.time.YearMonth;
 import javax.persistence.Column;
 import javax.persistence.Embedded;
@@ -111,7 +108,8 @@ public class Facility extends BaseTimeEntity {
     return this.facilitySchedules.addFacilitySchedule(createSchedule);
   }
 
-  public FacilitySchedule updateFacilitySchedule(FacilitySchedule updateSchedule, FacilitySchedule schedule,
+  public FacilitySchedule updateFacilitySchedule(FacilitySchedule updateSchedule,
+      FacilitySchedule schedule,
       Member loginMember) {
     verifyManagementPermission(loginMember);
 
@@ -130,19 +128,13 @@ public class Facility extends BaseTimeEntity {
     space.verifyManagementPermission(loginMember);
   }
 
-  public void validateFacilityAvailability(ReservationCreateDto createDto){
-    LocalDateTime requestStartTime = createDto.getReservationStart();
-    LocalDateTime requestEndTime = createDto.getReservationEnd();
-
-    boolean isFacilityOpen = this.isOpen(requestStartTime,requestEndTime);
-    boolean isReservationEnabled = this.getReservationEnable();
-
-    if (!isReservationEnabled || !isFacilityOpen) {
-      throw new InvalidTimeRangeException("해당 시간은 이용이 불가능한 시간입니다.");
+  public void verifyReservationEnable() {
+    if (!this.reservationEnable) {
+      throw new NotOpenedFacilityException();
     }
   }
 
-  public boolean isOpen(LocalDateTime start, LocalDateTime end) {
-    return facilitySchedules.isOpen(start, end);
+  public String getFacilityName() {
+    return name + "(" + facilityType.name() + ")";
   }
 }

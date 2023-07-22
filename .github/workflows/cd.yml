@@ -50,7 +50,7 @@ jobs:
           password: ${{ secrets.WAS_PASSWORD }}
           port: ${{ secrets.WAS_SSH_PORT }}
           script: |
-            docker stop $(docker ps -qa) 
-            docker rm $(docker ps -qa) 
+            docker stop modoocontainer
+            docker rm modoocontainer
             docker pull ${{ secrets.USERNAME }}/modoospace
             docker run -d -p 8080:8080 --name modoocontainer ${{ secrets.USERNAME }}/modoospace

@@ -58,12 +58,12 @@ public class Member extends BaseTimeEntity {
   }
 
   public void verifyRolePermission(Role role) {
-    if (isSameRole(role)) {
+    if (!isSameRole(role)) {
       throw new PermissionDeniedException();
     }
   }
 
-  private boolean isSameRole(Role role) {
-    return !this.role.equals(role);
+  public boolean isSameRole(Role role) {
+    return this.role.equals(role);
   }
 }

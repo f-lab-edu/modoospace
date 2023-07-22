@@ -1,6 +1,7 @@
 package com.modoospace;
 
 import com.modoospace.reservation.repository.ReservationQueryRepository;
+import com.modoospace.space.repository.FacilityScheduleQueryRepository;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
@@ -9,6 +10,7 @@ import org.springframework.context.annotation.Bean;
 
 @TestConfiguration
 public class TestConfig {
+
   @PersistenceContext
   private EntityManager entityManager;
 
@@ -20,5 +22,10 @@ public class TestConfig {
   @Bean
   public ReservationQueryRepository reservationQueryRepository() {
     return new ReservationQueryRepository(jpaQueryFactory());
+  }
+
+  @Bean
+  public FacilityScheduleQueryRepository facilityScheduleQueryRepository() {
+    return new FacilityScheduleQueryRepository(jpaQueryFactory());
   }
 }

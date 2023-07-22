@@ -7,7 +7,7 @@ import com.modoospace.member.domain.Role;
 import com.modoospace.space.domain.Facility;
 import com.modoospace.space.domain.FacilityType;
 import java.time.LocalDateTime;
-import java.util.Objects;
+import java.time.LocalTime;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.EnumType;
@@ -22,7 +22,6 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.ToString;
-import org.springframework.transaction.annotation.Transactional;
 
 @ToString
 @Entity
@@ -54,7 +53,8 @@ public class Reservation extends BaseTimeEntity {
   private Member visitor; // 방문자
 
   @Builder
-  public Reservation(LocalDateTime reservationStart, LocalDateTime reservationEnd, Facility facility, Member visitor) {
+  public Reservation(LocalDateTime reservationStart, LocalDateTime reservationEnd,
+      Facility facility, Member visitor) {
     this.reservationStart = reservationStart;
     this.reservationEnd = reservationEnd;
 
@@ -66,33 +66,49 @@ public class Reservation extends BaseTimeEntity {
   }
 
   public void approveReservation(Member loginMember) {
-    verifyHostRole(loginMember);
+    verifyManagementPermission(loginMember);
     this.status = ReservationStatus.COMPLETED;
   }
 
   public void updateAsHost(final Reservation updateReservation, Member loginMember) {
-    verifyHostRole(loginMember);
+    verifyManagementPermission(loginMember);
     this.reservationStart = updateReservation.getReservationStart();
     this.reservationEnd = updateReservation.getReservationEnd();
     this.status = updateReservation.getStatus();
   }
 
-  public void verifyHostRole(Member loginMember) {
-    if (facility.getSpace().getHost() == loginMember) {
-      return;
-    }
-    loginMember.verifyRolePermission(Role.ADMIN);
-  }
-
-  @Transactional
-  public void updateStatusToCanceled(Member loginMember) {
+  public void cancelAsVisitor(Member loginMember) {
     verifySameVisitor(loginMember);
     this.status = ReservationStatus.CANCELED;
   }
 
+  public void verifyReservationAccess(Member loginMember) {
+    if (loginMember.isSameRole(Role.VISITOR)) {
+      verifySameVisitor(loginMember);
+      return;
+    }
+    verifyManagementPermission(loginMember);
+  }
+
   public void verifySameVisitor(Member loginMember) {
-    if (!Objects.equals(visitor.getEmail(), loginMember.getEmail())) {
+    if (visitor != loginMember) {
       throw new PermissionDeniedException();
     }
+  }
+
+  public void verifyManagementPermission(Member loginMember) {
+    facility.verifyManagementPermission(loginMember);
+  }
+
+  public boolean isReservationBetween(LocalTime time) {
+    LocalTime startTime = reservationStart.toLocalTime();
+    LocalTime endTime = reservationEnd.toLocalTime();
+
+    return (startTime.isBefore(time) || startTime.equals(time))
+        && (endTime.isAfter(time) || endTime.equals(time));
+  }
+
+  public Member getHost() {
+    return this.facility.getSpace().getHost();
   }
 }

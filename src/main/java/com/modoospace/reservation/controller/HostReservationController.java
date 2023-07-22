@@ -10,7 +10,6 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -29,9 +28,10 @@ public class HostReservationController {
     return ResponseEntity.ok().body(reservationList);
   }
 
-  @PostMapping("/{reservationId}/approve")
-  public ResponseEntity<Void> approveReservation(@PathVariable Long reservationId) {
-    reservationService.updateStatus(reservationId);
+  @PutMapping("/{reservationId}/approve")
+  public ResponseEntity<Void> approveReservation(@PathVariable Long reservationId,
+      @LoginEmail final String loginEmail) {
+    reservationService.updateStatus(reservationId, loginEmail);
     return ResponseEntity.noContent().build();
   }
 
@@ -46,8 +46,10 @@ public class HostReservationController {
   }
 
   @GetMapping("/{reservationId}")
-  public ResponseEntity<ReservationReadDto> find(@PathVariable Long reservationId, @LoginEmail String loginEmail){
-    ReservationReadDto reservationReadDto = reservationService.findReservation(reservationId, loginEmail);
+  public ResponseEntity<ReservationReadDto> find(@PathVariable Long reservationId,
+      @LoginEmail String loginEmail) {
+    ReservationReadDto reservationReadDto = reservationService
+        .findReservation(reservationId, loginEmail);
     return ResponseEntity.ok().body(reservationReadDto);
   }
 }

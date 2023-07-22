@@ -1,4 +1,4 @@
-package com.modoospace.reservation.repository;
+package com.modoospace.space.repository;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -6,17 +6,17 @@ import com.modoospace.TestConfig;
 import com.modoospace.member.domain.Member;
 import com.modoospace.member.domain.MemberRepository;
 import com.modoospace.member.domain.Role;
-import com.modoospace.reservation.domain.Reservation;
-import com.modoospace.reservation.domain.ReservationRepository;
 import com.modoospace.space.controller.dto.facility.FacilityCreateDto;
 import com.modoospace.space.controller.dto.space.SpaceCreateUpdateDto;
 import com.modoospace.space.domain.Category;
 import com.modoospace.space.domain.CategoryRepository;
 import com.modoospace.space.domain.Facility;
 import com.modoospace.space.domain.FacilityRepository;
+import com.modoospace.space.domain.FacilitySchedule;
 import com.modoospace.space.domain.FacilityType;
 import com.modoospace.space.domain.Space;
 import com.modoospace.space.domain.SpaceRepository;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -29,10 +29,7 @@ import org.springframework.test.context.ActiveProfiles;
 @DataJpaTest
 @Import(TestConfig.class)
 @ActiveProfiles("test")
-public class ReservationQueryRepositoryTest {
-
-  @Autowired
-  private ReservationQueryRepository reservationQueryRepository;
+public class FacilityScheduleQueryRepositoryTest {
 
   @Autowired
   private MemberRepository memberRepository;
@@ -47,13 +44,11 @@ public class ReservationQueryRepositoryTest {
   private FacilityRepository facilityRepository;
 
   @Autowired
-  private ReservationRepository reservationRepository;
-
-  private Member visitorMember;
+  private FacilityScheduleQueryRepository facilityScheduleQueryRepository;
 
   private Facility roomFacility;
 
-  private LocalDateTime now;
+  private LocalDate now;
 
   @BeforeEach
   public void setUp() {
@@ -63,13 +58,6 @@ public class ReservationQueryRepositoryTest {
         .role(Role.HOST)
         .build();
     memberRepository.save(hostMember);
-
-    visitorMember = Member.builder()
-        .email("visitor@email")
-        .name("visitor")
-        .role(Role.VISITOR)
-        .build();
-    memberRepository.save(visitorMember);
 
     Category category = Category.builder()
         .name("스터디 공간")
@@ -91,35 +79,41 @@ public class ReservationQueryRepositoryTest {
         .build();
     roomFacility = facilityRepository.save(createRoomDto.toEntity(space));
 
-    now = LocalDateTime.now();
+    now = LocalDate.now();
   }
 
+  @DisplayName("해당 기간에 시설이 Open했는지 여부를 반환한다.")
   @Test
-  @DisplayName("동일한 시설,시간에 기존 예약이 있다면 true를 반환한다.")
-  public void isOverlappingReservation_true() {
-    LocalDateTime reservationStart = now;
-    LocalDateTime reservationEnd = now.plusHours(3);
-    Reservation reservation = Reservation.builder()
-        .reservationStart(reservationStart)
-        .reservationEnd(reservationEnd)
-        .visitor(visitorMember)
-        .facility(roomFacility)
-        .build();
-    reservationRepository.save(reservation);
+  public void isIncludingSchedule() {
+    LocalDateTime startDateTime = now.atTime(9, 0, 0);
+    LocalDateTime endDateTime = now.atTime(11, 59, 59);
+    assertThat(facilityScheduleQueryRepository
+        .isIncludingSchedule(roomFacility, startDateTime, endDateTime)).isTrue();
 
-    Boolean isExist = reservationQueryRepository
-        .isOverlappingReservation(roomFacility, now, now.plusHours(1));
-
-    assertThat(isExist).isTrue();
+    startDateTime = now.atTime(0, 0, 0);
+    endDateTime = now.plusDays(6).atTime(23, 59, 59);
+    assertThat(facilityScheduleQueryRepository
+        .isIncludingSchedule(roomFacility, startDateTime, endDateTime)).isTrue();
   }
 
-
+  @DisplayName("해당 시간범위에 시설이 Open했는지 여부를 반환한다. (날짜의 시간범위가 분리된 case 테스트)")
   @Test
-  @DisplayName("동일한 시설,시간에 기존 예약이 없다면 false를 반환한다.")
-  public void isOverlappingReservation_false() {
-    Boolean isExist = reservationQueryRepository
-        .isOverlappingReservation(roomFacility, now, now.plusHours(1));
+  public void isOpen_ifWeekdaySettingUpdate() {
+    FacilitySchedule updateFacilitySchedule = FacilitySchedule.builder()
+        .startDateTime(now.plusDays(1).atTime(0, 0, 0))
+        .endDateTime(now.plusDays(1).atTime(17, 59, 59))
+        .build(); // 오늘날짜 + 1 스케줄 데이터를 업데이트한다. (0시 ~ 18시로 변경)
+    FacilitySchedule facilitySchedule = roomFacility.getFacilitySchedules().getFacilitySchedules()
+        .get(now.getDayOfMonth());
+    facilitySchedule.update(updateFacilitySchedule);
 
-    assertThat(isExist).isFalse();
+    LocalDateTime startDateTime = now.atTime(9, 0, 0);
+    LocalDateTime endDateTime = now.plusDays(1).atTime(17, 59, 59);
+    assertThat(facilityScheduleQueryRepository
+        .isIncludingSchedule(roomFacility, startDateTime, endDateTime)).isTrue();
+
+    endDateTime = now.plusDays(2).atTime(17, 59, 59);
+    assertThat(facilityScheduleQueryRepository
+        .isIncludingSchedule(roomFacility, startDateTime, endDateTime)).isFalse();
   }
 }
