@@ -4,7 +4,10 @@ import com.modoospace.exception.InvalidTimeRangeException;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
+import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
@@ -127,8 +130,14 @@ public class FacilitySchedule {
   }
 
   public void update(FacilitySchedule facilitySchedule) {
-    startDateTime = facilitySchedule.getStartDateTime();
-    endDateTime = facilitySchedule.getEndDateTime();
+    this.startDateTime = facilitySchedule.getStartDateTime();
+    this.endDateTime = facilitySchedule.getEndDateTime();
+  }
+
+  public List<LocalTime> createHourlyTimeRange() {
+    return IntStream.rangeClosed(startDateTime.getHour(), endDateTime.getHour())
+        .mapToObj(hour -> LocalTime.of(hour, 0, 0))
+        .collect(Collectors.toList());
   }
 
   @Override

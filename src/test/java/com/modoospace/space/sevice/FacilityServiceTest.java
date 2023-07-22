@@ -3,6 +3,7 @@ package com.modoospace.space.sevice;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertAll;
 
+import com.modoospace.TestConfig;
 import com.modoospace.member.domain.Member;
 import com.modoospace.member.domain.MemberRepository;
 import com.modoospace.member.domain.Role;
@@ -18,6 +19,7 @@ import com.modoospace.space.domain.FacilityRepository;
 import com.modoospace.space.domain.FacilityType;
 import com.modoospace.space.domain.Space;
 import com.modoospace.space.domain.SpaceRepository;
+import com.modoospace.space.repository.FacilityScheduleQueryRepository;
 import java.time.DayOfWeek;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -31,7 +33,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase.Replace;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
+import org.springframework.context.annotation.Import;
 
+@Import({TestConfig.class})
 @DataJpaTest
 @AutoConfigureTestDatabase(replace = Replace.NONE)
 class FacilityServiceTest {
@@ -49,6 +53,9 @@ class FacilityServiceTest {
 
   @Autowired
   private CategoryRepository categoryRepository;
+
+  @Autowired
+  private FacilityScheduleQueryRepository facilityScheduleQueryRepository;
 
   private Member hostMember;
   private Space space;
@@ -77,10 +84,10 @@ class FacilityServiceTest {
     spaceRepository.save(space);
 
     nowDate = LocalDate.now();
-    if(nowDate.getDayOfWeek().equals(DayOfWeek.SUNDAY)){
+    if (nowDate.getDayOfWeek().equals(DayOfWeek.SUNDAY)) {
       nowDate = nowDate.plusDays(1);
     }
-    if(nowDate.getDayOfWeek().equals(DayOfWeek.SATURDAY)){
+    if (nowDate.getDayOfWeek().equals(DayOfWeek.SATURDAY)) {
       nowDate = nowDate.plusDays(2);
     }
   }
@@ -99,16 +106,16 @@ class FacilityServiceTest {
         .createFacility(space.getId(), createDto, hostMember.getEmail());
     Facility facility = facilityRepository.findById(facilityId).get();
 
+    LocalDateTime start = nowDate.atTime(0, 0, 0);
+    LocalDateTime end = nowDate.plusDays(2).atTime(23, 59, 59);
     assertAll(
         () -> assertThat(facility.getId()).isEqualTo(facilityId),
         () -> assertThat(facility.getName()).isEqualTo("스터디룸1"),
         () -> assertThat(facility.getFacilityType()).isEqualTo(FacilityType.ROOM),
         () -> assertThat(facility.getDescription()).isEqualTo("1~4인실 입니다."),
         () -> assertThat(facility.getReservationEnable()).isTrue(),
-        () -> assertThat(facility.isOpen(LocalDateTime.of(nowDate, LocalTime.of(0, 0, 0)),
-            LocalDateTime.of(nowDate, LocalTime.of(23, 59, 59)))),
-        () -> assertThat(facility.isOpen(LocalDateTime.of(nowDate, LocalTime.of(0, 0, 0)),
-            LocalDateTime.of(nowDate.plusDays(2), LocalTime.of(23, 59, 59))))
+        () -> assertThat(facilityScheduleQueryRepository.isIncludingSchedule(facility, start, end))
+            .isTrue()
     );
   }
 
@@ -137,16 +144,16 @@ class FacilityServiceTest {
         .createFacility(space.getId(), createDto, hostMember.getEmail());
     Facility facility = facilityRepository.findById(facilityId).get();
 
+    LocalDateTime start = nowDate.atTime(9, 0, 0);
+    LocalDateTime end = nowDate.atTime(20, 59, 59);
     assertAll(
         () -> assertThat(facility.getId()).isEqualTo(facilityId),
         () -> assertThat(facility.getName()).isEqualTo("스터디룸1"),
         () -> assertThat(facility.getFacilityType()).isEqualTo(FacilityType.ROOM),
         () -> assertThat(facility.getDescription()).isEqualTo("1~4인실 입니다."),
         () -> assertThat(facility.getReservationEnable()).isFalse(),
-        () -> assertThat(facility.isOpen(LocalDateTime.of(nowDate, LocalTime.of(9, 0, 0)),
-            LocalDateTime.of(nowDate, LocalTime.of(20, 59, 59)))).isTrue(),
-        () -> assertThat(facility.isOpen(LocalDateTime.of(nowDate, LocalTime.of(9, 0, 0)),
-            LocalDateTime.of(nowDate.plusDays(1), LocalTime.of(20, 59, 59)))).isFalse()
+        () -> assertThat(facilityScheduleQueryRepository.isIncludingSchedule(facility, start, end))
+            .isTrue()
     );
   }
 
@@ -171,16 +178,16 @@ class FacilityServiceTest {
         .updateFacility(facilityId, updateDto, hostMember.getEmail());
     Facility facility = facilityRepository.findById(facilityId).get();
 
+    LocalDateTime start = nowDate.atTime(0, 0, 0);
+    LocalDateTime end = nowDate.plusDays(2).atTime(23, 59, 59);
     assertAll(
         () -> assertThat(facility.getId()).isEqualTo(facilityId),
         () -> assertThat(facility.getName()).isEqualTo("스터디룸업데이트"),
         () -> assertThat(facility.getFacilityType()).isEqualTo(FacilityType.ROOM),
         () -> assertThat(facility.getDescription()).isEqualTo("설명업데이트"),
         () -> assertThat(facility.getReservationEnable()).isTrue(),
-        () -> assertThat(facility.isOpen(LocalDateTime.of(nowDate, LocalTime.of(0, 0, 0)),
-            LocalDateTime.of(nowDate, LocalTime.of(23, 59, 59)))).isTrue(),
-        () -> assertThat(facility.isOpen(LocalDateTime.of(nowDate, LocalTime.of(0, 0, 0)),
-            LocalDateTime.of(nowDate.plusDays(1), LocalTime.of(23, 59, 59)))).isTrue()
+        () -> assertThat(facilityScheduleQueryRepository.isIncludingSchedule(facility, start, end))
+            .isTrue()
     );
   }
 
@@ -216,16 +223,19 @@ class FacilityServiceTest {
         .updateFacility(facilityId, updateDto, hostMember.getEmail());
     Facility facility = facilityRepository.findById(facilityId).get();
 
+    LocalDateTime start = nowDate.atTime(9, 0, 0);
+    LocalDateTime end = nowDate.atTime(20, 59, 59);
     assertAll(
         () -> assertThat(facility.getId()).isEqualTo(facilityId),
         () -> assertThat(facility.getName()).isEqualTo("스터디룸업데이트"),
         () -> assertThat(facility.getFacilityType()).isEqualTo(FacilityType.ROOM),
         () -> assertThat(facility.getDescription()).isEqualTo("설명업데이트"),
         () -> assertThat(facility.getReservationEnable()).isTrue(),
-        () -> assertThat(facility.isOpen(LocalDateTime.of(nowDate, LocalTime.of(9, 0, 0)),
-            LocalDateTime.of(nowDate, LocalTime.of(20, 59, 59)))).isTrue(),
-        () -> assertThat(facility.isOpen(LocalDateTime.of(nowDate, LocalTime.of(9, 0, 0)),
-            LocalDateTime.of(nowDate.plusDays(1), LocalTime.of(20, 59, 59)))).isFalse()
+        () -> assertThat(facilityScheduleQueryRepository.isIncludingSchedule(facility, start, end))
+            .isTrue(),
+        () -> assertThat(
+            facilityScheduleQueryRepository.isIncludingSchedule(facility, start, end.plusDays(1)))
+            .isFalse()
     );
   }
 }

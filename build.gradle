@@ -52,6 +52,7 @@ dependencies {
 	// Test Lombok
 	testCompileOnly 'org.projectlombok:lombok'
 	testAnnotationProcessor 'org.projectlombok:lombok'
+	testImplementation 'org.mockito:mockito-core'
 }
 
 tasks.named('test') {

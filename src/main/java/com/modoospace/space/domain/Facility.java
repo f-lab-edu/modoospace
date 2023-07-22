@@ -5,8 +5,6 @@ import static javax.persistence.FetchType.LAZY;
 import com.modoospace.common.BaseTimeEntity;
 import com.modoospace.exception.NotOpenedFacilityException;
 import com.modoospace.member.domain.Member;
-import com.modoospace.reservation.controller.dto.ReservationCreateDto;
-import java.time.LocalDateTime;
 import java.time.YearMonth;
 import javax.persistence.Column;
 import javax.persistence.Embedded;
@@ -130,18 +128,8 @@ public class Facility extends BaseTimeEntity {
     space.verifyManagementPermission(loginMember);
   }
 
-  public boolean isOpen(LocalDateTime start, LocalDateTime end) {
-    return facilitySchedules.isOpen(start, end);
-  }
-
-  public void validateFacilityAvailability(ReservationCreateDto createDto) {
-    LocalDateTime requestStartTime = createDto.getReservationStart();
-    LocalDateTime requestEndTime = createDto.getReservationEnd();
-
-    boolean isFacilityOpen = this.isOpen(requestStartTime, requestEndTime);
-    boolean isReservationEnabled = this.getReservationEnable();
-
-    if (!isReservationEnabled || !isFacilityOpen) {
+  public void verifyReservationEnable() {
+    if (!this.reservationEnable) {
       throw new NotOpenedFacilityException();
     }
   }

@@ -11,7 +11,6 @@ import com.modoospace.space.domain.FacilitySchedule;
 import com.modoospace.space.domain.FacilityScheduleRepository;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.time.LocalTime;
 import java.time.YearMonth;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -23,9 +22,9 @@ import org.springframework.transaction.annotation.Transactional;
 @Service
 public class FacilityScheduleService {
 
-  private final FacilityScheduleRepository facilityScheduleRepository;
-  private final FacilityRepository facilityRepository;
   private final MemberRepository memberRepository;
+  private final FacilityRepository facilityRepository;
+  private final FacilityScheduleRepository facilityScheduleRepository;
 
   @Transactional
   public Long createFacilitySchedule(Long facilityId, FacilityScheduleCreateUpdateDto createDto,
@@ -142,29 +141,21 @@ public class FacilityScheduleService {
 
   private List<FacilitySchedule> find1DayFacilitySchedules(Facility facility,
       LocalDate findDate) {
-    LocalDateTime startDateTime = LocalDateTime
-        .of(findDate, LocalTime.of(0, 0, 0))
-        .minusSeconds(1);
-    LocalDateTime endDateTime = LocalDateTime
-        .of(findDate, LocalTime.of(23, 59, 59))
-        .plusSeconds(1);
+    LocalDateTime startDateTime = findDate.atTime(0, 0, 0);
+    LocalDateTime endDateTime = findDate.atTime(23, 59, 59);
 
     return facilityScheduleRepository
-        .findByFacilityAndStartDateTimeAfterAndEndDateTimeBeforeOrderByStartDateTime(facility, startDateTime,
+        .findByFacilityAndStartDateTimeBetweenOrderByStartDateTime(facility, startDateTime,
             endDateTime);
   }
 
   private List<FacilitySchedule> find1MonthFacilitySchedules(Facility facility,
       YearMonth findYearMonth) {
-    LocalDateTime startDateTime = LocalDateTime
-        .of(findYearMonth.atDay(1), LocalTime.of(0, 0, 0))
-        .minusSeconds(1);
-    LocalDateTime endDateTime = LocalDateTime
-        .of(findYearMonth.atEndOfMonth(), LocalTime.of(23, 59, 59))
-        .plusSeconds(1);
+    LocalDateTime startDateTime = findYearMonth.atDay(1).atTime(0, 0, 0);
+    LocalDateTime endDateTime = findYearMonth.atEndOfMonth().atTime(23, 59, 59);
 
     return facilityScheduleRepository
-        .findByFacilityAndStartDateTimeAfterAndEndDateTimeBeforeOrderByStartDateTime(facility, startDateTime,
+        .findByFacilityAndStartDateTimeBetweenOrderByStartDateTime(facility, startDateTime,
             endDateTime);
   }
 }

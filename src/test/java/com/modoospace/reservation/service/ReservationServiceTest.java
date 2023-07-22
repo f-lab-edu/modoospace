@@ -3,8 +3,10 @@ package com.modoospace.reservation.service;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 import static org.junit.jupiter.api.Assertions.assertAll;
+import static org.mockito.Mockito.mock;
 
 import com.modoospace.TestConfig;
+import com.modoospace.alarm.producer.AlarmProducer;
 import com.modoospace.exception.ConflictingReservationException;
 import com.modoospace.exception.PermissionDeniedException;
 import com.modoospace.member.domain.Member;
@@ -28,7 +30,7 @@ import com.modoospace.space.domain.FacilityScheduleRepository;
 import com.modoospace.space.domain.FacilityType;
 import com.modoospace.space.domain.Space;
 import com.modoospace.space.domain.SpaceRepository;
-import com.modoospace.space.sevice.FacilityScheduleService;
+import com.modoospace.space.repository.FacilityScheduleQueryRepository;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.Arrays;
@@ -49,13 +51,13 @@ import org.springframework.transaction.annotation.Transactional;
 public class ReservationServiceTest {
 
   @Autowired
-  private ReservationRepository reservationRepository;
+  private MemberRepository memberRepository;
 
   @Autowired
   private CategoryRepository categoryRepository;
 
   @Autowired
-  private MemberRepository memberRepository;
+  private SpaceRepository spaceRepository;
 
   @Autowired
   private FacilityRepository facilityRepository;
@@ -64,14 +66,15 @@ public class ReservationServiceTest {
   private FacilityScheduleRepository facilityScheduleRepository;
 
   @Autowired
-  private ReservationQueryRepository reservationQueryRepository;
+  private FacilityScheduleQueryRepository facilityScheduleQueryRepository;
 
   @Autowired
-  private SpaceRepository spaceRepository;
+  private ReservationRepository reservationRepository;
+
+  @Autowired
+  private ReservationQueryRepository reservationQueryRepository;
 
   private ReservationService reservationService;
-
-  private FacilityScheduleService facilityScheduleService;
 
   private Member visitorMember;
 
@@ -85,11 +88,11 @@ public class ReservationServiceTest {
 
   @BeforeEach
   public void setUp() {
-    facilityScheduleService = new FacilityScheduleService(facilityScheduleRepository,
-        facilityRepository, memberRepository);
-
-    reservationService = new ReservationService(reservationRepository, facilityRepository,
-        memberRepository, reservationQueryRepository, facilityScheduleService);
+    AlarmProducer alarmProducer = mock(AlarmProducer.class);
+    reservationService = new ReservationService(memberRepository, facilityRepository,
+        facilityScheduleRepository, facilityScheduleQueryRepository, reservationRepository,
+        reservationQueryRepository,
+        alarmProducer);
 
     hostMember = Member.builder()
         .email("host@email")
@@ -150,14 +153,32 @@ public class ReservationServiceTest {
     Assertions.assertThat(retDto.getAvailableTimes()).hasSize(15);
   }
 
-  @DisplayName("특정 날짜의 예약가능시간을 조회할 수 있다.(24시간 오픈)")
+  @DisplayName("특정 날짜의 예약가능시간을 조회할 수 있다.")
+  @Test
+  public void getAvailableTimes_ifPresentReservation() {
+    AvailabilityTimeResponseDto retDto = reservationService
+        .getAvailabilityTime(roomFacility.getId(), now.toLocalDate());
+
+    // 09:00:00 ~ 23:59:59
+    Assertions.assertThat(retDto.getAvailableTimes()).hasSize(15);
+  }
+
+  @DisplayName("특정 날짜의 예약가능시간을 조회할 수 있다.(12~15시 예약존재)")
   @Test
   public void getAvailableTimes_24Open() {
-    AvailabilityTimeResponseDto retDto = reservationService
-        .getAvailabilityTime(seatFacility.getId(), now.toLocalDate());
+    LocalDateTime reservationStart = now.toLocalDate().atTime(LocalTime.of(12, 0, 0));
+    LocalDateTime reservationEnd = now.toLocalDate().atTime(LocalTime.of(14, 59, 59));
+    ReservationCreateDto dto = ReservationCreateDto.builder()
+        .reservationStart(reservationStart)
+        .reservationEnd(reservationEnd)
+        .build();
+    reservationService.createReservation(dto, roomFacility.getId(), visitorMember.getEmail());
 
-    // 00:00:00 ~ 23:59:59
-    Assertions.assertThat(retDto.getAvailableTimes()).hasSize(24);
+    AvailabilityTimeResponseDto retDto = reservationService
+        .getAvailabilityTime(roomFacility.getId(), now.toLocalDate());
+
+    // 09:00:00 ~ 11:59:59, 15:00:00 ~ 23:59:59
+    Assertions.assertThat(retDto.getAvailableTimes()).hasSize(15 - 3);
   }
 
   @DisplayName("로그인한 멤버가 비지터일 경우 예약을 생성할 수 있다.")

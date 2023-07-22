@@ -97,37 +97,6 @@ class FacilitySchedulesTest {
     System.out.println(allDayFacilitySchedules);
   }
 
-  @DisplayName("해당 시간범위에 시설이 Open했는지 여부를 반환한다.")
-  @Test
-  public void isOpen() {
-    LocalDateTime startDateTime = LocalDateTime.of(nowDate, LocalTime.of(9, 0, 0));
-    LocalDateTime endDateTime = LocalDateTime.of(nowDate, LocalTime.of(11, 59, 59));
-    assertThat(allDayFacilitySchedules.isOpen(startDateTime, endDateTime)).isTrue();
-
-    startDateTime = LocalDateTime.of(nowDate, LocalTime.of(0, 0, 0));
-    endDateTime = LocalDateTime.of(nowDate.plusDays(6), LocalTime.of(23, 59, 59));
-    assertThat(allDayFacilitySchedules.isOpen(startDateTime, endDateTime)).isTrue();
-  }
-
-  @DisplayName("해당 시간범위에 시설이 Open했는지 여부를 반환한다. (날짜의 시간범위가 분리된 case 테스트)")
-  @Test
-  public void isOpen_ifWeekdaySettingUpdate() {
-    FacilitySchedule updateFacilitySchedule = FacilitySchedule.builder()
-        .startDateTime(LocalDateTime.of(nowDate.plusDays(1), LocalTime.of(0, 0, 0)))
-        .endDateTime(LocalDateTime.of(nowDate.plusDays(1), LocalTime.of(17, 59, 59)))
-        .build(); // 오늘날짜 + 1 스케줄 데이터를 업데이트한다. (0시 ~ 18시로 변경)
-    FacilitySchedule facilitySchedule = allDayFacilitySchedules.getFacilitySchedules()
-        .get(nowDate.getDayOfMonth());
-    facilitySchedule.update(updateFacilitySchedule);
-
-    LocalDateTime startDateTime = LocalDateTime.of(nowDate, LocalTime.of(9, 0, 0));
-    LocalDateTime endDateTime = LocalDateTime.of(nowDate.plusDays(1), LocalTime.of(17, 59, 59));
-    assertThat(allDayFacilitySchedules.isOpen(startDateTime, endDateTime)).isTrue();
-
-    endDateTime = LocalDateTime.of(nowDate.plusDays(2), LocalTime.of(17, 59, 59));
-    assertThat(allDayFacilitySchedules.isOpen(startDateTime, endDateTime)).isFalse();
-  }
-
   @DisplayName("시설 스케줄을 추가한다.")
   @Test
   public void addFacilitySchedule() {
