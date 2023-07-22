@@ -1,8 +1,8 @@
 package com.modoospace.space.controller;
 
+import com.modoospace.common.DayDto;
+import com.modoospace.common.MonthDto;
 import com.modoospace.config.auth.LoginEmail;
-import com.modoospace.space.controller.dto.facilitySchedule.FacilitySchedule1DayDto;
-import com.modoospace.space.controller.dto.facilitySchedule.FacilitySchedule1MonthDto;
 import com.modoospace.space.controller.dto.facilitySchedule.FacilityScheduleCreateUpdateDto;
 import com.modoospace.space.controller.dto.facilitySchedule.FacilityScheduleReadDto;
 import com.modoospace.space.sevice.FacilityScheduleService;
@@ -62,7 +62,7 @@ public class FacilityScheduleController {
 
   @GetMapping("/day")
   public ResponseEntity<List<FacilityScheduleReadDto>> find1Day(@PathVariable Long facilityId,
-      @RequestBody @Valid FacilitySchedule1DayDto searchDto) {
+      @RequestBody @Valid DayDto searchDto) {
     List<FacilityScheduleReadDto> facilityScheduleReadDtos = facilityScheduleService
         .find1DayFacilitySchedules(facilityId, searchDto.getDate());
     return ResponseEntity.ok().body(facilityScheduleReadDtos);
@@ -70,7 +70,7 @@ public class FacilityScheduleController {
 
   @PostMapping("/month")
   public ResponseEntity<Void> create1MonthDefault(@PathVariable Long facilityId,
-      @RequestBody @Valid FacilitySchedule1MonthDto createDto,
+      @RequestBody @Valid MonthDto createDto,
       @LoginEmail String loginEmail) {
     facilityScheduleService
         .create1MonthDefaultFacilitySchedules(facilityId, createDto.getYearMonth(), loginEmail);
@@ -79,7 +79,7 @@ public class FacilityScheduleController {
 
   @GetMapping("/month")
   public ResponseEntity<List<FacilityScheduleReadDto>> find1Month(@PathVariable Long facilityId,
-      @RequestBody @Valid FacilitySchedule1MonthDto searchDto) {
+      @RequestBody @Valid MonthDto searchDto) {
     List<FacilityScheduleReadDto> facilityScheduleReadDtos = facilityScheduleService
         .find1MonthFacilitySchedules(facilityId, searchDto.getYearMonth());
     return ResponseEntity.ok().body(facilityScheduleReadDtos);
@@ -87,7 +87,7 @@ public class FacilityScheduleController {
 
   @DeleteMapping("/month")
   public ResponseEntity<Void> delete1Month(@PathVariable Long facilityId,
-      @RequestBody @Valid FacilitySchedule1MonthDto deleteDto,
+      @RequestBody @Valid MonthDto deleteDto,
       @LoginEmail String loginEmail) {
     facilityScheduleService
         .delete1MonthFacilitySchedules(facilityId, deleteDto.getYearMonth(), loginEmail);
