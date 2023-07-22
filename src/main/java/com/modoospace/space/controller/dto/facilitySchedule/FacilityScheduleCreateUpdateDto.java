@@ -4,6 +4,7 @@ import com.fasterxml.jackson.annotation.JsonFormat;
 import com.modoospace.space.domain.Facility;
 import com.modoospace.space.domain.FacilitySchedule;
 import java.time.LocalDateTime;
+import javax.validation.constraints.NotNull;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
@@ -11,9 +12,11 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 public class FacilityScheduleCreateUpdateDto {
 
+  @NotNull
   @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ss", timezone = "Asia/Seoul")
   private LocalDateTime startDateTime;
 
+  @NotNull
   @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ss", timezone = "Asia/Seoul")
   private LocalDateTime endDateTime;
 

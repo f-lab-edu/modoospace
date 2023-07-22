@@ -8,6 +8,7 @@ import com.modoospace.exception.NotOpenedFacilityException;
 import com.modoospace.member.domain.Member;
 import com.modoospace.member.domain.MemberRepository;
 import com.modoospace.member.domain.Role;
+import com.modoospace.reservation.controller.dto.AvailabilityNowResponseDto;
 import com.modoospace.reservation.controller.dto.AvailabilityTimeResponseDto;
 import com.modoospace.reservation.controller.dto.ReservationCreateDto;
 import com.modoospace.reservation.controller.dto.ReservationReadDto;
@@ -88,6 +89,25 @@ public class ReservationService {
     }
   }
 
+  public AvailabilityNowResponseDto getAvailabilityNow(Long facilityId) {
+    Facility facility = findFacilityById(facilityId);
+    if (!facility.getReservationEnable()) {
+      return AvailabilityNowResponseDto.from(facility, false);
+    }
+
+    return AvailabilityNowResponseDto.from(facility, isAvailabilityNow(facility));
+  }
+
+  private Boolean isAvailabilityNow(Facility facility) {
+    LocalDateTime now = LocalDateTime.now();
+    Boolean isIncludingSchedule = facilityScheduleQueryRepository
+        .isIncludingSchedule(facility, now, now);
+    Boolean isOverlappingReservation = reservationQueryRepository
+        .isOverlappingReservation(facility, now, now);
+
+    return isIncludingSchedule && !isOverlappingReservation;
+  }
+
   public AvailabilityTimeResponseDto getAvailabilityTime(Long facilityId, LocalDate searchDate) {
     Facility facility = findFacilityById(facilityId);
     List<FacilitySchedule> facilitySchedules = findOpenFacilitySchedules(facility, searchDate);
@@ -104,8 +124,8 @@ public class ReservationService {
     LocalDateTime startDateTime = requestDate.atTime(0, 0, 0);
     LocalDateTime endDateTime = requestDate.atTime(23, 59, 59);
 
-    return facilityScheduleRepository
-        .findByFacilityAndStartDateTimeBetween(facility, startDateTime, endDateTime);
+    return facilityScheduleRepository.findByFacilityAndStartDateTimeBetween(
+        facility, startDateTime, endDateTime);
   }
 
   private List<Reservation> findActiveReservations(Facility facility, LocalDate requestDate) {
@@ -113,9 +133,8 @@ public class ReservationService {
     LocalDateTime startDateTime = requestDate.atTime(0, 0, 0);
     LocalDateTime endDateTime = requestDate.atTime(23, 59, 59);
 
-    return reservationRepository
-        .findByFacilityAndStatusInAndReservationStartBetween(facility, activeStatuses,
-            startDateTime, endDateTime);
+    return reservationRepository.findByFacilityAndStatusInAndReservationStartBetween(
+        facility, activeStatuses, startDateTime, endDateTime);
   }
 
   private List<LocalTime> createHourlyTimeRange(List<FacilitySchedule> facilitySchedules,
@@ -214,6 +233,9 @@ public class ReservationService {
     Member loginMember = findMemberByEmail(loginEmail);
     Reservation reservation = findReservationById(reservationId);
     reservation.cancelAsVisitor(loginMember);
+
+    AlarmEvent alarmEvent = AlarmEvent.toCancelReservationAlarm(reservation);
+    alarmProducer.send(alarmEvent);
   }
 
   private Member findMemberById(Long memberId) {

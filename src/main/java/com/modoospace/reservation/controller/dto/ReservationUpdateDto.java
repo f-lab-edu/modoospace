@@ -12,7 +12,6 @@ public class ReservationUpdateDto {
 
   ReservationStatus status;
 
-  @Builder
   public ReservationUpdateDto(ReservationStatus status) {
     this.status = status;
   }
