@@ -22,7 +22,7 @@ public class AdminReservationController {
 
   private final ReservationService reservationService;
 
-  @GetMapping("/member/{memberId}")
+   @GetMapping("/visitor/{memberId}")
   public ResponseEntity<List<ReservationReadDto>> findAllAsMember(@PathVariable Long memberId,
       @LoginEmail final String loginEmail) {
     List<ReservationReadDto> reservationList = reservationService

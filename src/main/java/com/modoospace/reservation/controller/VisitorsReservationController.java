@@ -27,8 +27,7 @@ public class VisitorsReservationController {
   private final ReservationService reservationService;
 
   @GetMapping
-  public ResponseEntity<List<ReservationReadDto>> findAllReservation(
-      @LoginEmail final String loginEmail) {
+  public ResponseEntity<List<ReservationReadDto>> findAll(@LoginEmail final String loginEmail) {
     List<ReservationReadDto> reservationList = reservationService.findAllAsVisitor(loginEmail);
     return ResponseEntity.ok().body(reservationList);
   }

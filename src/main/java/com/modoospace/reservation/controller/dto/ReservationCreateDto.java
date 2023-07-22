@@ -22,7 +22,6 @@ public class ReservationCreateDto {
   @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ss", timezone = "Asia/Seoul")
   private LocalDateTime reservationEnd;
 
-  @Builder
   public ReservationCreateDto(LocalDateTime reservationStart,
       LocalDateTime reservationEnd) {
     this.reservationStart = reservationStart;

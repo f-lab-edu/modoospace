@@ -167,10 +167,8 @@ public class ReservationServiceTest {
   public void getAvailableTimes_ifPresentReservation() {
     LocalDateTime reservationStart = now.toLocalDate().atTime(LocalTime.of(12, 0, 0));
     LocalDateTime reservationEnd = now.toLocalDate().atTime(LocalTime.of(14, 59, 59));
-    ReservationCreateDto dto = ReservationCreateDto.builder()
-        .reservationStart(reservationStart)
-        .reservationEnd(reservationEnd)
-        .build();
+    ReservationCreateDto dto = new ReservationCreateDto(reservationStart, reservationEnd);
+
     reservationService.createReservation(dto, roomFacility.getId(), visitorMember.getEmail());
 
     AvailabilityTimeResponseDto retDto = reservationService
@@ -185,10 +183,7 @@ public class ReservationServiceTest {
   public void createReservation_IfVisitor() {
     LocalDateTime reservationStart = now.toLocalDate().atTime(LocalTime.of(12, 0, 0));
     LocalDateTime reservationEnd = now.toLocalDate().atTime(LocalTime.of(14, 59, 59));
-    ReservationCreateDto dto = ReservationCreateDto.builder()
-        .reservationStart(reservationStart)
-        .reservationEnd(reservationEnd)
-        .build();
+    ReservationCreateDto dto = new ReservationCreateDto(reservationStart, reservationEnd);
     Long reservationId = reservationService.createReservation(dto, roomFacility.getId(),
         visitorMember.getEmail());
 
@@ -208,18 +203,12 @@ public class ReservationServiceTest {
   public void createReservationRoom_throwException_ifOverlappingReservation() {
     LocalDateTime reservationStart = now.toLocalDate().atTime(LocalTime.of(12, 0, 0));
     LocalDateTime reservationEnd = now.toLocalDate().atTime(LocalTime.of(14, 59, 59));
-    ReservationCreateDto dto = ReservationCreateDto.builder()
-        .reservationStart(reservationStart)
-        .reservationEnd(reservationEnd)
-        .build();
+    ReservationCreateDto dto = new ReservationCreateDto(reservationStart, reservationEnd);
     reservationService.createReservation(dto, roomFacility.getId(), visitorMember.getEmail());
 
     reservationStart = now.toLocalDate().atTime(LocalTime.of(13, 0, 0));
     reservationEnd = now.toLocalDate().atTime(LocalTime.of(15, 59, 59));
-    ReservationCreateDto dto2 = ReservationCreateDto.builder()
-        .reservationStart(reservationStart)
-        .reservationEnd(reservationEnd)
-        .build();
+    ReservationCreateDto dto2 = new ReservationCreateDto(reservationStart, reservationEnd);
     assertThatThrownBy(() -> reservationService
         .createReservation(dto2, roomFacility.getId(), visitorMember.getEmail()))
         .isInstanceOf(ConflictingReservationException.class);
@@ -230,10 +219,7 @@ public class ReservationServiceTest {
   public void reservationStatus_IfSeat() {
     LocalDateTime reservationStart = now;
     LocalDateTime reservationEnd = now.plusHours(3);
-    ReservationCreateDto dto = ReservationCreateDto.builder()
-        .reservationStart(reservationStart)
-        .reservationEnd(reservationEnd)
-        .build();
+    ReservationCreateDto dto = new ReservationCreateDto(reservationStart, reservationEnd);
     Long reservationId = reservationService.createReservation(dto, seatFacility.getId(),
         visitorMember.getEmail());
 
@@ -252,18 +238,12 @@ public class ReservationServiceTest {
   public void createReservationSeat_throwException_ifOverlappingReservation() {
     LocalDateTime reservationStart = now;
     LocalDateTime reservationEnd = now.plusHours(3);
-    ReservationCreateDto dto = ReservationCreateDto.builder()
-        .reservationStart(reservationStart)
-        .reservationEnd(reservationEnd)
-        .build();
+    ReservationCreateDto dto = new ReservationCreateDto(reservationStart, reservationEnd);
     reservationService.createReservation(dto, seatFacility.getId(), visitorMember.getEmail());
 
     reservationStart = now.plusHours(1);
     reservationEnd = now.plusHours(3);
-    ReservationCreateDto dto2 = ReservationCreateDto.builder()
-        .reservationStart(reservationStart)
-        .reservationEnd(reservationEnd)
-        .build();
+    ReservationCreateDto dto2 = new ReservationCreateDto(reservationStart, reservationEnd);
     assertThatThrownBy(() -> reservationService
         .createReservation(dto2, seatFacility.getId(), visitorMember.getEmail()))
         .isInstanceOf(ConflictingReservationException.class);
@@ -275,10 +255,7 @@ public class ReservationServiceTest {
   public void cancelReservation() {
     LocalDateTime reservationStart = now.toLocalDate().atTime(LocalTime.of(12, 0, 0));
     LocalDateTime reservationEnd = now.toLocalDate().atTime(LocalTime.of(14, 59, 59));
-    ReservationCreateDto dto = ReservationCreateDto.builder()
-        .reservationStart(reservationStart)
-        .reservationEnd(reservationEnd)
-        .build();
+    ReservationCreateDto dto = new ReservationCreateDto(reservationStart, reservationEnd);
     Long reservationId = reservationService
         .createReservation(dto, roomFacility.getId(), visitorMember.getEmail());
 
@@ -298,10 +275,7 @@ public class ReservationServiceTest {
   public void cancelReservation_throwException_IfNotMyReservation() {
     LocalDateTime reservationStart = now.toLocalDate().atTime(LocalTime.of(12, 0, 0));
     LocalDateTime reservationEnd = now.toLocalDate().atTime(LocalTime.of(14, 59, 59));
-    ReservationCreateDto dto = ReservationCreateDto.builder()
-        .reservationStart(reservationStart)
-        .reservationEnd(reservationEnd)
-        .build();
+    ReservationCreateDto dto = new ReservationCreateDto(reservationStart, reservationEnd);
     Long reservationId = reservationService
         .createReservation(dto, roomFacility.getId(), visitorMember.getEmail());
 
