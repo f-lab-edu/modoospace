@@ -39,15 +39,14 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
-import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase.Replace;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.context.annotation.Import;
+import org.springframework.test.context.ActiveProfiles;
 import org.springframework.transaction.annotation.Transactional;
 
-@Import({TestConfig.class})
 @DataJpaTest
-@AutoConfigureTestDatabase(replace = Replace.NONE)
+@Import(TestConfig.class)
+@ActiveProfiles("test")
 public class ReservationServiceTest {
 
   @Autowired
@@ -153,19 +152,19 @@ public class ReservationServiceTest {
     Assertions.assertThat(retDto.getAvailableTimes()).hasSize(15);
   }
 
-  @DisplayName("특정 날짜의 예약가능시간을 조회할 수 있다.")
+  @DisplayName("특정 날짜의 예약가능시간을 조회할 수 있다.(24시간 오픈)")
   @Test
-  public void getAvailableTimes_ifPresentReservation() {
+  public void getAvailableTimes_24Open() {
     AvailabilityTimeResponseDto retDto = reservationService
-        .getAvailabilityTime(roomFacility.getId(), now.toLocalDate());
+        .getAvailabilityTime(seatFacility.getId(), now.toLocalDate());
 
-    // 09:00:00 ~ 23:59:59
-    Assertions.assertThat(retDto.getAvailableTimes()).hasSize(15);
+    // 00:00:00 ~ 23:59:59
+    Assertions.assertThat(retDto.getAvailableTimes()).hasSize(24);
   }
 
   @DisplayName("특정 날짜의 예약가능시간을 조회할 수 있다.(12~15시 예약존재)")
   @Test
-  public void getAvailableTimes_24Open() {
+  public void getAvailableTimes_ifPresentReservation() {
     LocalDateTime reservationStart = now.toLocalDate().atTime(LocalTime.of(12, 0, 0));
     LocalDateTime reservationEnd = now.toLocalDate().atTime(LocalTime.of(14, 59, 59));
     ReservationCreateDto dto = ReservationCreateDto.builder()

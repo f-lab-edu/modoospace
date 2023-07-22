@@ -4,6 +4,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.junit.jupiter.api.Assertions.assertAll;
 
+import com.modoospace.TestConfig;
 import com.modoospace.exception.ConflictingTimeException;
 import com.modoospace.exception.NotFoundEntityException;
 import com.modoospace.member.domain.Member;
@@ -32,12 +33,13 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
-import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase.Replace;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
+import org.springframework.context.annotation.Import;
+import org.springframework.test.context.ActiveProfiles;
 
 @DataJpaTest
-@AutoConfigureTestDatabase(replace = Replace.NONE)
+@Import(TestConfig.class)
+@ActiveProfiles("test")
 public class FacilityScheduleServiceTest {
 
   @Autowired
@@ -235,7 +237,7 @@ public class FacilityScheduleServiceTest {
 
   @DisplayName("하루 치 스케줄데이터를 조회한다.")
   @Test
-  public void find1DayFacilitySchedules(){
+  public void find1DayFacilitySchedules() {
     List<FacilityScheduleReadDto> facilitySchedules = facilityScheduleService
         .find1DayFacilitySchedules(facility.getId(), nowDate);
 
@@ -264,7 +266,7 @@ public class FacilityScheduleServiceTest {
 
   @DisplayName("1달 치 스케줄데이터를 조회한다.")
   @Test
-  public void find1MonthFacilitySchedules(){
+  public void find1MonthFacilitySchedules() {
     List<FacilityScheduleReadDto> facilitySchedules = facilityScheduleService
         .find1MonthFacilitySchedules(facility.getId(), nowYearMonth);
 

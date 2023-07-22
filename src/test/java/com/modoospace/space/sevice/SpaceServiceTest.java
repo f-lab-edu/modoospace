@@ -4,6 +4,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.junit.jupiter.api.Assertions.assertAll;
 
+import com.modoospace.TestConfig;
 import com.modoospace.exception.NotFoundEntityException;
 import com.modoospace.exception.PermissionDeniedException;
 import com.modoospace.member.domain.Member;
@@ -21,12 +22,13 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
-import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase.Replace;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
+import org.springframework.context.annotation.Import;
+import org.springframework.test.context.ActiveProfiles;
 
 @DataJpaTest
-@AutoConfigureTestDatabase(replace = Replace.NONE)
+@Import(TestConfig.class)
+@ActiveProfiles("test")
 class SpaceServiceTest {
 
   private SpaceService spaceService;
