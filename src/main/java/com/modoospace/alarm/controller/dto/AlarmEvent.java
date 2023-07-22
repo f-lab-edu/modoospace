@@ -45,6 +45,14 @@ public class AlarmEvent {
         .build();
   }
 
+  public static AlarmEvent toCancelReservationAlarm(Reservation reservation) {
+    return AlarmEvent.builder()
+        .memberId(reservation.getHost().getId())
+        .reservationId(reservation.getId())
+        .alarmType(AlarmType.CANCELED_RESERVATION)
+        .build();
+  }
+
   public Alarm toEntity(Member member, Reservation reservation) {
     return Alarm.builder()
         .member(member)

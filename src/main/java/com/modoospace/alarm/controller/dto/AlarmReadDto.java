@@ -1,8 +1,6 @@
 package com.modoospace.alarm.controller.dto;
 
 import com.modoospace.alarm.domain.Alarm;
-import com.modoospace.alarm.domain.AlarmType;
-import com.modoospace.reservation.domain.Reservation;
 import javax.validation.constraints.NotNull;
 import lombok.Builder;
 import lombok.Getter;
@@ -33,14 +31,6 @@ public class AlarmReadDto {
         .id(alarm.getId())
         .reservationId(alarm.getReservation().getId())
         .message(alarm.getAlarmMessage())
-        .build();
-  }
-
-  public static AlarmReadDto toDto(Alarm alarm, Reservation reservation) {
-    return AlarmReadDto.builder()
-        .id(alarm.getId())
-        .reservationId(reservation.getId())
-        .message(reservation.getFacility().getFacilityName() + alarm.getAlarmType().getAlarmText())
         .build();
   }
 }
