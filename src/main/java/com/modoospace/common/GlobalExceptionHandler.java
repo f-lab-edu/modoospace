@@ -1,14 +1,14 @@
-package com.modoospace.global;
+package com.modoospace.common;
 
-import com.modoospace.global.exception.AlarmSendException;
-import com.modoospace.global.exception.ConflictingReservationException;
-import com.modoospace.global.exception.ConflictingTimeException;
-import com.modoospace.global.exception.DuplicatedWeekdayException;
-import com.modoospace.global.exception.InvalidTimeRangeException;
-import com.modoospace.global.exception.NotFoundEntityException;
-import com.modoospace.global.exception.NotOpenedFacilityException;
-import com.modoospace.global.exception.PermissionDeniedException;
-import com.modoospace.global.exception.SSEConnectError;
+import com.modoospace.common.exception.AlarmSendException;
+import com.modoospace.common.exception.ConflictingReservationException;
+import com.modoospace.common.exception.ConflictingTimeException;
+import com.modoospace.common.exception.DuplicatedWeekdayException;
+import com.modoospace.common.exception.InvalidTimeRangeException;
+import com.modoospace.common.exception.NotFoundEntityException;
+import com.modoospace.common.exception.NotOpenedFacilityException;
+import com.modoospace.common.exception.PermissionDeniedException;
+import com.modoospace.common.exception.SSEConnectError;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ExceptionHandler;

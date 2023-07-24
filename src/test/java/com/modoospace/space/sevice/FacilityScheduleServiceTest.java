@@ -5,8 +5,8 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.junit.jupiter.api.Assertions.assertAll;
 
 import com.modoospace.TestConfig;
-import com.modoospace.global.exception.ConflictingTimeException;
-import com.modoospace.global.exception.NotFoundEntityException;
+import com.modoospace.common.exception.ConflictingTimeException;
+import com.modoospace.common.exception.NotFoundEntityException;
 import com.modoospace.member.domain.Member;
 import com.modoospace.member.domain.MemberRepository;
 import com.modoospace.member.domain.Role;

@@ -1,12 +1,12 @@
 package com.modoospace.reservation.controller.dto;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
+import com.modoospace.common.DateFormatManager;
 import com.modoospace.member.domain.Member;
 import com.modoospace.reservation.domain.Reservation;
 import com.modoospace.space.domain.Facility;
 import java.time.LocalDateTime;
 import javax.validation.constraints.NotNull;
-import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
@@ -15,11 +15,11 @@ import lombok.NoArgsConstructor;
 public class ReservationCreateDto {
 
   @NotNull
-  @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ss", timezone = "Asia/Seoul")
+  @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = DateFormatManager.DATETIME_FORMAT, timezone = "Asia/Seoul")
   private LocalDateTime reservationStart;
 
   @NotNull
-  @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ss", timezone = "Asia/Seoul")
+  @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = DateFormatManager.DATETIME_FORMAT, timezone = "Asia/Seoul")
   private LocalDateTime reservationEnd;
 
   public ReservationCreateDto(LocalDateTime reservationStart,

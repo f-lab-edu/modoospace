@@ -2,9 +2,9 @@ package com.modoospace.reservation.serivce;
 
 import com.modoospace.alarm.controller.dto.AlarmEvent;
 import com.modoospace.alarm.producer.AlarmProducer;
-import com.modoospace.global.exception.ConflictingReservationException;
-import com.modoospace.global.exception.NotFoundEntityException;
-import com.modoospace.global.exception.NotOpenedFacilityException;
+import com.modoospace.common.exception.ConflictingReservationException;
+import com.modoospace.common.exception.NotFoundEntityException;
+import com.modoospace.common.exception.NotOpenedFacilityException;
 import com.modoospace.member.domain.Member;
 import com.modoospace.member.domain.MemberRepository;
 import com.modoospace.member.domain.Role;

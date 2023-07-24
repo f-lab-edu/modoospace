@@ -1,6 +1,7 @@
 package com.modoospace.space.controller.dto.facilitySchedule;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
+import com.modoospace.common.DateFormatManager;
 import com.modoospace.space.domain.FacilitySchedule;
 import java.time.LocalDateTime;
 import java.util.List;
@@ -19,10 +20,10 @@ public class FacilityScheduleReadDto {
   @NotNull
   private Long id;
 
-  @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ss", timezone = "Asia/Seoul")
+  @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = DateFormatManager.DATETIME_FORMAT, timezone = "Asia/Seoul")
   private LocalDateTime startDateTime;
 
-  @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ss", timezone = "Asia/Seoul")
+  @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = DateFormatManager.DATETIME_FORMAT, timezone = "Asia/Seoul")
   private LocalDateTime endDateTime;
 
   @Builder

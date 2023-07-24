@@ -1,6 +1,6 @@
 package com.modoospace.space.domain;
 
-import com.modoospace.global.exception.InvalidTimeRangeException;
+import com.modoospace.common.exception.InvalidTimeRangeException;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;

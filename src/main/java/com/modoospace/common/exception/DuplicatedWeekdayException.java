@@ -1,4 +1,4 @@
-package com.modoospace.global.exception;
+package com.modoospace.common.exception;
 
 import java.time.DayOfWeek;
 

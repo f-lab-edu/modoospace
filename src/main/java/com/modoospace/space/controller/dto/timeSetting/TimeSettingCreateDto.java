@@ -1,6 +1,7 @@
 package com.modoospace.space.controller.dto.timeSetting;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
+import com.modoospace.common.DateFormatManager;
 import com.modoospace.space.domain.TimeSetting;
 import java.time.LocalTime;
 import lombok.Getter;
@@ -10,10 +11,10 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 public class TimeSettingCreateDto {
 
-  @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "HH:mm:ss")
+  @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = DateFormatManager.TIME_FORMAT)
   private LocalTime startTime = LocalTime.of(0, 0, 0);
 
-  @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "HH:mm:ss")
+  @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = DateFormatManager.TIME_FORMAT)
   private LocalTime endTime = LocalTime.of(23, 59, 59);
 
   public TimeSettingCreateDto(LocalTime startTime, LocalTime endTime) {

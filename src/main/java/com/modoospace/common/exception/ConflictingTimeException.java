@@ -1,4 +1,4 @@
-package com.modoospace.global.exception;
+package com.modoospace.common.exception;
 
 import com.modoospace.space.domain.FacilitySchedule;
 import com.modoospace.space.domain.TimeSetting;

@@ -1,7 +1,7 @@
 package com.modoospace.member.domain;
 
 import com.modoospace.common.BaseTimeEntity;
-import com.modoospace.global.exception.PermissionDeniedException;
+import com.modoospace.common.exception.PermissionDeniedException;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.EnumType;

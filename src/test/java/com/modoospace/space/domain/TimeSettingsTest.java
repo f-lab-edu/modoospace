@@ -2,7 +2,7 @@ package com.modoospace.space.domain;
 
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
-import com.modoospace.global.exception.ConflictingTimeException;
+import com.modoospace.common.exception.ConflictingTimeException;
 import java.time.LocalTime;
 import java.util.Arrays;
 import java.util.List;
