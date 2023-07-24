@@ -1,8 +1,7 @@
 package com.modoospace.space.domain;
 
-import com.modoospace.exception.ConflictingTimeException;
+import com.modoospace.common.exception.ConflictingTimeException;
 import java.time.LocalDate;
-import java.time.LocalDateTime;
 import java.time.YearMonth;
 import java.util.ArrayList;
 import java.util.Collections;

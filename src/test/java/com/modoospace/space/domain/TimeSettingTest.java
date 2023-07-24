@@ -3,8 +3,8 @@ package com.modoospace.space.domain;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
-import com.modoospace.exception.ConflictingTimeException;
-import com.modoospace.exception.InvalidTimeRangeException;
+import com.modoospace.common.exception.ConflictingTimeException;
+import com.modoospace.common.exception.InvalidTimeRangeException;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;

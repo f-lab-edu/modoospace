@@ -5,8 +5,8 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.junit.jupiter.api.Assertions.assertAll;
 
 import com.modoospace.TestConfig;
-import com.modoospace.exception.NotFoundEntityException;
-import com.modoospace.exception.PermissionDeniedException;
+import com.modoospace.common.exception.NotFoundEntityException;
+import com.modoospace.common.exception.PermissionDeniedException;
 import com.modoospace.member.domain.Member;
 import com.modoospace.member.domain.MemberRepository;
 import com.modoospace.member.domain.Role;
