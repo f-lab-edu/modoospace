@@ -1,6 +1,6 @@
 package com.modoospace.space.sevice;
 
-import com.modoospace.exception.NotFoundEntityException;
+import com.modoospace.global.exception.NotFoundEntityException;
 import com.modoospace.member.domain.Member;
 import com.modoospace.member.domain.MemberRepository;
 import com.modoospace.space.controller.dto.facilitySchedule.FacilityScheduleCreateUpdateDto;

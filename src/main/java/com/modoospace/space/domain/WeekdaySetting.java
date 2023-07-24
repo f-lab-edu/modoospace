@@ -1,6 +1,6 @@
 package com.modoospace.space.domain;
 
-import com.modoospace.exception.DuplicatedWeekdayException;
+import com.modoospace.global.exception.DuplicatedWeekdayException;
 import java.time.DayOfWeek;
 import javax.persistence.Column;
 import javax.persistence.Entity;

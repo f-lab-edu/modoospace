@@ -3,7 +3,7 @@ package com.modoospace.space.domain;
 import static javax.persistence.FetchType.LAZY;
 
 import com.modoospace.common.BaseTimeEntity;
-import com.modoospace.exception.NotOpenedFacilityException;
+import com.modoospace.global.exception.NotOpenedFacilityException;
 import com.modoospace.member.domain.Member;
 import java.time.YearMonth;
 import javax.persistence.Column;

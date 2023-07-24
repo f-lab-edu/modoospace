@@ -1,4 +1,4 @@
-package com.modoospace.exception;
+package com.modoospace.global.exception;
 
 import java.time.LocalDateTime;
 import java.time.LocalTime;

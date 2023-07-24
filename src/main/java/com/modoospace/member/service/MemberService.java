@@ -1,6 +1,6 @@
 package com.modoospace.member.service;
 
-import com.modoospace.exception.NotFoundEntityException;
+import com.modoospace.global.exception.NotFoundEntityException;
 import com.modoospace.member.controller.dto.MemberUpdateDto;
 import com.modoospace.member.domain.Member;
 import com.modoospace.member.domain.MemberRepository;

@@ -2,7 +2,7 @@ package com.modoospace.space.domain;
 
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
-import com.modoospace.exception.DuplicatedWeekdayException;
+import com.modoospace.global.exception.DuplicatedWeekdayException;
 import java.time.DayOfWeek;
 import java.util.Arrays;
 import java.util.List;

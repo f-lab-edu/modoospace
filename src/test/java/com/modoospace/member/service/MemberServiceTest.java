@@ -3,7 +3,7 @@ package com.modoospace.member.service;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.junit.jupiter.api.Assertions.assertAll;
 
-import com.modoospace.exception.PermissionDeniedException;
+import com.modoospace.global.exception.PermissionDeniedException;
 import com.modoospace.member.controller.dto.MemberUpdateDto;
 import com.modoospace.member.domain.Member;
 import com.modoospace.member.domain.MemberRepository;

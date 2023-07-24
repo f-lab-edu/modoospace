@@ -7,8 +7,8 @@ import static org.mockito.Mockito.mock;
 
 import com.modoospace.TestConfig;
 import com.modoospace.alarm.producer.AlarmProducer;
-import com.modoospace.exception.ConflictingReservationException;
-import com.modoospace.exception.PermissionDeniedException;
+import com.modoospace.global.exception.ConflictingReservationException;
+import com.modoospace.global.exception.PermissionDeniedException;
 import com.modoospace.member.domain.Member;
 import com.modoospace.member.domain.MemberRepository;
 import com.modoospace.member.domain.Role;

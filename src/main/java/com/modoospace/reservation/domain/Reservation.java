@@ -1,7 +1,7 @@
 package com.modoospace.reservation.domain;
 
 import com.modoospace.common.BaseTimeEntity;
-import com.modoospace.exception.PermissionDeniedException;
+import com.modoospace.global.exception.PermissionDeniedException;
 import com.modoospace.member.domain.Member;
 import com.modoospace.member.domain.Role;
 import com.modoospace.space.domain.Facility;

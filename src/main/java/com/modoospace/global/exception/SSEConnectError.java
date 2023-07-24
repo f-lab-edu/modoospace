@@ -1,4 +1,4 @@
-package com.modoospace.exception;
+package com.modoospace.global.exception;
 
 public class SSEConnectError extends RuntimeException {
 

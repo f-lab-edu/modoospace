@@ -3,7 +3,7 @@ package com.modoospace.alarm.producer;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.modoospace.alarm.controller.dto.AlarmEvent;
-import com.modoospace.exception.AlarmSendException;
+import com.modoospace.global.exception.AlarmSendException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
