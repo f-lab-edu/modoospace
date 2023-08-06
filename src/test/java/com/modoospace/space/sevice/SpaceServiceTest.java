@@ -11,7 +11,7 @@ import com.modoospace.member.domain.Member;
 import com.modoospace.member.domain.MemberRepository;
 import com.modoospace.member.domain.Role;
 import com.modoospace.space.controller.dto.space.SpaceCreateUpdateDto;
-import com.modoospace.space.controller.dto.space.SpaceReadDetailDto;
+import com.modoospace.space.controller.dto.space.SpaceReadDto;
 import com.modoospace.space.domain.Address;
 import com.modoospace.space.domain.Category;
 import com.modoospace.space.domain.CategoryRepository;
@@ -24,6 +24,8 @@ import org.junit.jupiter.params.provider.ValueSource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.context.annotation.Import;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.test.context.ActiveProfiles;
 
 @DataJpaTest
@@ -99,7 +101,7 @@ class SpaceServiceTest {
   public void createSpace_IfHost() {
     Long spaceId = spaceService.createSpace(category.getId(), createDto, hostMember.getEmail());
 
-    SpaceReadDetailDto retSpaceDto = spaceService.findSpace(spaceId);
+    SpaceReadDto retSpaceDto = spaceService.findSpace(spaceId);
     assertAll(
         () -> assertThat(retSpaceDto.getId()).isEqualTo(spaceId),
         () -> assertThat(retSpaceDto.getName()).isEqualTo("공간이름"),
@@ -135,7 +137,7 @@ class SpaceServiceTest {
 
     spaceService.updateSpace(spaceId, updateDto, email);
 
-    SpaceReadDetailDto retSpaceDto = spaceService.findSpace(spaceId);
+    SpaceReadDto retSpaceDto = spaceService.findSpace(spaceId);
     assertAll(
         () -> assertThat(retSpaceDto.getName()).isEqualTo("업데이트공간"),
         () -> assertThat(retSpaceDto.getDescription()).isEqualTo("업데이트설명"),
@@ -197,6 +199,11 @@ class SpaceServiceTest {
         .build();
     spaceService.createSpace(category.getId(), createDto, hostMember.getEmail());
 
-    assertThat(spaceService.findSpaceByHost(hostMember.getId())).hasSize(2);
+    PageRequest pageRequest = PageRequest.of(0, 10);
+    Page<SpaceReadDto> retPage = spaceService
+        .findSpaceByHost(hostMember.getId(), pageRequest);
+
+    assertThat(retPage.isFirst()).isTrue();
+    assertThat(retPage.getTotalElements()).isEqualTo(2);
   }
 }
