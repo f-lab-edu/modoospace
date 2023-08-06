@@ -4,7 +4,6 @@ import com.modoospace.common.exception.NotFoundEntityException;
 import com.modoospace.member.domain.Member;
 import com.modoospace.member.domain.MemberRepository;
 import com.modoospace.space.controller.dto.space.SpaceCreateUpdateDto;
-import com.modoospace.space.controller.dto.space.SpaceReadDetailDto;
 import com.modoospace.space.controller.dto.space.SpaceReadDto;
 import com.modoospace.space.domain.Category;
 import com.modoospace.space.domain.CategoryRepository;
@@ -50,10 +49,10 @@ public class SpaceService {
     return spaces.map(space -> SpaceReadDto.toDto(space));
   }
 
-  public SpaceReadDetailDto findSpace(Long spaceId) {
+  public SpaceReadDto findSpace(Long spaceId) {
     Space space = findSpaceById(spaceId);
 
-    return SpaceReadDetailDto.toDto(space);
+    return SpaceReadDto.toDto(space);
   }
 
   @Transactional
