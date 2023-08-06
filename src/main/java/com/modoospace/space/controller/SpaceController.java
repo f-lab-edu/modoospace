@@ -9,6 +9,9 @@ import java.net.URI;
 import java.util.List;
 import javax.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -41,8 +44,9 @@ public class SpaceController {
   }
 
   @GetMapping("/host/{hostId}")
-  public ResponseEntity<List<SpaceReadDto>> findByHost(@PathVariable Long hostId) {
-    List<SpaceReadDto> spaceReadDtos = spaceService.findSpaceByHost(hostId);
+  public ResponseEntity<Page<SpaceReadDto>> findByHost(@PathVariable Long hostId,
+      @PageableDefault Pageable pageable) {
+    Page<SpaceReadDto> spaceReadDtos = spaceService.findSpaceByHost(hostId, pageable);
     return ResponseEntity.ok().body(spaceReadDtos);
   }
 

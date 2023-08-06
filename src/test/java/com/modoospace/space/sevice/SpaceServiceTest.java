@@ -12,6 +12,7 @@ import com.modoospace.member.domain.MemberRepository;
 import com.modoospace.member.domain.Role;
 import com.modoospace.space.controller.dto.space.SpaceCreateUpdateDto;
 import com.modoospace.space.controller.dto.space.SpaceReadDetailDto;
+import com.modoospace.space.controller.dto.space.SpaceReadDto;
 import com.modoospace.space.domain.Address;
 import com.modoospace.space.domain.Category;
 import com.modoospace.space.domain.CategoryRepository;
@@ -24,6 +25,8 @@ import org.junit.jupiter.params.provider.ValueSource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.context.annotation.Import;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.test.context.ActiveProfiles;
 
 @DataJpaTest
@@ -197,6 +200,11 @@ class SpaceServiceTest {
         .build();
     spaceService.createSpace(category.getId(), createDto, hostMember.getEmail());
 
-    assertThat(spaceService.findSpaceByHost(hostMember.getId())).hasSize(2);
+    PageRequest pageRequest = PageRequest.of(0, 10);
+    Page<SpaceReadDto> retPage = spaceService
+        .findSpaceByHost(hostMember.getId(), pageRequest);
+
+    assertThat(retPage.isFirst()).isTrue();
+    assertThat(retPage.getTotalElements()).isEqualTo(2);
   }
 }

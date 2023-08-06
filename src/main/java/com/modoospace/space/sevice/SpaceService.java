@@ -12,6 +12,8 @@ import com.modoospace.space.domain.Space;
 import com.modoospace.space.domain.SpaceRepository;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -42,12 +44,10 @@ public class SpaceService {
     return SpaceReadDto.toDtos(spaces);
   }
 
-  public List<SpaceReadDto> findSpaceByHost(Long hostId) {
-    Member host = memberRepository.findById(hostId)
-        .orElseThrow(() -> new NotFoundEntityException("사용자", hostId));
-    List<Space> spaces = spaceRepository.findByHost(host);
+  public Page<SpaceReadDto> findSpaceByHost(Long hostId, Pageable pageable) {
+    Page<Space> spaces = spaceRepository.findByHostId(hostId, pageable);
 
-    return SpaceReadDto.toDtos(spaces);
+    return spaces.map(space -> SpaceReadDto.toDto(space));
   }
 
   public SpaceReadDetailDto findSpace(Long spaceId) {
