@@ -44,10 +44,19 @@ public class SpaceService {
   }
 
   public Page<SpaceReadDto> findSpaceByHost(Long hostId, Pageable pageable) {
-    Page<Space> spaces = spaceRepository.findByHostId(hostId, pageable);
+    Member member = memberRepository.findById(hostId)
+        .orElseThrow(() -> new NotFoundEntityException("유저", hostId));
+
+    Page<Space> spaces = spaceRepository.findByHost(member, pageable);
 
     return spaces.map(space -> SpaceReadDto.toDto(space));
   }
+
+//  public Page<SpaceReadDto> findSpaceByHost(Long hostId, Pageable pageable) {
+//    Page<Space> spaces = spaceRepository.findByHostId(hostId, pageable);
+//
+//    return spaces.map(space -> SpaceReadDto.toDto(space));
+//  }
 
   public SpaceReadDto findSpace(Long spaceId) {
     Space space = findSpaceById(spaceId);
