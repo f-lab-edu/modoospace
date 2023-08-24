@@ -3,11 +3,16 @@ package com.modoospace.space.controller;
 import com.modoospace.config.auth.LoginEmail;
 import com.modoospace.space.controller.dto.facility.FacilityCreateDto;
 import com.modoospace.space.controller.dto.facility.FacilityReadDetailDto;
+import com.modoospace.space.controller.dto.facility.FacilityReadDto;
+import com.modoospace.space.controller.dto.facility.FacilitySearchDto;
 import com.modoospace.space.controller.dto.facility.FacilityUpdateDto;
+import com.modoospace.space.domain.FacilityType;
 import com.modoospace.space.sevice.FacilityService;
 import java.net.URI;
 import javax.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -32,6 +37,14 @@ public class FacilityController {
     Long facilityId = facilityService.createFacility(spaceId, createDto, loginEmail);
     return ResponseEntity
         .created(URI.create("/api/v1/spaces/" + spaceId + "/facilities/" + facilityId)).build();
+  }
+
+  @GetMapping()
+  public ResponseEntity<Page<FacilityReadDto>> search(@PathVariable Long spaceId,
+      FacilitySearchDto searchDto, Pageable pageable) {
+    Page<FacilityReadDto> facilityReadDtos = facilityService
+        .searchFacility(spaceId, searchDto, pageable);
+    return ResponseEntity.ok().body(facilityReadDtos);
   }
 
   @GetMapping("/{facilityId}")
