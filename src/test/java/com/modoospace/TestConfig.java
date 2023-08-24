@@ -1,6 +1,7 @@
 package com.modoospace;
 
 import com.modoospace.reservation.repository.ReservationQueryRepository;
+import com.modoospace.space.repository.FacilityQueryRepository;
 import com.modoospace.space.repository.FacilityScheduleQueryRepository;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import javax.persistence.EntityManager;
@@ -22,6 +23,11 @@ public class TestConfig {
   @Bean
   public ReservationQueryRepository reservationQueryRepository() {
     return new ReservationQueryRepository(jpaQueryFactory());
+  }
+
+  @Bean
+  public FacilityQueryRepository facilityQueryRepository() {
+    return new FacilityQueryRepository(jpaQueryFactory());
   }
 
   @Bean
