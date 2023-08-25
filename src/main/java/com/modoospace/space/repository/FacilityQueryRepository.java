@@ -45,8 +45,7 @@ public class FacilityQueryRepository {
         .fetch();
 
     JPAQuery<Facility> countQuery = jpaQueryFactory
-        .select(facility)
-        .from(facility)
+        .selectFrom(facility)
         .where(spaceIdEq(spaceId)
             , nameContains(searchDto.getName())
             , facilityTypeEq(searchDto.getFacilityType())

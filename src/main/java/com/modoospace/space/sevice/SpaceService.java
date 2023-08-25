@@ -5,11 +5,12 @@ import com.modoospace.member.domain.Member;
 import com.modoospace.member.domain.MemberRepository;
 import com.modoospace.space.controller.dto.space.SpaceCreateUpdateDto;
 import com.modoospace.space.controller.dto.space.SpaceReadDto;
+import com.modoospace.space.controller.dto.space.SpaceSearchDto;
 import com.modoospace.space.domain.Category;
 import com.modoospace.space.domain.CategoryRepository;
 import com.modoospace.space.domain.Space;
 import com.modoospace.space.domain.SpaceRepository;
-import java.util.List;
+import com.modoospace.space.repository.SpaceQueryRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -23,6 +24,7 @@ public class SpaceService {
   private final MemberRepository memberRepository;
   private final SpaceRepository spaceRepository;
   private final CategoryRepository categoryRepository;
+  private final SpaceQueryRepository spaceQueryRepository;
 
   @Transactional
   public Long createSpace(Long categoryId, SpaceCreateUpdateDto createDto, String loginEmail) {
@@ -35,16 +37,8 @@ public class SpaceService {
     return space.getId();
   }
 
-  public List<SpaceReadDto> findSpaceByCategory(Long categoryId) {
-    // TODO : 페이징처리가 필요합니다.
-    Category category = findCategoryById(categoryId);
-    List<Space> spaces = spaceRepository.findByCategory(category);
-
-    return SpaceReadDto.toDtos(spaces);
-  }
-
-  public Page<SpaceReadDto> findSpaceByHost(Long hostId, Pageable pageable) {
-    Page<Space> spaces = spaceRepository.findByHostId(hostId, pageable);
+  public Page<SpaceReadDto> searchSpace(SpaceSearchDto searchDto, Pageable pageable) {
+    Page<Space> spaces = spaceQueryRepository.searchSpace(searchDto, pageable);
 
     return spaces.map(space -> SpaceReadDto.toDto(space));
   }

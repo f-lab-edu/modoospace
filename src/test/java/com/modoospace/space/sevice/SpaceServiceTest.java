@@ -12,10 +12,12 @@ import com.modoospace.member.domain.MemberRepository;
 import com.modoospace.member.domain.Role;
 import com.modoospace.space.controller.dto.space.SpaceCreateUpdateDto;
 import com.modoospace.space.controller.dto.space.SpaceReadDto;
+import com.modoospace.space.controller.dto.space.SpaceSearchDto;
 import com.modoospace.space.domain.Address;
 import com.modoospace.space.domain.Category;
 import com.modoospace.space.domain.CategoryRepository;
 import com.modoospace.space.domain.SpaceRepository;
+import com.modoospace.space.repository.SpaceQueryRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -44,6 +46,9 @@ class SpaceServiceTest {
   @Autowired
   private CategoryRepository categoryRepository;
 
+  @Autowired
+  private SpaceQueryRepository spaceQueryRepository;
+
   private Member hostMember;
   private Member visitorMember;
   private Member adminMember;
@@ -53,7 +58,8 @@ class SpaceServiceTest {
 
   @BeforeEach
   public void setUp() {
-    spaceService = new SpaceService(memberRepository, spaceRepository, categoryRepository);
+    spaceService = new SpaceService(memberRepository, spaceRepository, categoryRepository,
+        spaceQueryRepository);
 
     hostMember = Member.builder()
         .email("host@email")
@@ -191,7 +197,7 @@ class SpaceServiceTest {
 
   @DisplayName("호스트ID로 호스트가 소유하고있는 공간을 조회할 수 있다.")
   @Test
-  public void findSpaceByHost() {
+  public void searchSpaceByHostId() {
     spaceService.createSpace(category.getId(), createDto, hostMember.getEmail());
     createDto = SpaceCreateUpdateDto.builder()
         .name("공간이름2")
@@ -200,8 +206,10 @@ class SpaceServiceTest {
     spaceService.createSpace(category.getId(), createDto, hostMember.getEmail());
 
     PageRequest pageRequest = PageRequest.of(0, 10);
+    SpaceSearchDto searchDto = new SpaceSearchDto();
+    searchDto.setHostId(hostMember.getId());
     Page<SpaceReadDto> retPage = spaceService
-        .findSpaceByHost(hostMember.getId(), pageRequest);
+        .searchSpace(searchDto, pageRequest);
 
     assertThat(retPage.isFirst()).isTrue();
     assertThat(retPage.getTotalElements()).isEqualTo(2);

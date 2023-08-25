@@ -3,14 +3,13 @@ package com.modoospace.space.controller;
 import com.modoospace.config.auth.LoginEmail;
 import com.modoospace.space.controller.dto.space.SpaceCreateUpdateDto;
 import com.modoospace.space.controller.dto.space.SpaceReadDto;
+import com.modoospace.space.controller.dto.space.SpaceSearchDto;
 import com.modoospace.space.sevice.SpaceService;
 import java.net.URI;
-import java.util.List;
 import javax.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
-import org.springframework.data.web.PageableDefault;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -36,16 +35,9 @@ public class SpaceController {
     return ResponseEntity.created(URI.create("/api/v1/spaces/" + spaceId)).build();
   }
 
-  @GetMapping("/category/{categoryId}")
-  public ResponseEntity<List<SpaceReadDto>> findByCategory(@PathVariable Long categoryId) {
-    List<SpaceReadDto> spaceReadDtos = spaceService.findSpaceByCategory(categoryId);
-    return ResponseEntity.ok().body(spaceReadDtos);
-  }
-
-  @GetMapping("/host/{hostId}")
-  public ResponseEntity<Page<SpaceReadDto>> findByHost(@PathVariable Long hostId,
-      @PageableDefault Pageable pageable) {
-    Page<SpaceReadDto> spaceReadDtos = spaceService.findSpaceByHost(hostId, pageable);
+  @GetMapping()
+  public ResponseEntity<Page<SpaceReadDto>> search(SpaceSearchDto searchDto, Pageable pageable) {
+    Page<SpaceReadDto> spaceReadDtos = spaceService.searchSpace(searchDto, pageable);
     return ResponseEntity.ok().body(spaceReadDtos);
   }
 
