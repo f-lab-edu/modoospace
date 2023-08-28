@@ -5,9 +5,10 @@ import static com.modoospace.space.domain.QFacilitySchedule.facilitySchedule;
 import com.modoospace.space.domain.Facility;
 import com.modoospace.space.domain.FacilitySchedule;
 import com.querydsl.core.BooleanBuilder;
-import com.querydsl.jpa.impl.JPAQuery;
 import com.querydsl.jpa.impl.JPAQueryFactory;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.YearMonth;
 import java.util.List;
 import java.util.stream.IntStream;
 import lombok.RequiredArgsConstructor;
@@ -32,13 +33,11 @@ public class FacilityScheduleQueryRepository {
 
     // 같은 날짜의 시간범위를 체크하는 경우
     if (start.toLocalDate().isEqual(end.toLocalDate())) {
-      return getIncludingScheduleQuery(facility, start, end).fetchOne() != null;
+      return getIncludingSchedule(facility, start, end) != null;
     }
 
     // 다른 날짜의 시간범위를 체크하는 경우
-    List<FacilitySchedule> facilitySchedules = getIncludedScheduleQuery(facility, start, end)
-        .orderBy(facilitySchedule.startDateTime.asc())
-        .fetch();
+    List<FacilitySchedule> facilitySchedules = getIncludedSchedules(facility, start, end);
     if (facilitySchedules.isEmpty()) {
       return false;
     }
@@ -67,36 +66,59 @@ public class FacilityScheduleQueryRepository {
     return true;
   }
 
-  private JPAQuery<FacilitySchedule> getIncludedScheduleQuery(Facility facility,
+  private FacilitySchedule getIncludingSchedule(Facility facility,
       LocalDateTime start, LocalDateTime end) {
     BooleanBuilder builder = new BooleanBuilder();
-    builder.and(facilitySchedule.facility.eq(facility))
-        .and(facilitySchedule.startDateTime.before(end))
-        .and(facilitySchedule.endDateTime.after(start));
-
-    JPAQuery<FacilitySchedule> query = jpaQueryFactory
-        .select(facilitySchedule)
-        .from(facilitySchedule)
-        .where(builder);
-
-    return query;
-  }
-
-  private JPAQuery<FacilitySchedule> getIncludingScheduleQuery(Facility facility,
-      LocalDateTime start, LocalDateTime end) {
-    BooleanBuilder builder = new BooleanBuilder();
-
     builder.and(facilitySchedule.facility.eq(facility))
         .and(facilitySchedule.startDateTime.before(start)
             .or(facilitySchedule.startDateTime.eq(start)))
         .and(facilitySchedule.endDateTime.after(end)
             .or(facilitySchedule.endDateTime.eq(end)));
 
-    JPAQuery<FacilitySchedule> query = jpaQueryFactory
+    return jpaQueryFactory
         .select(facilitySchedule)
         .from(facilitySchedule)
-        .where(builder);
+        .where(builder)
+        .fetchOne();
+  }
 
-    return query;
+  private List<FacilitySchedule> getIncludedSchedules(Facility facility,
+      LocalDateTime start, LocalDateTime end) {
+    BooleanBuilder builder = new BooleanBuilder();
+    builder.and(facilitySchedule.facility.eq(facility))
+        .and(facilitySchedule.startDateTime.before(end))
+        .and(facilitySchedule.endDateTime.after(start));
+
+    return jpaQueryFactory
+        .select(facilitySchedule)
+        .from(facilitySchedule)
+        .where(builder)
+        .orderBy(facilitySchedule.startDateTime.asc())
+        .fetch();
+  }
+
+  public List<FacilitySchedule> find1DaySchedules(Facility facility, LocalDate findDate) {
+    LocalDateTime startDateTime = findDate.atTime(0, 0, 0);
+    LocalDateTime endDateTime = findDate.atTime(23, 59, 59);
+
+    return getBetweenStartTimeSchedules(facility, startDateTime, endDateTime);
+  }
+
+  public List<FacilitySchedule> find1MonthSchedules(Facility facility,
+      YearMonth findYearMonth) {
+    LocalDateTime startDateTime = findYearMonth.atDay(1).atTime(0, 0, 0);
+    LocalDateTime endDateTime = findYearMonth.atEndOfMonth().atTime(23, 59, 59);
+
+    return getBetweenStartTimeSchedules(facility, startDateTime, endDateTime);
+  }
+
+  private List<FacilitySchedule> getBetweenStartTimeSchedules(Facility facility,
+      LocalDateTime startDateTime, LocalDateTime endDateTime) {
+    return jpaQueryFactory
+        .selectFrom(facilitySchedule)
+        .where(facilitySchedule.facility.id.eq(facility.getId())
+            , facilitySchedule.startDateTime.between(startDateTime, endDateTime))
+        .orderBy(facilitySchedule.startDateTime.asc())
+        .fetch();
   }
 }
