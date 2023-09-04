@@ -5,17 +5,16 @@ import com.modoospace.alarm.controller.dto.AlarmReadDto;
 import com.modoospace.alarm.domain.Alarm;
 import com.modoospace.alarm.domain.AlarmRepository;
 import com.modoospace.alarm.domain.EmitterRepository;
+import com.modoospace.alarm.repository.AlarmQueryRepository;
 import com.modoospace.common.exception.NotFoundEntityException;
 import com.modoospace.common.exception.SSEConnectError;
 import com.modoospace.member.domain.Member;
 import com.modoospace.member.domain.MemberRepository;
-import com.modoospace.reservation.domain.Reservation;
-import com.modoospace.reservation.domain.ReservationRepository;
 import java.io.IOException;
-import java.util.List;
 import java.util.Optional;
-import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
@@ -28,17 +27,15 @@ public class AlarmService {
   private static final String ALARM_NAME = "alarm";
 
   private final MemberRepository memberRepository;
-  private final ReservationRepository reservationRepository;
   private final AlarmRepository alarmRepository;
+  private final AlarmQueryRepository alarmQueryRepository;
   private final EmitterRepository emitterRepository;
 
-  public List<AlarmReadDto> findAlarmsByMember(String loginEmail) {
+  public Page<AlarmReadDto> searchAlarms(String loginEmail, Pageable pageable) {
     Member loginMember = findMemberByEmail(loginEmail);
-    List<Alarm> alarms = alarmRepository.findByMember(loginMember);
+    Page<Alarm> alarms = alarmQueryRepository.searchByMember(loginMember, pageable);
 
-    return alarms.stream()
-        .map(AlarmReadDto::toDto)
-        .collect(Collectors.toList());
+    return alarms.map(AlarmReadDto::toDto);
   }
 
   public SseEmitter connectAlarm(String loginEmail) {
@@ -59,8 +56,7 @@ public class AlarmService {
   @Transactional
   public void saveAndSend(AlarmEvent alarmEvent) {
     Member member = findMemberById(alarmEvent.getMemberId());
-    Reservation reservation = findReservationById(alarmEvent.getReservationId());
-    Alarm alarm = alarmRepository.save(alarmEvent.toEntity(member, reservation));
+    Alarm alarm = alarmRepository.save(alarmEvent.toEntity());
 
     send(alarm.getId(), member.getEmail());
   }
@@ -89,11 +85,5 @@ public class AlarmService {
     Member member = memberRepository.findById(memberId)
         .orElseThrow(() -> new NotFoundEntityException("사용자", memberId));
     return member;
-  }
-
-  private Reservation findReservationById(Long reservationId) {
-    Reservation reservation = reservationRepository.findById(reservationId)
-        .orElseThrow(() -> new NotFoundEntityException("예약", reservationId));
-    return reservation;
   }
 }

@@ -9,8 +9,8 @@ import com.modoospace.space.domain.Facility;
 import com.modoospace.space.domain.FacilityRepository;
 import com.modoospace.space.domain.FacilitySchedule;
 import com.modoospace.space.domain.FacilityScheduleRepository;
+import com.modoospace.space.repository.FacilityScheduleQueryRepository;
 import java.time.LocalDate;
-import java.time.LocalDateTime;
 import java.time.YearMonth;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -25,6 +25,7 @@ public class FacilityScheduleService {
   private final MemberRepository memberRepository;
   private final FacilityRepository facilityRepository;
   private final FacilityScheduleRepository facilityScheduleRepository;
+  private final FacilityScheduleQueryRepository facilityScheduleQueryRepository;
 
   @Transactional
   public Long createFacilitySchedule(Long facilityId, FacilityScheduleCreateUpdateDto createDto,
@@ -73,7 +74,8 @@ public class FacilityScheduleService {
   public List<FacilityScheduleReadDto> find1DayFacilitySchedules(Long facilityId,
       LocalDate findDate) {
     Facility facility = findFacilityById(facilityId);
-    List<FacilitySchedule> facilitySchedules = find1DayFacilitySchedules(facility, findDate);
+    List<FacilitySchedule> facilitySchedules = facilityScheduleQueryRepository
+        .find1DaySchedules(facility, findDate);
 
     return facilitySchedules.stream()
         .map(facilitySchedule -> FacilityScheduleReadDto.toDto(facilitySchedule))
@@ -93,7 +95,8 @@ public class FacilityScheduleService {
   public List<FacilityScheduleReadDto> find1MonthFacilitySchedules(Long facilityId,
       YearMonth findYearMonth) {
     Facility facility = findFacilityById(facilityId);
-    List<FacilitySchedule> facilitySchedules = find1MonthFacilitySchedules(facility, findYearMonth);
+    List<FacilitySchedule> facilitySchedules = facilityScheduleQueryRepository
+        .find1MonthSchedules(facility, findYearMonth);
 
     return facilitySchedules.stream()
         .map(facilitySchedule -> FacilityScheduleReadDto.toDto(facilitySchedule))
@@ -113,8 +116,8 @@ public class FacilityScheduleService {
       Member loginMember) {
     facility.verifyManagementPermission(loginMember);
 
-    List<FacilitySchedule> facilitySchedules = find1MonthFacilitySchedules(facility,
-        deleteYearMonth);
+    List<FacilitySchedule> facilitySchedules = facilityScheduleQueryRepository
+        .find1MonthSchedules(facility, deleteYearMonth);
     if (!facilitySchedules.isEmpty()) {
       facilityScheduleRepository
           .deleteAllInBatch(facilitySchedules); // deleteAll 과 deleteAllInBatch의 차이점 공부필요.
@@ -137,25 +140,5 @@ public class FacilityScheduleService {
     FacilitySchedule facilitySchedule = facilityScheduleRepository.findById(facilityScheduleId)
         .orElseThrow(() -> new NotFoundEntityException("시설스케줄", facilityScheduleId));
     return facilitySchedule;
-  }
-
-  private List<FacilitySchedule> find1DayFacilitySchedules(Facility facility,
-      LocalDate findDate) {
-    LocalDateTime startDateTime = findDate.atTime(0, 0, 0);
-    LocalDateTime endDateTime = findDate.atTime(23, 59, 59);
-
-    return facilityScheduleRepository
-        .findByFacilityAndStartDateTimeBetweenOrderByStartDateTime(facility, startDateTime,
-            endDateTime);
-  }
-
-  private List<FacilitySchedule> find1MonthFacilitySchedules(Facility facility,
-      YearMonth findYearMonth) {
-    LocalDateTime startDateTime = findYearMonth.atDay(1).atTime(0, 0, 0);
-    LocalDateTime endDateTime = findYearMonth.atEndOfMonth().atTime(23, 59, 59);
-
-    return facilityScheduleRepository
-        .findByFacilityAndStartDateTimeBetweenOrderByStartDateTime(facility, startDateTime,
-            endDateTime);
   }
 }

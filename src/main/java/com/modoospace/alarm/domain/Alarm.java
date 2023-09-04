@@ -1,17 +1,12 @@
 package com.modoospace.alarm.domain;
 
 import com.modoospace.common.BaseTimeEntity;
-import com.modoospace.member.domain.Member;
-import com.modoospace.reservation.domain.Reservation;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.EnumType;
 import javax.persistence.Enumerated;
-import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
-import javax.persistence.JoinColumn;
-import javax.persistence.ManyToOne;
 import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Getter;
@@ -27,27 +22,26 @@ public class Alarm extends BaseTimeEntity {
   @Column(name = "alarm_id")
   private Long id;
 
-  @ManyToOne(fetch = FetchType.LAZY)
-  @JoinColumn(name = "member_id")
-  private Member member;
+  private Long memberId;
 
-  @ManyToOne(fetch = FetchType.LAZY)
-  @JoinColumn(name = "reservation_id")
-  private Reservation reservation;
+  private Long reservationId;
+
+  private String facilityName;
 
   @Enumerated(EnumType.STRING)
   private AlarmType alarmType;
 
   @Builder
-  public Alarm(Long id, Member member, Reservation reservation,
+  public Alarm(Long id, Long memberId, Long reservationId, String facilityName,
       AlarmType alarmType) {
     this.id = id;
-    this.member = member;
-    this.reservation = reservation;
+    this.memberId = memberId;
+    this.reservationId = reservationId;
+    this.facilityName = facilityName;
     this.alarmType = alarmType;
   }
 
-  public String getAlarmMessage(){
-    return reservation.getFacility().getFacilityName() + alarmType.getAlarmText();
+  public String getAlarmMessage() {
+    return facilityName + alarmType.getAlarmText();
   }
 }

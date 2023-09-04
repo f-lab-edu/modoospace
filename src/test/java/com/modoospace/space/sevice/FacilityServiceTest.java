@@ -19,6 +19,7 @@ import com.modoospace.space.domain.FacilityRepository;
 import com.modoospace.space.domain.FacilityType;
 import com.modoospace.space.domain.Space;
 import com.modoospace.space.domain.SpaceRepository;
+import com.modoospace.space.repository.FacilityQueryRepository;
 import com.modoospace.space.repository.FacilityScheduleQueryRepository;
 import java.time.DayOfWeek;
 import java.time.LocalDate;
@@ -56,13 +57,16 @@ class FacilityServiceTest {
   @Autowired
   private FacilityScheduleQueryRepository facilityScheduleQueryRepository;
 
+  @Autowired
+  private FacilityQueryRepository facilityQueryRepository;
+
   private Member hostMember;
   private Space space;
   private LocalDate nowDate;
 
   @BeforeEach
   public void setUp() {
-    facilityService = new FacilityService(memberRepository, spaceRepository, facilityRepository);
+    facilityService = new FacilityService(memberRepository, spaceRepository, facilityRepository, facilityQueryRepository);
 
     hostMember = Member.builder()
         .email("host@email")

@@ -5,12 +5,17 @@ import com.modoospace.member.domain.Member;
 import com.modoospace.member.domain.MemberRepository;
 import com.modoospace.space.controller.dto.facility.FacilityCreateDto;
 import com.modoospace.space.controller.dto.facility.FacilityReadDetailDto;
+import com.modoospace.space.controller.dto.facility.FacilityReadDto;
+import com.modoospace.space.controller.dto.facility.FacilitySearchDto;
 import com.modoospace.space.controller.dto.facility.FacilityUpdateDto;
 import com.modoospace.space.domain.Facility;
 import com.modoospace.space.domain.FacilityRepository;
 import com.modoospace.space.domain.Space;
 import com.modoospace.space.domain.SpaceRepository;
+import com.modoospace.space.repository.FacilityQueryRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -21,6 +26,7 @@ public class FacilityService {
   private final MemberRepository memberRepository;
   private final SpaceRepository spaceRepository;
   private final FacilityRepository facilityRepository;
+  private final FacilityQueryRepository facilityQueryRepository;
 
   @Transactional
   public Long createFacility(Long spaceId, FacilityCreateDto createDto, String loginEmail) {
@@ -32,6 +38,11 @@ public class FacilityService {
     facilityRepository.save(facility);
 
     return facility.getId();
+  }
+
+  public Page<FacilityReadDto> searchFacility(Long spaceId, FacilitySearchDto searchDto,
+      Pageable pageable) {
+    return facilityQueryRepository.searchFacility(spaceId, searchDto, pageable);
   }
 
   public FacilityReadDetailDto findFacility(Long facilityId) {

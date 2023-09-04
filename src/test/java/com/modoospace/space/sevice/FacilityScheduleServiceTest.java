@@ -23,6 +23,7 @@ import com.modoospace.space.domain.FacilityScheduleRepository;
 import com.modoospace.space.domain.FacilityType;
 import com.modoospace.space.domain.Space;
 import com.modoospace.space.domain.SpaceRepository;
+import com.modoospace.space.repository.FacilityScheduleQueryRepository;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
@@ -57,6 +58,9 @@ public class FacilityScheduleServiceTest {
   @Autowired
   private FacilityScheduleRepository facilityScheduleRepository;
 
+  @Autowired
+  private FacilityScheduleQueryRepository facilityScheduleQueryRepository;
+
   private FacilityScheduleService facilityScheduleService;
 
   private Member hostMember;
@@ -72,7 +76,7 @@ public class FacilityScheduleServiceTest {
   @BeforeEach
   public void setUp() {
     facilityScheduleService = new FacilityScheduleService(memberRepository, facilityRepository,
-        facilityScheduleRepository);
+        facilityScheduleRepository, facilityScheduleQueryRepository);
 
     hostMember = Member.builder()
         .email("host@email")

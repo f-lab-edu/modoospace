@@ -29,7 +29,7 @@ public class AlarmReadDto {
   public static AlarmReadDto toDto(Alarm alarm) {
     return AlarmReadDto.builder()
         .id(alarm.getId())
-        .reservationId(alarm.getReservation().getId())
+        .reservationId(alarm.getReservationId())
         .message(alarm.getAlarmMessage())
         .build();
   }

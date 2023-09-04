@@ -13,11 +13,13 @@ import com.modoospace.space.domain.CategoryRepository;
 import com.modoospace.space.domain.Facility;
 import com.modoospace.space.domain.FacilityRepository;
 import com.modoospace.space.domain.FacilitySchedule;
+import com.modoospace.space.domain.FacilityScheduleRepository;
 import com.modoospace.space.domain.FacilityType;
 import com.modoospace.space.domain.Space;
 import com.modoospace.space.domain.SpaceRepository;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.List;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -42,6 +44,9 @@ public class FacilityScheduleQueryRepositoryTest {
 
   @Autowired
   private FacilityRepository facilityRepository;
+
+  @Autowired
+  private FacilityScheduleRepository facilityScheduleRepository;
 
   @Autowired
   private FacilityScheduleQueryRepository facilityScheduleQueryRepository;
@@ -96,13 +101,13 @@ public class FacilityScheduleQueryRepositoryTest {
         .isIncludingSchedule(roomFacility, startDateTime, endDateTime)).isTrue();
   }
 
-  @DisplayName("해당 시간범위에 시설이 Open했는지 여부를 반환한다. (날짜의 시간범위가 분리된 case 테스트)")
+  @DisplayName("해당 기간에 시설이 Open했는지 여부를 반환한다. (날짜마다 시간범위가 다른 case)")
   @Test
-  public void isOpen_ifWeekdaySettingUpdate() {
+  public void isIncludingSchedule_ifScheduleUpdate() {
     FacilitySchedule updateFacilitySchedule = FacilitySchedule.builder()
         .startDateTime(now.plusDays(1).atTime(0, 0, 0))
         .endDateTime(now.plusDays(1).atTime(17, 59, 59))
-        .build(); // 오늘날짜 + 1 스케줄 데이터를 업데이트한다. (0시 ~ 18시로 변경)
+        .build(); // 오늘날짜 + 1 스케줄 데이터를 업데이트한다. (0~18로 변경, 다음날은 0~24)
     FacilitySchedule facilitySchedule = roomFacility.getFacilitySchedules().getFacilitySchedules()
         .get(now.getDayOfMonth());
     facilitySchedule.update(updateFacilitySchedule);
@@ -113,6 +118,31 @@ public class FacilityScheduleQueryRepositoryTest {
         .isIncludingSchedule(roomFacility, startDateTime, endDateTime)).isTrue();
 
     endDateTime = now.plusDays(2).atTime(17, 59, 59);
+    assertThat(facilityScheduleQueryRepository
+        .isIncludingSchedule(roomFacility, startDateTime, endDateTime)).isFalse();
+  }
+
+  @DisplayName("해당 기간에 시설이 Open했는지 여부를 반환한다. (한 날짜에 스케줄이 여러개 있는 case)")
+  @Test
+  public void isIncludingSchedule_ifScheduleUpdate2() {
+    FacilitySchedule facilitySchedule1 = FacilitySchedule.builder()
+        .startDateTime(now.plusDays(1).atTime(9, 0, 0))
+        .endDateTime(now.plusDays(1).atTime(11, 59, 59))
+        .build();
+    FacilitySchedule facilitySchedule2 = FacilitySchedule.builder()
+        .startDateTime(now.plusDays(1).atTime(13, 0, 0))
+        .endDateTime(now.plusDays(1).atTime(17, 59, 59))
+        .build();// 오늘날짜 + 1 스케줄 데이터를 업데이트한다. (9~12, 13~18로 변경)
+
+    List<FacilitySchedule> facilitySchedules = roomFacility.getFacilitySchedules()
+        .getFacilitySchedules();
+    facilitySchedules.remove(now.getDayOfMonth());
+    facilitySchedules.add(facilitySchedule1);
+    facilitySchedules.add(facilitySchedule2);
+    facilityScheduleRepository.flush();
+
+    LocalDateTime startDateTime = now.plusDays(1).atTime(9, 0, 0);
+    LocalDateTime endDateTime = now.plusDays(1).atTime(17, 59, 59);
     assertThat(facilityScheduleQueryRepository
         .isIncludingSchedule(roomFacility, startDateTime, endDateTime)).isFalse();
   }
