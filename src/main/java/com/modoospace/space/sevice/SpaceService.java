@@ -40,7 +40,7 @@ public class SpaceService {
   public Page<SpaceReadDto> searchSpace(SpaceSearchDto searchDto, Pageable pageable) {
     Page<Space> spaces = spaceQueryRepository.searchSpace(searchDto, pageable);
 
-    return spaces.map(space -> SpaceReadDto.toDto(space));
+    return spaces.map(SpaceReadDto::toDto);
   }
 
   public SpaceReadDto findSpace(Long spaceId) {
