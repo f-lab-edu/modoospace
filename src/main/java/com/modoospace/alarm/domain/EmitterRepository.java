@@ -1,30 +1,37 @@
 package com.modoospace.alarm.domain;
 
-import java.util.HashMap;
-import java.util.Map;
 import java.util.Optional;
+import lombok.RequiredArgsConstructor;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Repository;
 import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 
-/**
- * 로컬 캐시로 Emitter 저장 문제 : 여러 개의 서버 인스턴스끼리 공유가 안됨. -> 추후 전체 인스턴스끼리 공유 또는 알림(메세징)이 필요함.
- */
 @Repository
+@RequiredArgsConstructor
 public class EmitterRepository {
 
-  private Map<String, SseEmitter> emitterMap = new HashMap<>();
+  private final RedisTemplate<String, Object> redisTemplate;
 
   public SseEmitter save(String loginEmail, SseEmitter sseEmitter) {
-    emitterMap.put(loginEmail, sseEmitter);
+    String key = getKey(loginEmail);
+    redisTemplate.opsForValue().set(key, sseEmitter);
 
     return sseEmitter;
   }
 
   public Optional<SseEmitter> find(String loginEmail) {
-    return Optional.ofNullable(emitterMap.get(loginEmail));
+    String key = getKey(loginEmail);
+    SseEmitter sseEmitter = (SseEmitter) redisTemplate.opsForValue().get(key);
+
+    return Optional.ofNullable(sseEmitter);
   }
 
   public void delete(String loginEmail) {
-    emitterMap.remove(loginEmail);
+    String key = getKey(loginEmail);
+    redisTemplate.delete(key);
+  }
+
+  private String getKey(String loginEmail) {
+    return "SSE: " + loginEmail;
   }
 }
