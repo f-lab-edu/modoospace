@@ -4,12 +4,11 @@ import com.modoospace.alarm.controller.dto.AlarmEvent;
 import com.modoospace.alarm.controller.dto.AlarmReadDto;
 import com.modoospace.alarm.domain.Alarm;
 import com.modoospace.alarm.domain.AlarmRepository;
-import com.modoospace.alarm.domain.EmitterRepository;
 import com.modoospace.alarm.repository.AlarmQueryRepository;
-import com.modoospace.common.exception.NotFoundEntityException;
+import com.modoospace.alarm.repository.EmitterCacheRepository;
 import com.modoospace.common.exception.SSEConnectError;
 import com.modoospace.member.domain.Member;
-import com.modoospace.member.domain.MemberRepository;
+import com.modoospace.member.service.MemberService;
 import java.io.IOException;
 import java.util.Optional;
 import lombok.RequiredArgsConstructor;
@@ -26,13 +25,13 @@ public class AlarmService {
   private static final Long DEFAULT_TIMEOUT = 60L * 1000 * 60;
   private static final String ALARM_NAME = "alarm";
 
-  private final MemberRepository memberRepository;
+  private final MemberService memberService;
   private final AlarmRepository alarmRepository;
   private final AlarmQueryRepository alarmQueryRepository;
-  private final EmitterRepository emitterRepository;
+  private final EmitterCacheRepository emitterRepository;
 
   public Page<AlarmReadDto> searchAlarms(String loginEmail, Pageable pageable) {
-    Member loginMember = findMemberByEmail(loginEmail);
+    Member loginMember = memberService.findMemberByEmail(loginEmail);
     Page<Alarm> alarms = alarmQueryRepository.searchByMember(loginMember, pageable);
 
     return alarms.map(AlarmReadDto::toDto);
@@ -41,8 +40,6 @@ public class AlarmService {
   public SseEmitter connectAlarm(String loginEmail) {
     SseEmitter sseEmitter = new SseEmitter(DEFAULT_TIMEOUT);
     emitterRepository.save(loginEmail, sseEmitter);
-    sseEmitter.onCompletion(() -> emitterRepository.delete(loginEmail));
-    sseEmitter.onTimeout(() -> emitterRepository.delete(loginEmail));
 
     try {
       sseEmitter.send(SseEmitter.event().id("id").name(ALARM_NAME).data("connect completed"));
@@ -55,14 +52,14 @@ public class AlarmService {
 
   @Transactional
   public void saveAndSend(AlarmEvent alarmEvent) {
-    Member member = findMemberById(alarmEvent.getMemberId());
+    Member member = memberService.findMemberById(alarmEvent.getMemberId());
     Alarm alarm = alarmRepository.save(alarmEvent.toEntity());
 
     send(alarm.getId(), member.getEmail());
   }
 
   private void send(Long alarmId, String email) {
-    Optional<SseEmitter> optionalSseEmitter = emitterRepository.find(email);
+    Optional<SseEmitter> optionalSseEmitter = emitterRepository.findByEmail(email);
     if (optionalSseEmitter.isPresent()) {
       SseEmitter sseEmitter = optionalSseEmitter.get();
       try {
@@ -73,17 +70,5 @@ public class AlarmService {
         throw new SSEConnectError();
       }
     }
-  }
-
-  private Member findMemberByEmail(String email) {
-    Member member = memberRepository.findByEmail(email)
-        .orElseThrow(() -> new NotFoundEntityException("사용자", email));
-    return member;
-  }
-
-  private Member findMemberById(Long memberId) {
-    Member member = memberRepository.findById(memberId)
-        .orElseThrow(() -> new NotFoundEntityException("사용자", memberId));
-    return member;
   }
 }

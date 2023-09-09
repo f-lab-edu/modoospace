@@ -4,10 +4,10 @@ import com.modoospace.config.auth.dto.OAuthAttributes;
 import com.modoospace.config.auth.dto.SessionMember;
 import com.modoospace.member.domain.Member;
 import com.modoospace.member.domain.MemberRepository;
+import com.modoospace.member.repository.MemberCacheRepository;
 import java.util.Collections;
 import javax.servlet.http.HttpSession;
 import lombok.RequiredArgsConstructor;
-import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.oauth2.client.userinfo.DefaultOAuth2UserService;
 import org.springframework.security.oauth2.client.userinfo.OAuth2UserRequest;
 import org.springframework.security.oauth2.client.userinfo.OAuth2UserService;
@@ -21,6 +21,7 @@ import org.springframework.stereotype.Service;
 public class CustomOAuth2UserService implements OAuth2UserService<OAuth2UserRequest, OAuth2User> {
 
   private final MemberRepository memberRepository;
+  private final MemberCacheRepository memberCacheRepository;
   private final HttpSession httpSession;
 
   @Override
@@ -57,6 +58,8 @@ public class CustomOAuth2UserService implements OAuth2UserService<OAuth2UserRequ
         .map(entity -> entity.updateNameFromProvider(attributes.getName()))
         .orElse(attributes.toEntity());
 
-    return memberRepository.save(member);
+    memberCacheRepository.save(member);
+    memberRepository.save(member);
+    return member;
   }
 }

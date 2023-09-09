@@ -2,7 +2,7 @@ package com.modoospace.space.sevice;
 
 import com.modoospace.common.exception.NotFoundEntityException;
 import com.modoospace.member.domain.Member;
-import com.modoospace.member.domain.MemberRepository;
+import com.modoospace.member.service.MemberService;
 import com.modoospace.space.controller.dto.space.SpaceCreateUpdateDto;
 import com.modoospace.space.controller.dto.space.SpaceReadDto;
 import com.modoospace.space.controller.dto.space.SpaceSearchDto;
@@ -21,14 +21,14 @@ import org.springframework.transaction.annotation.Transactional;
 @Service
 public class SpaceService {
 
-  private final MemberRepository memberRepository;
+  private final MemberService memberService;
   private final SpaceRepository spaceRepository;
   private final CategoryRepository categoryRepository;
   private final SpaceQueryRepository spaceQueryRepository;
 
   @Transactional
   public Long createSpace(Long categoryId, SpaceCreateUpdateDto createDto, String loginEmail) {
-    Member host = findMemberByEmail(loginEmail);
+    Member host = memberService.findMemberByEmail(loginEmail);
     Category category = findCategoryById(categoryId);
 
     Space space = createDto.toEntity(category, host);
@@ -50,8 +50,8 @@ public class SpaceService {
   }
 
   @Transactional
-  public void updateSpace(Long spaceId, SpaceCreateUpdateDto updateDto, String email) {
-    Member loginMember = findMemberByEmail(email);
+  public void updateSpace(Long spaceId, SpaceCreateUpdateDto updateDto, String loginEmail) {
+    Member loginMember = memberService.findMemberByEmail(loginEmail);
     Space space = findSpaceById(spaceId);
     Space updatedSpace = updateDto.toEntity(space.getCategory(), space.getHost());
 
@@ -59,20 +59,14 @@ public class SpaceService {
   }
 
   @Transactional
-  public void deleteSpace(Long spaceId, String email) {
-    Member loginMember = findMemberByEmail(email);
+  public void deleteSpace(Long spaceId, String loginEmail) {
+    Member loginMember = memberService.findMemberByEmail(loginEmail);
     Space space = findSpaceById(spaceId);
 
     // TODO: 예약이 존재하는지 확인이 필요합니다.
 
     space.verifyManagementPermission(loginMember);
     spaceRepository.delete(space);
-  }
-
-  private Member findMemberByEmail(String email) {
-    Member member = memberRepository.findByEmail(email)
-        .orElseThrow(() -> new NotFoundEntityException("사용자", email));
-    return member;
   }
 
   private Space findSpaceById(Long spaceId) {
