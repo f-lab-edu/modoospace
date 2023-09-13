@@ -5,11 +5,16 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.exc.InvalidDefinitionException;
+import com.fasterxml.jackson.databind.exc.MismatchedInputException;
+import java.io.Serializable;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import org.springframework.security.core.SpringSecurityCoreVersion;
+import org.springframework.security.oauth2.core.endpoint.OAuth2AuthorizationResponseType;
+import org.springframework.util.Assert;
 
 /**
  * Controller 단 에서 RequestBody 인자로 사용되는 DTO의 Getter를 제외하려했으나, 자꾸 역직렬화 실패 예외가 터짐. 파악을 위해 Spring에서
@@ -70,5 +75,68 @@ public class ObjectMapperTest {
 
     String name;
     int age;
+  }
+
+  @DisplayName("Oauth2.0에 사용되는 OAuth2AuthorizationResponseType는 역직렬화에 실패한다.")
+  @Test
+  public void objectMapper_throwException_IfOAuth2AuthorizationResponseTypeRead() throws Exception{
+    ObjectMapper objectMapper = new ObjectMapper();
+    String content = objectMapper.writeValueAsString(new OAuth2AuthorizationResponseType("code"));
+
+    assertThatThrownBy(() -> objectMapper.readValue(content, OAuth2AuthorizationResponseType.class))
+        .isInstanceOf(MismatchedInputException.class);
+  }
+
+  @DisplayName("기본 생성자를 추가한 OAuth2AuthorizationResponseType는 역직렬화에 성공한다.")
+  @Test
+  public void objectMapper_readSuccess_IfOAuth2AuthorizationResponseTypeAddNoConstructor() throws Exception{
+    ObjectMapper objectMapper = new ObjectMapper();
+    String content = objectMapper.writeValueAsString(new OAuth2AuthorizationResponseType_Test("code"));
+
+    OAuth2AuthorizationResponseType_Test responseTypeTest = objectMapper
+        .readValue(content, OAuth2AuthorizationResponseType_Test.class);
+  }
+
+  public static class OAuth2AuthorizationResponseType_Test implements Serializable {
+
+    private static final long serialVersionUID = SpringSecurityCoreVersion.SERIAL_VERSION_UID;
+
+    public static final OAuth2AuthorizationResponseType_Test CODE = new OAuth2AuthorizationResponseType_Test("code");
+
+    private final String value;
+
+    public OAuth2AuthorizationResponseType_Test() {
+      this.value = "code";
+    }
+
+    public OAuth2AuthorizationResponseType_Test(String value) {
+      Assert.hasText(value, "value cannot be empty");
+      this.value = value;
+    }
+
+    /**
+     * Returns the value of the authorization response type.
+     * @return the value of the authorization response type
+     */
+    public String getValue() {
+      return this.value;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+      if (this == obj) {
+        return true;
+      }
+      if (obj == null || this.getClass() != obj.getClass()) {
+        return false;
+      }
+      org.springframework.security.oauth2.core.endpoint.OAuth2AuthorizationResponseType that = (org.springframework.security.oauth2.core.endpoint.OAuth2AuthorizationResponseType) obj;
+      return this.getValue().equals(that.getValue());
+    }
+
+    @Override
+    public int hashCode() {
+      return this.getValue().hashCode();
+    }
   }
 }
