@@ -38,18 +38,21 @@ public class ReservationTest {
   public void setUp() {
 
     adminMember = Member.builder()
+        .id(1L)
         .email("admin@email")
         .name("admin")
         .role(Role.ADMIN)
         .build();
 
     hostMember = Member.builder()
+        .id(2L)
         .email("host@email")
         .name("host")
         .role(Role.HOST)
         .build();
 
     visitorMember = Member.builder()
+        .id(3L)
         .email("visitor@email")
         .name("visitor")
         .role(Role.VISITOR)
