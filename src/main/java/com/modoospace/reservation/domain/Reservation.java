@@ -91,7 +91,7 @@ public class Reservation extends BaseTimeEntity {
   }
 
   public void verifySameVisitor(Member loginMember) {
-    if (visitor.getId().equals(loginMember.getId())) {
+    if (!visitor.getId().equals(loginMember.getId())) {
       throw new PermissionDeniedException();
     }
   }
