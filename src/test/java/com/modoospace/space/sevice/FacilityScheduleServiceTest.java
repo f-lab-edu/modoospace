@@ -4,7 +4,6 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.junit.jupiter.api.Assertions.assertAll;
 
-import com.modoospace.TestConfig;
 import com.modoospace.common.exception.ConflictingTimeException;
 import com.modoospace.common.exception.NotFoundEntityException;
 import com.modoospace.member.domain.Member;
@@ -19,29 +18,31 @@ import com.modoospace.space.domain.Category;
 import com.modoospace.space.domain.CategoryRepository;
 import com.modoospace.space.domain.Facility;
 import com.modoospace.space.domain.FacilityRepository;
-import com.modoospace.space.domain.FacilityScheduleRepository;
 import com.modoospace.space.domain.FacilityType;
 import com.modoospace.space.domain.Space;
 import com.modoospace.space.domain.SpaceRepository;
-import com.modoospace.space.repository.FacilityScheduleQueryRepository;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.time.YearMonth;
 import java.util.Arrays;
 import java.util.List;
+import javax.persistence.EntityManager;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
-import org.springframework.context.annotation.Import;
+import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
+import org.springframework.transaction.annotation.Transactional;
 
-@DataJpaTest
-@Import(TestConfig.class)
+@SpringBootTest
 @ActiveProfiles("test")
+@Transactional
 public class FacilityScheduleServiceTest {
+
+  @Autowired
+  private FacilityScheduleService facilityScheduleService;
 
   @Autowired
   private MemberRepository memberRepository;
@@ -56,12 +57,7 @@ public class FacilityScheduleServiceTest {
   private FacilityRepository facilityRepository;
 
   @Autowired
-  private FacilityScheduleRepository facilityScheduleRepository;
-
-  @Autowired
-  private FacilityScheduleQueryRepository facilityScheduleQueryRepository;
-
-  private FacilityScheduleService facilityScheduleService;
+  private EntityManager em;
 
   private Member hostMember;
 
@@ -75,20 +71,19 @@ public class FacilityScheduleServiceTest {
 
   @BeforeEach
   public void setUp() {
-    facilityScheduleService = new FacilityScheduleService(memberRepository, facilityRepository,
-        facilityScheduleRepository, facilityScheduleQueryRepository);
-
     hostMember = Member.builder()
         .email("host@email")
         .name("host")
         .role(Role.HOST)
         .build();
     memberRepository.save(hostMember);
+    memberRepository.flush();
 
     Category category = Category.builder()
         .name("스터디 공간")
         .build();
     categoryRepository.save(category);
+
     SpaceCreateUpdateDto spaceCreateDto = SpaceCreateUpdateDto.builder()
         .name("공간이름")
         .description("설명")
@@ -109,6 +104,8 @@ public class FacilityScheduleServiceTest {
 
     nowDate = LocalDate.now();
     nowYearMonth = YearMonth.now();
+
+    em.flush();
   }
 
   @DisplayName("시설 스케줄 데이터를 생성한다.")

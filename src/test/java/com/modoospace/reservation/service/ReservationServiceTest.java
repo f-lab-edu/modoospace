@@ -5,13 +5,13 @@ import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.mockito.Mockito.mock;
 
-import com.modoospace.TestConfig;
 import com.modoospace.alarm.producer.AlarmProducer;
 import com.modoospace.common.exception.ConflictingReservationException;
 import com.modoospace.common.exception.PermissionDeniedException;
 import com.modoospace.member.domain.Member;
 import com.modoospace.member.domain.MemberRepository;
 import com.modoospace.member.domain.Role;
+import com.modoospace.member.service.MemberService;
 import com.modoospace.reservation.controller.dto.AvailabilityTimeResponseDto;
 import com.modoospace.reservation.controller.dto.ReservationCreateDto;
 import com.modoospace.reservation.controller.dto.ReservationReadDto;
@@ -39,14 +39,13 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
-import org.springframework.context.annotation.Import;
+import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.transaction.annotation.Transactional;
 
-@DataJpaTest
-@Import(TestConfig.class)
+@SpringBootTest
 @ActiveProfiles("test")
+@Transactional
 public class ReservationServiceTest {
 
   @Autowired
@@ -61,6 +60,23 @@ public class ReservationServiceTest {
   @Autowired
   private FacilityRepository facilityRepository;
 
+  private Member visitorMember;
+
+  private Member hostMember;
+
+  private Facility roomFacility;
+
+  private Facility seatFacility;
+
+  private LocalDateTime now;
+
+  private ReservationService reservationService;
+
+  // TODO : AlarmProducer mock객체를 Injection하기 위해 테스트에 사용되지 않는
+  //        하지만 ReservationService에 결합된 클래스들을 가져오는게 맞는걸까?
+  @Autowired
+  private MemberService memberService;
+
   @Autowired
   private FacilityScheduleRepository facilityScheduleRepository;
 
@@ -73,25 +89,12 @@ public class ReservationServiceTest {
   @Autowired
   private ReservationQueryRepository reservationQueryRepository;
 
-  private ReservationService reservationService;
-
-  private Member visitorMember;
-
-  private Member hostMember;
-
-  private Facility roomFacility;
-
-  private Facility seatFacility;
-
-  private LocalDateTime now;
-
   @BeforeEach
   public void setUp() {
-    AlarmProducer alarmProducer = mock(AlarmProducer.class);
-    reservationService = new ReservationService(memberRepository, facilityRepository,
+    AlarmProducer alarmProducerMock = mock(AlarmProducer.class);
+    reservationService = new ReservationService(memberService, facilityRepository,
         facilityScheduleRepository, facilityScheduleQueryRepository, reservationRepository,
-        reservationQueryRepository,
-        alarmProducer);
+        reservationQueryRepository, alarmProducerMock);
 
     hostMember = Member.builder()
         .email("host@email")
@@ -249,7 +252,6 @@ public class ReservationServiceTest {
         .isInstanceOf(ConflictingReservationException.class);
   }
 
-  @Transactional
   @DisplayName("방문자가 본인의 예약을 취소할 수 있다.")
   @Test
   public void cancelReservation() {
