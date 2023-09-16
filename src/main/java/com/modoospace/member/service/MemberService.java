@@ -4,6 +4,7 @@ import com.modoospace.common.exception.NotFoundEntityException;
 import com.modoospace.member.controller.dto.MemberUpdateDto;
 import com.modoospace.member.domain.Member;
 import com.modoospace.member.domain.MemberRepository;
+import com.modoospace.member.repository.MemberCacheRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -13,6 +14,7 @@ import org.springframework.transaction.annotation.Transactional;
 public class MemberService {
 
   private final MemberRepository memberRepository;
+  private final MemberCacheRepository memberCacheRepository;
 
   @Transactional
   public void updateMemberRole(Long memberId, MemberUpdateDto updateDto, String loginEmail) {
@@ -20,15 +22,18 @@ public class MemberService {
     Member member = findMemberById(memberId);
 
     member.updateRoleOnlyAdmin(updateDto.getRole(), loginMember);
+    memberCacheRepository.save(member);
   }
 
-  private Member findMemberByEmail(String email) {
-    Member member = memberRepository.findByEmail(email)
-        .orElseThrow(() -> new NotFoundEntityException("사용자", email));
-    return member;
+  public Member findMemberByEmail(String email) {
+    return memberCacheRepository.findByEmail(email)
+        .orElseGet(
+            () -> memberRepository.findByEmail(email)
+                .orElseThrow(() -> new NotFoundEntityException("사용자", email))
+        );
   }
 
-  private Member findMemberById(Long id) {
+  public Member findMemberById(Long id) {
     Member member = memberRepository.findById(id)
         .orElseThrow(() -> new NotFoundEntityException("사용자", id));
     return member;

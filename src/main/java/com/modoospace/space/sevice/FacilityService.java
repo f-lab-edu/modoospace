@@ -2,7 +2,7 @@ package com.modoospace.space.sevice;
 
 import com.modoospace.common.exception.NotFoundEntityException;
 import com.modoospace.member.domain.Member;
-import com.modoospace.member.domain.MemberRepository;
+import com.modoospace.member.service.MemberService;
 import com.modoospace.space.controller.dto.facility.FacilityCreateDto;
 import com.modoospace.space.controller.dto.facility.FacilityReadDetailDto;
 import com.modoospace.space.controller.dto.facility.FacilityReadDto;
@@ -23,14 +23,14 @@ import org.springframework.transaction.annotation.Transactional;
 @Service
 public class FacilityService {
 
-  private final MemberRepository memberRepository;
+  private final MemberService memberService;
   private final SpaceRepository spaceRepository;
   private final FacilityRepository facilityRepository;
   private final FacilityQueryRepository facilityQueryRepository;
 
   @Transactional
   public Long createFacility(Long spaceId, FacilityCreateDto createDto, String loginEmail) {
-    Member host = findMemberByEmail(loginEmail);
+    Member host = memberService.findMemberByEmail(loginEmail);
     Space space = findSpaceById(spaceId);
     space.verifyManagementPermission(host);
 
@@ -53,7 +53,7 @@ public class FacilityService {
 
   @Transactional
   public void updateFacility(Long facilityId, FacilityUpdateDto updateDto, String loginEmail) {
-    Member loginMember = findMemberByEmail(loginEmail);
+    Member loginMember = memberService.findMemberByEmail(loginEmail);
     Facility facility = findFacilityById(facilityId);
     Facility updatedFacility = updateDto.toEntity();
 
@@ -61,19 +61,14 @@ public class FacilityService {
   }
 
   @Transactional
-  public void deleteFacility(Long facilityId, String email) {
-    Member loginMember = findMemberByEmail(email);
+  public void deleteFacility(Long facilityId, String loginEmail) {
+    Member loginMember = memberService.findMemberByEmail(loginEmail);
     Facility facility = findFacilityById(facilityId);
 
     // TODO: 예약이 존재하는지 확인이 필요합니다.
 
     facility.verifyManagementPermission(loginMember);
     facilityRepository.delete(facility);
-  }
-
-  private Member findMemberByEmail(String email) {
-    return memberRepository.findByEmail(email)
-        .orElseThrow(() -> new NotFoundEntityException("사용자", email));
   }
 
   private Space findSpaceById(Long spaceId) {

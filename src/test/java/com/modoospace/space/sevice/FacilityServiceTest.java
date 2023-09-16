@@ -7,6 +7,7 @@ import com.modoospace.TestConfig;
 import com.modoospace.member.domain.Member;
 import com.modoospace.member.domain.MemberRepository;
 import com.modoospace.member.domain.Role;
+import com.modoospace.member.service.MemberService;
 import com.modoospace.space.controller.dto.facility.FacilityCreateDto;
 import com.modoospace.space.controller.dto.facility.FacilityUpdateDto;
 import com.modoospace.space.controller.dto.space.SpaceCreateUpdateDto;
@@ -32,14 +33,17 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
+import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.annotation.Import;
 import org.springframework.test.context.ActiveProfiles;
+import org.springframework.transaction.annotation.Transactional;
 
-@DataJpaTest
-@Import(TestConfig.class)
+@SpringBootTest
 @ActiveProfiles("test")
+@Transactional
 class FacilityServiceTest {
 
+  @Autowired
   private FacilityService facilityService;
 
   @Autowired
@@ -57,17 +61,12 @@ class FacilityServiceTest {
   @Autowired
   private FacilityScheduleQueryRepository facilityScheduleQueryRepository;
 
-  @Autowired
-  private FacilityQueryRepository facilityQueryRepository;
-
   private Member hostMember;
   private Space space;
   private LocalDate nowDate;
 
   @BeforeEach
   public void setUp() {
-    facilityService = new FacilityService(memberRepository, spaceRepository, facilityRepository, facilityQueryRepository);
-
     hostMember = Member.builder()
         .email("host@email")
         .name("host")

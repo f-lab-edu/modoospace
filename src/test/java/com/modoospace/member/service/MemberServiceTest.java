@@ -8,21 +8,29 @@ import com.modoospace.member.controller.dto.MemberUpdateDto;
 import com.modoospace.member.domain.Member;
 import com.modoospace.member.domain.MemberRepository;
 import com.modoospace.member.domain.Role;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.test.context.ActiveProfiles;
+import org.springframework.transaction.annotation.Transactional;
 
-@DataJpaTest
+@SpringBootTest
 @ActiveProfiles("test")
+@Transactional
 class MemberServiceTest {
 
+  @Autowired
   private MemberService memberService;
 
   @Autowired
   private MemberRepository memberRepository;
+
+  @Autowired
+  private StringRedisTemplate redisTemplate;
 
   private Member adminMember;
   private Member hostMember;
@@ -30,8 +38,6 @@ class MemberServiceTest {
 
   @BeforeEach
   public void setUp() {
-    memberService = new MemberService(memberRepository);
-
     adminMember = Member.builder()
         .email("admin@email")
         .name("admin")
@@ -53,6 +59,11 @@ class MemberServiceTest {
     memberRepository.save(adminMember);
     memberRepository.save(hostMember);
     memberRepository.save(visitorMember);
+  }
+
+  @AfterEach
+  public void after() {
+    redisTemplate.getConnectionFactory().getConnection().flushAll();
   }
 
   @DisplayName("Visitor 사용자를 Host로 변경한디.")

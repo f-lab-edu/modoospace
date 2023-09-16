@@ -4,7 +4,6 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.junit.jupiter.api.Assertions.assertAll;
 
-import com.modoospace.TestConfig;
 import com.modoospace.common.exception.NotFoundEntityException;
 import com.modoospace.common.exception.PermissionDeniedException;
 import com.modoospace.member.domain.Member;
@@ -17,24 +16,24 @@ import com.modoospace.space.domain.Address;
 import com.modoospace.space.domain.Category;
 import com.modoospace.space.domain.CategoryRepository;
 import com.modoospace.space.domain.SpaceRepository;
-import com.modoospace.space.repository.SpaceQueryRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
-import org.springframework.context.annotation.Import;
+import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.test.context.ActiveProfiles;
+import org.springframework.transaction.annotation.Transactional;
 
-@DataJpaTest
-@Import(TestConfig.class)
+@SpringBootTest
 @ActiveProfiles("test")
+@Transactional
 class SpaceServiceTest {
 
+  @Autowired
   private SpaceService spaceService;
 
   @Autowired
@@ -46,9 +45,6 @@ class SpaceServiceTest {
   @Autowired
   private CategoryRepository categoryRepository;
 
-  @Autowired
-  private SpaceQueryRepository spaceQueryRepository;
-
   private Member hostMember;
   private Member visitorMember;
   private Member adminMember;
@@ -58,9 +54,6 @@ class SpaceServiceTest {
 
   @BeforeEach
   public void setUp() {
-    spaceService = new SpaceService(memberRepository, spaceRepository, categoryRepository,
-        spaceQueryRepository);
-
     hostMember = Member.builder()
         .email("host@email")
         .name("host")

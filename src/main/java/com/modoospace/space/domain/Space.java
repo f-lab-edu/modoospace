@@ -76,7 +76,7 @@ public class Space extends BaseTimeEntity {
   }
 
   public void verifyManagementPermission(Member loginMember) {
-    if (host == loginMember) {
+    if (host.getId().equals(loginMember.getId())) {
       return;
     }
     loginMember.verifyRolePermission(Role.ADMIN);

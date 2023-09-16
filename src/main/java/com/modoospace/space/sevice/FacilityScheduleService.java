@@ -2,7 +2,7 @@ package com.modoospace.space.sevice;
 
 import com.modoospace.common.exception.NotFoundEntityException;
 import com.modoospace.member.domain.Member;
-import com.modoospace.member.domain.MemberRepository;
+import com.modoospace.member.service.MemberService;
 import com.modoospace.space.controller.dto.facilitySchedule.FacilityScheduleCreateUpdateDto;
 import com.modoospace.space.controller.dto.facilitySchedule.FacilityScheduleReadDto;
 import com.modoospace.space.domain.Facility;
@@ -22,7 +22,7 @@ import org.springframework.transaction.annotation.Transactional;
 @Service
 public class FacilityScheduleService {
 
-  private final MemberRepository memberRepository;
+  private final MemberService memberService;
   private final FacilityRepository facilityRepository;
   private final FacilityScheduleRepository facilityScheduleRepository;
   private final FacilityScheduleQueryRepository facilityScheduleQueryRepository;
@@ -30,7 +30,7 @@ public class FacilityScheduleService {
   @Transactional
   public Long createFacilitySchedule(Long facilityId, FacilityScheduleCreateUpdateDto createDto,
       String loginEmail) {
-    Member loginMember = findMemberByEmail(loginEmail);
+    Member loginMember = memberService.findMemberByEmail(loginEmail);
     Facility facility = findFacilityById(facilityId);
 
     FacilitySchedule facilitySchedule = facility
@@ -50,7 +50,7 @@ public class FacilityScheduleService {
   public Long updateFacilitySchedule(Long facilityScheduleId,
       FacilityScheduleCreateUpdateDto updateDto,
       String loginEmail) {
-    Member loginMember = findMemberByEmail(loginEmail);
+    Member loginMember = memberService.findMemberByEmail(loginEmail);
     FacilitySchedule schedule = findFacilityScheduleById(facilityScheduleId);
     Facility facility = schedule.getFacility();
 
@@ -63,7 +63,7 @@ public class FacilityScheduleService {
 
   @Transactional
   public void deleteFacilitySchedule(Long facilityScheduleId, String loginEmail) {
-    Member loginMember = findMemberByEmail(loginEmail);
+    Member loginMember = memberService.findMemberByEmail(loginEmail);
     FacilitySchedule schedule = findFacilityScheduleById(facilityScheduleId);
     Facility facility = schedule.getFacility();
 
@@ -85,7 +85,7 @@ public class FacilityScheduleService {
   @Transactional
   public void create1MonthDefaultFacilitySchedules(Long facilityId, YearMonth createYearMonth,
       String loginEmail) {
-    Member loginMember = findMemberByEmail(loginEmail);
+    Member loginMember = memberService.findMemberByEmail(loginEmail);
     Facility facility = findFacilityById(facilityId);
 
     delete1MonthFacilitySchedules(facility, createYearMonth, loginMember);
@@ -106,7 +106,7 @@ public class FacilityScheduleService {
   @Transactional
   public void delete1MonthFacilitySchedules(Long facilityId, YearMonth deleteYearMonth,
       String loginEmail) {
-    Member loginMember = findMemberByEmail(loginEmail);
+    Member loginMember = memberService.findMemberByEmail(loginEmail);
     Facility facility = findFacilityById(facilityId);
 
     delete1MonthFacilitySchedules(facility, deleteYearMonth, loginMember);
@@ -122,12 +122,6 @@ public class FacilityScheduleService {
       facilityScheduleRepository
           .deleteAllInBatch(facilitySchedules); // deleteAll 과 deleteAllInBatch의 차이점 공부필요.
     }
-  }
-
-  private Member findMemberByEmail(String email) {
-    Member member = memberRepository.findByEmail(email)
-        .orElseThrow(() -> new NotFoundEntityException("사용자", email));
-    return member;
   }
 
   private Facility findFacilityById(Long facilityId) {
