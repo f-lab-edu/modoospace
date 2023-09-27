@@ -9,6 +9,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 @RequiredArgsConstructor
 @Controller
 public class MainController {
+
   @GetMapping({"", "/"})
   public String index(Model model, @LoginEmail String loginEmail) {
     if (loginEmail != null) {
