@@ -9,6 +9,7 @@ import com.querydsl.jpa.impl.JPAQuery;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.support.PageableExecutionUtils;
@@ -20,6 +21,7 @@ public class AlarmQueryRepository {
 
   private final JPAQueryFactory jpaQueryFactory;
 
+  @Cacheable(cacheNames = "searchAlarms", key = "#member.id +':'+ #pageable.pageNumber")
   public Page<Alarm> searchByMember(Member member, Pageable pageable) {
 
     List<Alarm> content = jpaQueryFactory
@@ -27,6 +29,7 @@ public class AlarmQueryRepository {
         .where(memberIdEq(member.getId()))
         .offset(pageable.getOffset())
         .limit(pageable.getPageSize())
+        .orderBy(alarm.createdTime.desc())
         .fetch();
 
     JPAQuery<Alarm> countQuery = jpaQueryFactory

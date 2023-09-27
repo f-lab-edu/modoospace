@@ -1,6 +1,7 @@
 package com.modoospace.alarm.domain;
 
 import com.modoospace.common.BaseTimeEntity;
+import java.io.Serializable;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.EnumType;
@@ -15,7 +16,7 @@ import lombok.NoArgsConstructor;
 @Entity
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-public class Alarm extends BaseTimeEntity {
+public class Alarm extends BaseTimeEntity implements Serializable {
 
   @Id
   @GeneratedValue
