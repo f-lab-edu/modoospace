@@ -7,6 +7,7 @@ import com.modoospace.alarm.domain.AlarmRepository;
 import com.modoospace.alarm.repository.AlarmQueryRepository;
 import com.modoospace.alarm.repository.EmitterCacheRepository;
 import com.modoospace.common.exception.SSEConnectError;
+import com.modoospace.config.redis.CachePrefixEvict;
 import com.modoospace.member.domain.Member;
 import com.modoospace.member.service.MemberService;
 import java.io.IOException;
@@ -51,6 +52,7 @@ public class AlarmService {
   }
 
   @Transactional
+  @CachePrefixEvict(cacheNames = "searchAlarms", key = "#{alarmEvent.memberId}")
   public void saveAndSend(AlarmEvent alarmEvent) {
     Member member = memberService.findMemberById(alarmEvent.getMemberId());
     Alarm alarm = alarmRepository.save(alarmEvent.toEntity());
