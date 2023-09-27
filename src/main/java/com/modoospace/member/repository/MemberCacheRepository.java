@@ -48,6 +48,6 @@ public class MemberCacheRepository {
   }
 
   public String getKey(String email) {
-    return "MEMBER: " + email;
+    return "MEMBER:" + email;
   }
 }
