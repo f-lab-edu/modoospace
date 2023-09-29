@@ -7,7 +7,9 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
@@ -24,6 +26,13 @@ public class AlarmController {
       Pageable pageable) {
     Page<AlarmReadDto> alarms = alarmService.searchAlarms(loginEmail, pageable);
     return ResponseEntity.ok().body(alarms);
+  }
+
+  @DeleteMapping("/{alarmId}")
+  public ResponseEntity<Void> delete(@PathVariable Long alarmId,
+      @LoginEmail String loginEmail) {
+    alarmService.delete(alarmId, loginEmail);
+    return ResponseEntity.noContent().build();
   }
 
   @GetMapping("/subscribe")

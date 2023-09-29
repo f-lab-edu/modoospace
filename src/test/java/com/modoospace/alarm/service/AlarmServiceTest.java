@@ -104,7 +104,7 @@ class AlarmServiceTest {
     PageRequest pageRequest = PageRequest.of(0, 10);
     alarmService.searchAlarms("host@email", pageRequest);
 
-    alarmService.delete("host@email", alarm.getId());
+    alarmService.delete(alarm.getId(), "host@email");
 
     String pattern = "searchAlarms::" + hostMember.getEmail() + ":*";
     Set<String> keys = redisTemplate.keys(pattern);

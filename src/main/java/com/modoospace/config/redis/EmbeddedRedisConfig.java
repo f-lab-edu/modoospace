@@ -1,4 +1,4 @@
-package com.modoospace.config;
+package com.modoospace.config.redis;
 
 import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;

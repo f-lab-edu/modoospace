@@ -77,10 +77,10 @@ public class AlarmService {
 
   @Transactional
   @CachePrefixEvict(cacheNames = "searchAlarms", key = "#loginEmail")
-  public void delete(String loginEmail, Long alarmId) {
+  public void delete(Long alarmId, String loginEmail) {
     Member loginMember = memberService.findMemberByEmail(loginEmail);
     Alarm alarm = findAlarmById(alarmId);
-    
+
     alarm.verifyManagementPermission(loginMember);
     alarmRepository.delete(alarm);
   }
