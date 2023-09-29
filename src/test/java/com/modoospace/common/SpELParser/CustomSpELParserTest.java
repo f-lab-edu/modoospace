@@ -11,23 +11,25 @@ import org.springframework.expression.spel.SpelEvaluationException;
 
 public class CustomSpELParserTest {
 
-  @DisplayName("#instance.filed 표현식이 주어진 경우 filed의 값을 반환한다.(age)")
+  private Person person = new Person(10L, "jeonghwa", 29, true);
+
+  @DisplayName("#instance.filed 표현식이 주어진 경우 filed의 값을 반환한다.(Long)")
   @Test
-  public void parserTest_InstanceFiled_Age() {
+  public void parserTest_InstanceFiled_Long() {
     String[] parameterNames = {"person"};
-    Object[] args = {new Person("jeonghwa", 29)};
-    String expression = "#person.age";
+    Object[] args = {person};
+    String expression = "#person.id";
 
     Object ret = CustomSpELParser.extractValueFromExpression(parameterNames, args, expression);
 
-    assertThat((Integer) ret).isEqualTo(29);
+    assertThat((Long) ret).isEqualTo(10L);
   }
 
-  @DisplayName("#instance.filed 표현식이 주어진 경우 filed의 값을 반환한다.(name)")
+  @DisplayName("#instance.filed 표현식이 주어진 경우 filed의 값을 반환한다.(String)")
   @Test
-  public void parserTest_InstanceFiled_Name() {
+  public void parserTest_InstanceFiled_String() {
     String[] parameterNames = {"person"};
-    Object[] args = {new Person("jeonghwa", 29)};
+    Object[] args = {person};
     String expression = "#person.name";
 
     Object ret = CustomSpELParser.extractValueFromExpression(parameterNames, args, expression);
@@ -35,12 +37,36 @@ public class CustomSpELParserTest {
     assertThat((String) ret).isEqualTo("jeonghwa");
   }
 
+  @DisplayName("#instance.filed 표현식이 주어진 경우 filed의 값을 반환한다.(Integer)")
+  @Test
+  public void parserTest_InstanceFiled_Integer() {
+    String[] parameterNames = {"person"};
+    Object[] args = {person};
+    String expression = "#person.age";
+
+    Object ret = CustomSpELParser.extractValueFromExpression(parameterNames, args, expression);
+
+    assertThat((Integer) ret).isEqualTo(29);
+  }
+
+  @DisplayName("#instance.filed 표현식이 주어진 경우 filed의 값을 반환한다.(Boolean)")
+  @Test
+  public void parserTest_InstanceFiled_Boolean() {
+    String[] parameterNames = {"person"};
+    Object[] args = {person};
+    String expression = "#person.use";
+
+    Object ret = CustomSpELParser.extractValueFromExpression(parameterNames, args, expression);
+
+    assertThat((Boolean) ret).isEqualTo(true);
+  }
+
 
   @DisplayName("#instance.filed 표현식이 주어진 경우 해당 인스턴스의 없는 field일 경우 Exception이 발생한다.")
   @Test
   public void parserTest_InstanceNotHaveFiled() {
     String[] parameterNames = {"person"};
-    Object[] args = {new Person("jeonghwa", 29)};
+    Object[] args = {person};
     String expression = "#person.noField";
 
     assertThatThrownBy(
@@ -52,7 +78,7 @@ public class CustomSpELParserTest {
   @Test
   public void parserTest_NotAppearParameter_Instance() {
     String[] parameterNames = {"person"};
-    Object[] args = {new Person("jeonghwa", 29)};
+    Object[] args = {person};
     String expression = "#noInstance.age";
 
     assertThatThrownBy(
@@ -81,18 +107,22 @@ public class CustomSpELParserTest {
 
     assertThatThrownBy(
         () -> CustomSpELParser.extractValueFromExpression(parameterNames, args, expression))
-        .isInstanceOf(SpelEvaluationException.class);
+        .isInstanceOf(NullPointerException.class);
   }
 
   @Getter
   public static class Person {
 
+    private Long id;
     private String name;
     private Integer age;
+    private Boolean use;
 
-    public Person(String name, Integer age) {
+    public Person(Long id, String name, Integer age, Boolean use) {
+      this.id = id;
       this.name = name;
       this.age = age;
+      this.use = use;
     }
   }
 }
