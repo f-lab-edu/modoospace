@@ -50,8 +50,8 @@ public class FacilityCreateDto {
   );
 
   public FacilityCreateDto(String name, FacilityType facilityType, Boolean reservationEnable,
-                           String description, List<TimeSettingCreateDto> timeSettings,
-                           List<WeekdaySettingCreateDto> weekdaySettings) {
+      String description, List<TimeSettingCreateDto> timeSettings,
+      List<WeekdaySettingCreateDto> weekdaySettings) {
     this.name = name;
     this.facilityType = facilityType;
     this.reservationEnable = reservationEnable;

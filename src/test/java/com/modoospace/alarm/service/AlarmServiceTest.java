@@ -68,7 +68,7 @@ class AlarmServiceTest {
     redisTemplate.getConnectionFactory().getConnection().flushAll();
   }
 
-  @DisplayName("알람을 검색하면, searchAlarms::멤버ID:페이지넘버를 키값으로 결과가 캐싱된다.")
+  @DisplayName("알람을 검색하면, searchAlarms::이메일:페이지넘버를 키값으로 결과가 캐싱된다.")
   @Test
   public void searchAlarms_redisSave() {
     PageRequest pageRequest = PageRequest.of(0, 10);

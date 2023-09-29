@@ -126,6 +126,3 @@ public class CustomSpELParserTest {
     }
   }
 }
-
-
-

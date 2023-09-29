@@ -7,8 +7,4 @@ public class RedisProcessingException extends RuntimeException {
   public RedisProcessingException() {
     super(MESSAGE);
   }
-
-  public RedisProcessingException(String message) {
-    super(message);
-  }
 }

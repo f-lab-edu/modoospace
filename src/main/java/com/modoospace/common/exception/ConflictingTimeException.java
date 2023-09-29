@@ -9,7 +9,8 @@ public class ConflictingTimeException extends RuntimeException {
     super(timeSetting1 + "과 " + timeSetting2 + " 시간이 겹칩니다.");
   }
 
-  public ConflictingTimeException(FacilitySchedule facilitySchedule1, FacilitySchedule facilitySchedule2) {
+  public ConflictingTimeException(FacilitySchedule facilitySchedule1,
+      FacilitySchedule facilitySchedule2) {
     super(facilitySchedule1 + "과 " + facilitySchedule2 + " 시간이 겹칩니다.");
   }
 }

@@ -48,7 +48,7 @@ public class ReservationReadDto {
     this.member = member;
   }
 
-  public static ReservationReadDto toDto(Reservation reservation){
+  public static ReservationReadDto toDto(Reservation reservation) {
     return ReservationReadDto.builder()
         .id(reservation.getId())
         .facility(FacilityReadDto.toDto(reservation.getFacility()))

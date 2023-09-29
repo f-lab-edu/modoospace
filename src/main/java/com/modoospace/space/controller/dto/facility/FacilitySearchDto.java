@@ -8,7 +8,8 @@ import lombok.Setter;
 /**
  * query string 형식으로 dto를 받기 위해서는 setter 필요
  */
-@Getter @Setter
+@Getter
+@Setter
 @NoArgsConstructor
 public class FacilitySearchDto {
 
