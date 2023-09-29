@@ -1,6 +1,6 @@
 package com.modoospace.config.redis;
 
-import com.modoospace.common.SpELParser.CustomSpELParser;
+import com.modoospace.common.CustomSpELParser;
 import java.util.Set;
 import lombok.extern.slf4j.Slf4j;
 import org.aspectj.lang.ProceedingJoinPoint;

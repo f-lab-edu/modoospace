@@ -1,4 +1,4 @@
-package com.modoospace.common.SpELParser;
+package com.modoospace.common;
 
 import java.util.Optional;
 import java.util.regex.Matcher;
@@ -13,7 +13,7 @@ import org.springframework.expression.spel.standard.SpelExpressionParser;
 import org.springframework.expression.spel.support.StandardEvaluationContext;
 
 /**
- * Custom Annotation의 SpEL표현을 Parser하는 클래스
+ * Custom Annotation의 SpEL표현 Parser 클래스
  */
 public class CustomSpELParser {
 
@@ -32,7 +32,7 @@ public class CustomSpELParser {
     }
 
     // case2 : #value
-    return getValue(expression, createVariableContext(parameterNames, args));
+    return getValue(expression, createContextAndSetVariable(parameterNames, args));
   }
 
   private static Object getValueOfInstanceFiled(String[] parameterNames, Object[] args,
@@ -40,8 +40,9 @@ public class CustomSpELParser {
     int index = IntStream.range(0, parameterNames.length)
         .filter(i -> instanceName.equals(parameterNames[i]))
         .findFirst()
-        .orElseThrow(() -> new SpelEvaluationException(
-            SpelMessage.PROPERTY_OR_FIELD_NOT_READABLE_ON_NULL, instanceName));
+        .orElseThrow(
+            () -> new SpelEvaluationException(SpelMessage.PROPERTY_OR_FIELD_NOT_READABLE_ON_NULL,
+                instanceName));
 
     return getValue(fieldName, createRootObjectContext(args[index]));
   }
@@ -50,7 +51,7 @@ public class CustomSpELParser {
     return new StandardEvaluationContext(object);
   }
 
-  private static EvaluationContext createVariableContext(String[] parameterNames, Object[] args) {
+  private static EvaluationContext createContextAndSetVariable(String[] parameterNames, Object[] args) {
     EvaluationContext context = new StandardEvaluationContext();
     IntStream.range(0, parameterNames.length)
         .forEach(i -> context.setVariable(parameterNames[i], args[i]));
@@ -60,7 +61,8 @@ public class CustomSpELParser {
   private static Object getValue(String expression, EvaluationContext context) {
     Expression parseExpression = EXPRESSION_PARSER.parseExpression(expression);
     Optional<Object> value = Optional.ofNullable(parseExpression.getValue(context));
-    return value.orElseThrow(() -> new SpelEvaluationException(
-        SpelMessage.PROPERTY_OR_FIELD_NOT_READABLE_ON_NULL, expression));
+    return value.orElseThrow(
+        () -> new SpelEvaluationException(SpelMessage.PROPERTY_OR_FIELD_NOT_READABLE_ON_NULL,
+            expression));
   }
 }
