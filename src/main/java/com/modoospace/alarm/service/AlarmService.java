@@ -52,7 +52,7 @@ public class AlarmService {
   }
 
   @Transactional
-  @CachePrefixEvict(cacheNames = "searchAlarms", key = "#{alarmEvent.memberId}")
+  @CachePrefixEvict(cacheNames = "searchAlarms", key = "#alarmEvent.memberId")
   public void saveAndSend(AlarmEvent alarmEvent) {
     Member member = memberService.findMemberById(alarmEvent.getMemberId());
     Alarm alarm = alarmRepository.save(alarmEvent.toEntity());

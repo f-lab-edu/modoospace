@@ -1,5 +1,6 @@
 package com.modoospace.config.redis;
 
+import com.modoospace.common.SpELParser.CustomSpELParser;
 import java.util.Set;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -23,9 +24,10 @@ public class CachePrefixEvictAdvisor {
     MethodSignature methodSignature = (MethodSignature) joinPoint.getSignature();
     CachePrefixEvict annotation = methodSignature.getMethod().getAnnotation(CachePrefixEvict.class);
 
-    // TODO : SpEL로 넘어온값 해석하는 Parser 만들어줘야함.
-    log.info("cacheNames = {}, key = {} redis evict try", annotation.cacheNames(),
-        annotation.key());
+    String key = CustomSpELParser.extractValueFromExpression(
+        methodSignature.getParameterNames(), joinPoint.getArgs(), annotation.key()
+    ).toString();
+    log.info("cacheNames = {}, key = {} redis evict try", annotation.cacheNames(), key);
     Set<String> keys = redisTemplate.keys(annotation.key() + "*");
     if (keys != null) {
       log.info("{} clear complete", keys);
