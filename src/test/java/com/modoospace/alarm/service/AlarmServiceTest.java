@@ -3,6 +3,7 @@ package com.modoospace.alarm.service;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import com.modoospace.alarm.controller.dto.AlarmEvent;
+import com.modoospace.alarm.domain.Alarm;
 import com.modoospace.alarm.domain.AlarmRepository;
 import com.modoospace.alarm.domain.AlarmType;
 import com.modoospace.member.domain.Member;
@@ -39,6 +40,8 @@ class AlarmServiceTest {
 
   private Member hostMember;
 
+  private Alarm alarm;
+
   @BeforeEach
   public void setUp() {
     hostMember = Member.builder()
@@ -51,12 +54,12 @@ class AlarmServiceTest {
 
     for (int i = 0; i < 10; i++) {
       AlarmEvent testEvent = AlarmEvent.builder()
-          .memberId(hostMember.getId())
+          .email(hostMember.getEmail())
           .reservationId((long) i)
           .facilityName("테스트 시설")
           .alarmType(AlarmType.NEW_RESERVATION)
           .build();
-      alarmRepository.save(testEvent.toEntity());
+      alarm = alarmRepository.save(testEvent.toEntity());
     }
   }
 
@@ -71,7 +74,7 @@ class AlarmServiceTest {
     PageRequest pageRequest = PageRequest.of(0, 10);
     alarmService.searchAlarms("host@email", pageRequest);
 
-    String pattern = "searchAlarms::" + hostMember.getId() + ":*";
+    String pattern = "searchAlarms::" + hostMember.getEmail() + ":*";
     Set<String> keys = redisTemplate.keys(pattern);
     assertThat(keys).hasSize(1);
     System.out.println("keys = " + keys);
@@ -83,14 +86,27 @@ class AlarmServiceTest {
     PageRequest pageRequest = PageRequest.of(0, 10);
     alarmService.searchAlarms("host@email", pageRequest);
     AlarmEvent testEvent = AlarmEvent.builder()
-        .memberId(hostMember.getId())
+        .email(hostMember.getEmail())
         .reservationId(1L)
         .facilityName("테스트 시설")
         .alarmType(AlarmType.NEW_RESERVATION)
         .build();
     alarmService.saveAndSend(testEvent);
 
-    String pattern = "searchAlarms::" + hostMember.getId() + ":*";
+    String pattern = "searchAlarms::" + hostMember.getEmail() + ":*";
+    Set<String> keys = redisTemplate.keys(pattern);
+    assertThat(keys).isEmpty();
+  }
+
+  @DisplayName("알람을 삭제하면 redis에 저장되어있던 해당 멤버의 알람 페이징 데이터가 전부 삭제된다.")
+  @Test
+  public void deleteAlarm_EmptyRedisKeys() {
+    PageRequest pageRequest = PageRequest.of(0, 10);
+    alarmService.searchAlarms("host@email", pageRequest);
+
+    alarmService.delete("host@email", alarm.getId());
+
+    String pattern = "searchAlarms::" + hostMember.getEmail() + ":*";
     Set<String> keys = redisTemplate.keys(pattern);
     assertThat(keys).isEmpty();
   }

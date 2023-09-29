@@ -21,12 +21,12 @@ public class AlarmQueryRepository {
 
   private final JPAQueryFactory jpaQueryFactory;
 
-  @Cacheable(cacheNames = "searchAlarms", key = "#member.id +':'+ #pageable.pageNumber")
+  @Cacheable(cacheNames = "searchAlarms", key = "#member.email +':'+ #pageable.pageNumber")
   public Page<Alarm> searchByMember(Member member, Pageable pageable) {
 
     List<Alarm> content = jpaQueryFactory
         .selectFrom(alarm)
-        .where(memberIdEq(member.getId()))
+        .where(emailEq(member.getEmail()))
         .offset(pageable.getOffset())
         .limit(pageable.getPageSize())
         .orderBy(alarm.createdTime.desc())
@@ -34,12 +34,12 @@ public class AlarmQueryRepository {
 
     JPAQuery<Alarm> countQuery = jpaQueryFactory
         .selectFrom(alarm)
-        .where(memberIdEq(member.getId()));
+        .where(emailEq(member.getEmail()));
 
     return PageableExecutionUtils.getPage(content, pageable, countQuery::fetchCount);
   }
 
-  private BooleanExpression memberIdEq(Long memberId) {
-    return memberId != null ? alarm.memberId.eq(memberId) : null;
+  private BooleanExpression emailEq(String email) {
+    return email != null ? alarm.email.eq(email) : null;
   }
 }

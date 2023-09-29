@@ -13,7 +13,7 @@ import lombok.NoArgsConstructor;
 public class AlarmEvent {
 
   @NotNull
-  private Long memberId;
+  private String email;
 
   @NotNull
   private Long reservationId;
@@ -25,8 +25,8 @@ public class AlarmEvent {
   private AlarmType alarmType;
 
   @Builder
-  public AlarmEvent(Long memberId, Long reservationId, String facilityName, AlarmType alarmType) {
-    this.memberId = memberId;
+  public AlarmEvent(String email, Long reservationId, String facilityName, AlarmType alarmType) {
+    this.email = email;
     this.reservationId = reservationId;
     this.facilityName = facilityName;
     this.alarmType = alarmType;
@@ -34,7 +34,7 @@ public class AlarmEvent {
 
   public static AlarmEvent toNewReservationAlarm(Reservation reservation) {
     return AlarmEvent.builder()
-        .memberId(reservation.getHost().getId())
+        .email(reservation.getHost().getEmail())
         .reservationId(reservation.getId())
         .facilityName(reservation.getFacility().getFacilityName())
         .alarmType(AlarmType.NEW_RESERVATION)
@@ -43,7 +43,7 @@ public class AlarmEvent {
 
   public static AlarmEvent toApprovedReservationAlarm(Reservation reservation) {
     return AlarmEvent.builder()
-        .memberId(reservation.getVisitor().getId())
+        .email(reservation.getVisitor().getEmail())
         .reservationId(reservation.getId())
         .facilityName(reservation.getFacility().getFacilityName())
         .alarmType(AlarmType.APPROVED_RESERVATION)
@@ -52,7 +52,7 @@ public class AlarmEvent {
 
   public static AlarmEvent toCancelReservationAlarm(Reservation reservation) {
     return AlarmEvent.builder()
-        .memberId(reservation.getHost().getId())
+        .email(reservation.getHost().getEmail())
         .reservationId(reservation.getId())
         .facilityName(reservation.getFacility().getFacilityName())
         .alarmType(AlarmType.CANCELED_RESERVATION)
@@ -61,7 +61,7 @@ public class AlarmEvent {
 
   public Alarm toEntity() {
     return Alarm.builder()
-        .memberId(memberId)
+        .email(email)
         .reservationId(reservationId)
         .facilityName(facilityName)
         .alarmType(alarmType)
