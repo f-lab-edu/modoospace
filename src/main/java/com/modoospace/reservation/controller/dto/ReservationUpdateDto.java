@@ -2,7 +2,6 @@ package com.modoospace.reservation.controller.dto;
 
 import com.modoospace.reservation.domain.Reservation;
 import com.modoospace.reservation.domain.ReservationStatus;
-import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 

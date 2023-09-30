@@ -6,7 +6,6 @@ import com.modoospace.space.controller.dto.facility.FacilityReadDetailDto;
 import com.modoospace.space.controller.dto.facility.FacilityReadDto;
 import com.modoospace.space.controller.dto.facility.FacilitySearchDto;
 import com.modoospace.space.controller.dto.facility.FacilityUpdateDto;
-import com.modoospace.space.domain.FacilityType;
 import com.modoospace.space.sevice.FacilityService;
 import java.net.URI;
 import javax.validation.Valid;

@@ -1,5 +1,6 @@
 package com.modoospace;
 
+import com.modoospace.alarm.repository.AlarmQueryRepository;
 import com.modoospace.reservation.repository.ReservationQueryRepository;
 import com.modoospace.space.repository.FacilityQueryRepository;
 import com.modoospace.space.repository.FacilityScheduleQueryRepository;
@@ -39,5 +40,10 @@ public class TestConfig {
   @Bean
   public FacilityScheduleQueryRepository facilityScheduleQueryRepository() {
     return new FacilityScheduleQueryRepository(jpaQueryFactory());
+  }
+
+  @Bean
+  public AlarmQueryRepository alarmQueryRepository() {
+    return new AlarmQueryRepository(jpaQueryFactory());
   }
 }

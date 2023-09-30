@@ -49,6 +49,6 @@ public class EmitterCacheRepository {
   }
 
   private String getKey(String loginEmail) {
-    return "SSE: " + loginEmail;
+    return "SSE:" + loginEmail;
   }
 }

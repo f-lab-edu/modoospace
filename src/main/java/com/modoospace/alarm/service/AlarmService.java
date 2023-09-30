@@ -6,7 +6,9 @@ import com.modoospace.alarm.domain.Alarm;
 import com.modoospace.alarm.domain.AlarmRepository;
 import com.modoospace.alarm.repository.AlarmQueryRepository;
 import com.modoospace.alarm.repository.EmitterCacheRepository;
+import com.modoospace.common.exception.NotFoundEntityException;
 import com.modoospace.common.exception.SSEConnectError;
+import com.modoospace.config.redis.CachePrefixEvict;
 import com.modoospace.member.domain.Member;
 import com.modoospace.member.service.MemberService;
 import java.io.IOException;
@@ -32,9 +34,8 @@ public class AlarmService {
 
   public Page<AlarmReadDto> searchAlarms(String loginEmail, Pageable pageable) {
     Member loginMember = memberService.findMemberByEmail(loginEmail);
-    Page<Alarm> alarms = alarmQueryRepository.searchByMember(loginMember, pageable);
 
-    return alarms.map(AlarmReadDto::toDto);
+    return alarmQueryRepository.searchByMember(loginMember, pageable);
   }
 
   public SseEmitter connectAlarm(String loginEmail) {
@@ -51,8 +52,9 @@ public class AlarmService {
   }
 
   @Transactional
+  @CachePrefixEvict(cacheNames = "searchAlarms", key = "#alarmEvent.email")
   public void saveAndSend(AlarmEvent alarmEvent) {
-    Member member = memberService.findMemberById(alarmEvent.getMemberId());
+    Member member = memberService.findMemberByEmail(alarmEvent.getEmail());
     Alarm alarm = alarmRepository.save(alarmEvent.toEntity());
 
     send(alarm.getId(), member.getEmail());
@@ -70,5 +72,21 @@ public class AlarmService {
         throw new SSEConnectError();
       }
     }
+  }
+
+  @Transactional
+  @CachePrefixEvict(cacheNames = "searchAlarms", key = "#loginEmail")
+  public void delete(Long alarmId, String loginEmail) {
+    Member loginMember = memberService.findMemberByEmail(loginEmail);
+    Alarm alarm = findAlarmById(alarmId);
+
+    alarm.verifyManagementPermission(loginMember);
+    alarmRepository.delete(alarm);
+  }
+
+  private Alarm findAlarmById(Long alarmId) {
+    return alarmRepository.findById(alarmId).orElseThrow(
+        () -> new NotFoundEntityException("알람", alarmId)
+    );
   }
 }

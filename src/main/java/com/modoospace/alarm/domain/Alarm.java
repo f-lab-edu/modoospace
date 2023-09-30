@@ -1,6 +1,8 @@
 package com.modoospace.alarm.domain;
 
 import com.modoospace.common.BaseTimeEntity;
+import com.modoospace.member.domain.Member;
+import com.modoospace.member.domain.Role;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.EnumType;
@@ -22,7 +24,7 @@ public class Alarm extends BaseTimeEntity {
   @Column(name = "alarm_id")
   private Long id;
 
-  private Long memberId;
+  private String email;
 
   private Long reservationId;
 
@@ -32,16 +34,19 @@ public class Alarm extends BaseTimeEntity {
   private AlarmType alarmType;
 
   @Builder
-  public Alarm(Long id, Long memberId, Long reservationId, String facilityName,
+  public Alarm(Long id, String email, Long reservationId, String facilityName,
       AlarmType alarmType) {
     this.id = id;
-    this.memberId = memberId;
+    this.email = email;
     this.reservationId = reservationId;
     this.facilityName = facilityName;
     this.alarmType = alarmType;
   }
 
-  public String getAlarmMessage() {
-    return facilityName + alarmType.getAlarmText();
+  public void verifyManagementPermission(Member loginMember) {
+    if (email.equals(loginMember.getEmail())) {
+      return;
+    }
+    loginMember.verifyRolePermission(Role.ADMIN);
   }
 }
