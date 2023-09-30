@@ -34,9 +34,8 @@ public class AlarmService {
 
   public Page<AlarmReadDto> searchAlarms(String loginEmail, Pageable pageable) {
     Member loginMember = memberService.findMemberByEmail(loginEmail);
-    Page<Alarm> alarms = alarmQueryRepository.searchByMember(loginMember, pageable);
 
-    return alarms.map(AlarmReadDto::toDto);
+    return alarmQueryRepository.searchByMember(loginMember, pageable);
   }
 
   public SseEmitter connectAlarm(String loginEmail) {

@@ -2,8 +2,10 @@ package com.modoospace.alarm.repository;
 
 import static com.modoospace.alarm.domain.QAlarm.alarm;
 
+import com.modoospace.alarm.controller.dto.AlarmReadDto;
 import com.modoospace.alarm.domain.Alarm;
 import com.modoospace.member.domain.Member;
+import com.querydsl.core.types.Projections;
 import com.querydsl.core.types.dsl.BooleanExpression;
 import com.querydsl.jpa.impl.JPAQuery;
 import com.querydsl.jpa.impl.JPAQueryFactory;
@@ -22,10 +24,18 @@ public class AlarmQueryRepository {
   private final JPAQueryFactory jpaQueryFactory;
 
   @Cacheable(cacheNames = "searchAlarms", key = "#member.email +':'+ #pageable.pageNumber")
-  public Page<Alarm> searchByMember(Member member, Pageable pageable) {
+  public Page<AlarmReadDto> searchByMember(Member member, Pageable pageable) {
 
-    List<Alarm> content = jpaQueryFactory
-        .selectFrom(alarm)
+    List<AlarmReadDto> content = jpaQueryFactory
+        .select(
+            Projections.constructor(AlarmReadDto.class
+                , alarm.id
+                , alarm.reservationId
+                , alarm.facilityName
+                , alarm.alarmType
+            )
+        )
+        .from(alarm)
         .where(emailEq(member.getEmail()))
         .offset(pageable.getOffset())
         .limit(pageable.getPageSize())
