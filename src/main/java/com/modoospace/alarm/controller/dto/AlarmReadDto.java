@@ -1,6 +1,7 @@
 package com.modoospace.alarm.controller.dto;
 
 import com.modoospace.alarm.domain.AlarmType;
+import java.io.Serializable;
 import javax.validation.constraints.NotNull;
 import lombok.Builder;
 import lombok.Getter;
@@ -8,7 +9,7 @@ import lombok.NoArgsConstructor;
 
 @Getter
 @NoArgsConstructor
-public class AlarmReadDto {
+public class AlarmReadDto implements Serializable {
 
   @NotNull
   private Long id;
