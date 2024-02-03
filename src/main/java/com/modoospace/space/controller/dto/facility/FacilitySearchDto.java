@@ -1,6 +1,5 @@
 package com.modoospace.space.controller.dto.facility;
 
-import com.modoospace.space.domain.FacilityType;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -15,14 +14,10 @@ public class FacilitySearchDto {
 
   private String name;
 
-  private FacilityType facilityType;
-
   private Boolean reservationEnable;
 
-  public FacilitySearchDto(String name, FacilityType facilityType,
-      Boolean reservationEnable) {
+  public FacilitySearchDto(String name, Boolean reservationEnable) {
     this.name = name;
-    this.facilityType = facilityType;
     this.reservationEnable = reservationEnable;
   }
 }

@@ -5,7 +5,6 @@ import com.modoospace.common.exception.PermissionDeniedException;
 import com.modoospace.member.domain.Member;
 import com.modoospace.member.domain.Role;
 import com.modoospace.space.domain.Facility;
-import com.modoospace.space.domain.FacilityType;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import javax.persistence.Column;
@@ -29,86 +28,85 @@ import lombok.ToString;
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class Reservation extends BaseTimeEntity {
 
-  @Id
-  @GeneratedValue
-  @Column(name = "reservation_id")
-  private Long id;
+    @Id
+    @GeneratedValue
+    @Column(name = "reservation_id")
+    private Long id;
 
-  @Column(nullable = false)
-  private LocalDateTime reservationStart; // 예약 시작 일시
+    @Column(nullable = false)
+    private LocalDateTime reservationStart; // 예약 시작 일시
 
-  @Column(nullable = false)
-  private LocalDateTime reservationEnd; // 예약 종료 일시
+    @Column(nullable = false)
+    private LocalDateTime reservationEnd; // 예약 종료 일시
 
-  @Enumerated(EnumType.STRING)
-  @Column(nullable = false)
-  private ReservationStatus status; // 상태
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
+    private ReservationStatus status; // 상태
 
-  @ManyToOne(fetch = FetchType.LAZY)
-  @JoinColumn(name = "facility_id")
-  private Facility facility; // 시설
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "facility_id")
+    private Facility facility; // 시설
 
-  @ManyToOne(fetch = FetchType.LAZY)
-  @JoinColumn(name = "visitor_id")
-  private Member visitor; // 방문자
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "visitor_id")
+    private Member visitor; // 방문자
 
-  @Builder
-  public Reservation(LocalDateTime reservationStart, LocalDateTime reservationEnd,
-      Facility facility, Member visitor) {
-    this.reservationStart = reservationStart;
-    this.reservationEnd = reservationEnd;
+    @Builder
+    public Reservation(LocalDateTime reservationStart, LocalDateTime reservationEnd,
+        Facility facility, Member visitor) {
+        this.reservationStart = reservationStart;
+        this.reservationEnd = reservationEnd;
 
-    FacilityType facilityType = facility.getFacilityType();
-    this.status = facilityType.getDefaultStatus();
+        this.status = ReservationStatus.WAITING;
 
-    this.facility = facility;
-    this.visitor = visitor;
-  }
-
-  public void approveReservation(Member loginMember) {
-    verifyManagementPermission(loginMember);
-    this.status = ReservationStatus.COMPLETED;
-  }
-
-  public void updateAsHost(final Reservation updateReservation, Member loginMember) {
-    verifyManagementPermission(loginMember);
-    this.reservationStart = updateReservation.getReservationStart();
-    this.reservationEnd = updateReservation.getReservationEnd();
-    this.status = updateReservation.getStatus();
-  }
-
-  public void cancelAsVisitor(Member loginMember) {
-    verifySameVisitor(loginMember);
-    this.status = ReservationStatus.CANCELED;
-  }
-
-  public void verifyReservationAccess(Member loginMember) {
-    if (loginMember.isSameRole(Role.VISITOR)) {
-      verifySameVisitor(loginMember);
-      return;
+        this.facility = facility;
+        this.visitor = visitor;
     }
-    verifyManagementPermission(loginMember);
-  }
 
-  public void verifySameVisitor(Member loginMember) {
-    if (!visitor.getId().equals(loginMember.getId())) {
-      throw new PermissionDeniedException();
+    public void approveReservation(Member loginMember) {
+        verifyManagementPermission(loginMember);
+        this.status = ReservationStatus.COMPLETED;
     }
-  }
 
-  public void verifyManagementPermission(Member loginMember) {
-    facility.verifyManagementPermission(loginMember);
-  }
+    public void updateAsHost(final Reservation updateReservation, Member loginMember) {
+        verifyManagementPermission(loginMember);
+        this.reservationStart = updateReservation.getReservationStart();
+        this.reservationEnd = updateReservation.getReservationEnd();
+        this.status = updateReservation.getStatus();
+    }
 
-  public boolean isReservationBetween(LocalTime time) {
-    LocalTime startTime = reservationStart.toLocalTime();
-    LocalTime endTime = reservationEnd.toLocalTime();
+    public void cancelAsVisitor(Member loginMember) {
+        verifySameVisitor(loginMember);
+        this.status = ReservationStatus.CANCELED;
+    }
 
-    return (startTime.isBefore(time) || startTime.equals(time))
-        && (endTime.isAfter(time) || endTime.equals(time));
-  }
+    public void verifyReservationAccess(Member loginMember) {
+        if (loginMember.isSameRole(Role.VISITOR)) {
+            verifySameVisitor(loginMember);
+            return;
+        }
+        verifyManagementPermission(loginMember);
+    }
 
-  public Member getHost() {
-    return this.facility.getSpace().getHost();
-  }
+    public void verifySameVisitor(Member loginMember) {
+        if (!visitor.getId().equals(loginMember.getId())) {
+            throw new PermissionDeniedException();
+        }
+    }
+
+    public void verifyManagementPermission(Member loginMember) {
+        facility.verifyManagementPermission(loginMember);
+    }
+
+    public boolean isReservationBetween(LocalTime time) {
+        LocalTime startTime = reservationStart.toLocalTime();
+        LocalTime endTime = reservationEnd.toLocalTime();
+
+        return (startTime.isBefore(time) || startTime.equals(time))
+            && (endTime.isAfter(time) || endTime.equals(time));
+    }
+
+    public Member getHost() {
+        return this.facility.getSpace().getHost();
+    }
 }

@@ -13,7 +13,6 @@ import com.modoospace.space.controller.dto.space.SpaceCreateUpdateDto;
 import com.modoospace.space.domain.Category;
 import com.modoospace.space.domain.CategoryRepository;
 import com.modoospace.space.domain.FacilityRepository;
-import com.modoospace.space.domain.FacilityType;
 import com.modoospace.space.domain.Space;
 import com.modoospace.space.domain.SpaceRepository;
 import org.junit.jupiter.api.BeforeEach;
@@ -31,83 +30,82 @@ import org.springframework.test.context.ActiveProfiles;
 @ActiveProfiles("test")
 public class FacilityQueryRepositoryTest {
 
-  @Autowired
-  private MemberRepository memberRepository;
+    @Autowired
+    private MemberRepository memberRepository;
 
-  @Autowired
-  private CategoryRepository categoryRepository;
+    @Autowired
+    private CategoryRepository categoryRepository;
 
-  @Autowired
-  private SpaceRepository spaceRepository;
+    @Autowired
+    private SpaceRepository spaceRepository;
 
-  @Autowired
-  private FacilityRepository facilityRepository;
+    @Autowired
+    private FacilityRepository facilityRepository;
 
-  @Autowired
-  private FacilityQueryRepository facilityQueryRepository;
+    @Autowired
+    private FacilityQueryRepository facilityQueryRepository;
 
-  private Space space;
+    private Space space;
 
-  @BeforeEach
-  public void setUp() {
-    Member hostMember = Member.builder()
-        .email("host@email")
-        .name("host")
-        .role(Role.HOST)
-        .build();
-    memberRepository.save(hostMember);
+    @BeforeEach
+    public void setUp() {
+        Member hostMember = Member.builder()
+            .email("host@email")
+            .name("host")
+            .role(Role.HOST)
+            .build();
+        memberRepository.save(hostMember);
 
-    Category category = Category.builder()
-        .name("스터디 공간")
-        .build();
-    categoryRepository.save(category);
+        Category category = Category.builder()
+            .name("스터디 공간")
+            .build();
+        categoryRepository.save(category);
 
-    SpaceCreateUpdateDto spaceCreateDto = SpaceCreateUpdateDto.builder()
-        .name("공간이름")
-        .description("설명")
-        .build();
-    space = spaceCreateDto.toEntity(category, hostMember);
-    spaceRepository.save(space);
+        SpaceCreateUpdateDto spaceCreateDto = SpaceCreateUpdateDto.builder()
+            .name("공간이름")
+            .description("설명")
+            .build();
+        space = spaceCreateDto.toEntity(category, hostMember);
+        spaceRepository.save(space);
 
-    FacilityCreateDto createRoomDto = FacilityCreateDto.builder()
-        .name("스터디룸")
-        .facilityType(FacilityType.ROOM)
-        .description("1~4인실 입니다.")
-        .reservationEnable(true)
-        .build();
-    facilityRepository.save(createRoomDto.toEntity(space));
-    FacilityCreateDto createSeatDto = FacilityCreateDto.builder()
-        .name("스터디좌석")
-        .facilityType(FacilityType.SEAT)
-        .description("스터디좌석 입니다.")
-        .reservationEnable(true)
-        .build();
-    facilityRepository.save(createSeatDto.toEntity(space));
-  }
+        FacilityCreateDto createRoomDto = FacilityCreateDto.builder()
+            .name("스터디룸1")
+            .description("1~4인실 입니다.")
+            .reservationEnable(true)
+            .build();
+        facilityRepository.save(createRoomDto.toEntity(space));
 
-  @DisplayName("검색 조건에 맞는 시설을 반환한다.")
-  @Test
-  public void searchFacility() {
-    FacilitySearchDto searchDto = new FacilitySearchDto();
-    searchDto.setName("스터디");
-    searchDto.setReservationEnable(true);
+        FacilityCreateDto createRoomDto2 = FacilityCreateDto.builder()
+            .name("스터디룸2")
+            .description("1~8인실 입니다.")
+            .reservationEnable(true)
+            .build();
+        facilityRepository.save(createRoomDto2.toEntity(space));
+    }
 
-    Page<FacilityReadDto> resultPage = facilityQueryRepository
-        .searchFacility(space.getId(), searchDto, PageRequest.of(0, 10));
+    @DisplayName("검색 조건에 맞는 시설을 반환한다.")
+    @Test
+    public void searchFacility() {
+        FacilitySearchDto searchDto = new FacilitySearchDto();
+        searchDto.setName("스터디");
+        searchDto.setReservationEnable(true);
 
-    assertThat(resultPage.getContent()).extracting("name")
-        .containsExactly("스터디룸", "스터디좌석");
-  }
+        Page<FacilityReadDto> resultPage = facilityQueryRepository
+            .searchFacility(space.getId(), searchDto, PageRequest.of(0, 10));
 
-  @DisplayName("검색 조건에 맞는 시설이 없다면 빈 페이지를 반환한다.")
-  @Test
-  public void searchFacility_emptyPage() {
-    FacilitySearchDto searchDto = new FacilitySearchDto();
-    searchDto.setReservationEnable(false);
+        assertThat(resultPage.getContent()).extracting("name")
+            .containsExactly("스터디룸1", "스터디룸2");
+    }
 
-    Page<FacilityReadDto> resultPage = facilityQueryRepository
-        .searchFacility(space.getId(), searchDto, PageRequest.of(0, 10));
+    @DisplayName("검색 조건에 맞는 시설이 없다면 빈 페이지를 반환한다.")
+    @Test
+    public void searchFacility_emptyPage() {
+        FacilitySearchDto searchDto = new FacilitySearchDto();
+        searchDto.setReservationEnable(false);
 
-    assertThat(resultPage.getContent()).isEmpty();
-  }
+        Page<FacilityReadDto> resultPage = facilityQueryRepository
+            .searchFacility(space.getId(), searchDto, PageRequest.of(0, 10));
+
+        assertThat(resultPage.getContent()).isEmpty();
+    }
 }
