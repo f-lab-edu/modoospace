@@ -2,94 +2,85 @@ package com.modoospace.space.domain;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.junit.jupiter.api.Assertions.assertAll;
 
 import com.modoospace.common.exception.ConflictingTimeException;
 import com.modoospace.common.exception.InvalidTimeRangeException;
 import java.time.LocalDate;
-import java.time.LocalDateTime;
 import java.time.LocalTime;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.List;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
 class TimeSettingTest {
 
-  @DisplayName("시작시간은 종료시간보다 이후일 수 없다.")
-  @Test
-  public void TimeSetting_throwException_ifStartTimeAfterEndTime() {
-    assertThatThrownBy(() -> TimeSetting.builder()
-        .startTime(LocalTime.of(16, 0))
-        .endTime(LocalTime.of(14, 59, 59))
-        .build()).isInstanceOf(InvalidTimeRangeException.class);
-  }
+    @DisplayName("시작시간은 종료시간보다 이후일 수 없다.")
+    @Test
+    public void TimeSetting_throwException_ifStartTimeAfterEndTime() {
+        assertThatThrownBy(() -> createTimeSetting(15, 9))
+            .isInstanceOf(InvalidTimeRangeException.class);
+    }
 
-  @DisplayName("시간이 겹치는지 확인한다.")
-  @Test
-  public void verifyConflicting() {
-    TimeSetting timeSetting = TimeSetting.builder()
-        .startTime(LocalTime.of(9, 00))
-        .endTime(LocalTime.of(14, 59, 59))
-        .build();
+    @DisplayName("시간이 겹치는지 확인한다.")
+    @Test
+    public void verifyConflicting() {
+        TimeSetting timeSetting = createTimeSetting(9, 15);
+        TimeSetting tartgetTimeSetting = createTimeSetting(15, 19);
 
-    TimeSetting compareTimeSetting = TimeSetting.builder()
-        .startTime(LocalTime.of(15, 00))
-        .endTime(LocalTime.of(18, 59, 59))
-        .build();
+        timeSetting.verifyConflicting(tartgetTimeSetting);
+    }
 
-    timeSetting.verifyConflicting(compareTimeSetting);
-  }
+    @DisplayName("시간이 겹친다면 예외를 던진다.")
+    @Test
+    public void verifyConflicting_throwException_ifTimeOverlapping() {
+        TimeSetting timeSetting = createTimeSetting(10, 19);
+        TimeSetting tartgetTimeSetting = createTimeSetting(16, 19);
 
-  @DisplayName("시간이 겹친다면 예외를 던진다.")
-  @Test
-  public void verifyConflicting_throwException_ifTimeOverlapping() {
-    TimeSetting timeSetting = TimeSetting.builder()
-        .startTime(LocalTime.of(10, 00))
-        .endTime(LocalTime.of(18, 59, 59))
-        .build();
-    TimeSetting compareTimeSetting = TimeSetting.builder()
-        .startTime(LocalTime.of(16, 00))
-        .endTime(LocalTime.of(18, 59, 59))
-        .build();
+        assertThatThrownBy(() -> timeSetting.verifyConflicting(tartgetTimeSetting))
+            .isInstanceOf(ConflictingTimeException.class);
+    }
 
-    assertThatThrownBy(() -> timeSetting.verifyConflicting(compareTimeSetting))
-        .isInstanceOf(ConflictingTimeException.class);
-  }
+    @DisplayName("시간이 연속적이라면 true를 반환한다.")
+    @Test
+    public void isContinuous() {
+        TimeSetting timeSetting = createTimeSetting(9, 15);
+        TimeSetting tartgetTimeSetting = createTimeSetting(15, 19);
 
-  @DisplayName("Time세팅값을 시작시간이 빠른 순으로 정렬한다.")
-  @Test
-  public void TimeSetting_Sort() {
-    TimeSetting timeSetting = TimeSetting.builder()
-        .startTime(LocalTime.of(14, 0))
-        .endTime(LocalTime.of(18, 59, 59))
-        .build();
-    TimeSetting timeSetting2 = TimeSetting.builder()
-        .startTime(LocalTime.of(9, 0))
-        .endTime(LocalTime.of(18, 59, 59))
-        .build();
-    List<TimeSetting> timeSettings = Arrays.asList(timeSetting, timeSetting2);
+        assertThat(timeSetting.isContinuous(tartgetTimeSetting)).isTrue();
+    }
 
-    Collections.sort(timeSettings, Comparator.comparing(TimeSetting::getStartTime));
+    @DisplayName("시간을 merge한다.")
+    @Test
+    public void merge() {
+        TimeSetting timeSetting = createTimeSetting(9, 15);
+        TimeSetting tartgetTimeSetting = createTimeSetting(15, 19);
 
-    System.out.println(timeSettings);
-  }
+        timeSetting.merge(tartgetTimeSetting);
 
-  @DisplayName("해당 날짜의 시설 스케줄을 생성한다.")
-  @Test
-  public void createFacilitySchedule() {
-    TimeSetting timeSetting = TimeSetting.builder()
-        .startTime(LocalTime.of(14, 0))
-        .endTime(LocalTime.of(18, 59, 59))
-        .build();
-    LocalDate scheduleDate = LocalDate.of(2022, 1, 1);
+        assertAll(
+            () -> assertThat(timeSetting.getStartHour()).isEqualTo(9),
+            () -> assertThat(timeSetting.getEndHour()).isEqualTo(19)
+        );
+    }
 
-    FacilitySchedule retFacilitySchedule = timeSetting.createFacilitySchedule(scheduleDate);
+    @DisplayName("해당 날짜의 시설 스케줄을 생성한다.")
+    @Test
+    public void createSchedule() {
+        TimeSetting timeSetting = createTimeSetting(14, 19);
+        LocalDate date = LocalDate.of(2022, 1, 1);
 
-    assertThat(retFacilitySchedule.getStartDateTime())
-        .isEqualTo(LocalDateTime.of(2022, 1, 1, 14, 0));
-    assertThat(retFacilitySchedule.getEndDateTime())
-        .isEqualTo(LocalDateTime.of(2022, 1, 1, 18, 59, 59));
-  }
+        Schedule retSchedule = timeSetting.createSchedule(date);
+
+        assertAll(
+            () -> assertThat(retSchedule.getDate()).isEqualTo(date),
+            () -> assertThat(retSchedule.getStartHour()).isEqualTo(14),
+            () -> assertThat(retSchedule.getEndHour()).isEqualTo(19)
+        );
+    }
+
+    private TimeSetting createTimeSetting(Integer start, Integer end) {
+        TimeRange timeRange = new TimeRange(start, end);
+        return TimeSetting.builder()
+            .timeRange(timeRange)
+            .build();
+    }
 }

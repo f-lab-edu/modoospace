@@ -5,12 +5,12 @@ import java.time.LocalTime;
 
 public class InvalidTimeRangeException extends RuntimeException {
 
-  public InvalidTimeRangeException(LocalTime startTime, LocalTime endTime) {
-    super("시작시간(" + startTime.toString() + ") 은 종료시간(" + endTime.toString() + ") 보다 이후일 수 없습니다.");
-  }
+    public InvalidTimeRangeException(LocalTime startHour, LocalTime endHour) {
+        super("시작 시간(" + startHour + ") 은 마지막 시작 시간(" + endHour + ") 보다 이후일 수 없습니다.");
+    }
 
-  public InvalidTimeRangeException(LocalDateTime startDateTime, LocalDateTime endDateTime) {
-    super("시작시간(" + startDateTime.toString() + ") 은 종료시간(" + endDateTime.toString()
-        + ") 보다 이후일 수 없습니다.");
-  }
+    public InvalidTimeRangeException(LocalDateTime startDate, LocalDateTime endDate) {
+        super("시작 시간(" + startDate.toString() + ") 은 마지막 시작 시간(" + endDate.toString()
+            + ") 보다 이후일 수 없습니다.");
+    }
 }
