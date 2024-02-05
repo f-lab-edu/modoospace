@@ -31,6 +31,8 @@ public class FacilityQueryRepository {
                     , facility.id
                     , facility.name
                     , facility.reservationEnable
+                    , facility.minUser
+                    , facility.maxUser
                     , facility.description)
             )
             .from(facility)

@@ -29,6 +29,12 @@ public class FacilityCreateDto {
     @NotNull
     private Boolean reservationEnable;
 
+    @NotNull
+    private Integer minUser;
+
+    @NotNull
+    private Integer maxUser;
+
     private String description;
 
     @Builder.Default
@@ -46,11 +52,15 @@ public class FacilityCreateDto {
     );
 
     public FacilityCreateDto(String name, Boolean reservationEnable,
-        String description, List<TimeSettingCreateDto> timeSettings,
-        List<WeekdaySettingCreateDto> weekdaySettings) {
+        Integer minUser, Integer maxUser, String description,
+        List<TimeSettingCreateDto> timeSettings, List<WeekdaySettingCreateDto> weekdaySettings) {
         this.name = name;
         this.reservationEnable = reservationEnable;
+
+        this.minUser = minUser;
+        this.maxUser = maxUser;
         this.description = description;
+
         this.timeSettings = timeSettings;
         this.weekdaySettings = weekdaySettings;
     }
@@ -59,6 +69,8 @@ public class FacilityCreateDto {
         return Facility.builder()
             .name(name)
             .reservationEnable(reservationEnable)
+            .minUser(minUser)
+            .maxUser(maxUser)
             .description(description)
             .space(space)
             .timeSettings(new TimeSettings(toTimeSettings(timeSettings)))

@@ -20,14 +20,23 @@ public class FacilityReadDto {
     @NotNull
     private Boolean reservationEnable;
 
+    @NotNull
+    private Integer minUser;
+
+    @NotNull
+    private Integer maxUser;
+
     private String description;
 
     @Builder
     public FacilityReadDto(Long id, String name, Boolean reservationEnable,
-        String description) {
+        Integer minUser, Integer maxUser, String description) {
         this.id = id;
         this.name = name;
         this.reservationEnable = reservationEnable;
+
+        this.minUser = minUser;
+        this.maxUser = maxUser;
         this.description = description;
     }
 
@@ -36,6 +45,8 @@ public class FacilityReadDto {
             .id(facility.getId())
             .name(facility.getName())
             .reservationEnable(facility.getReservationEnable())
+            .minUser(facility.getMinUser())
+            .maxUser(facility.getMaxUser())
             .description(facility.getDescription())
             .build();
     }

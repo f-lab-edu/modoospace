@@ -3,6 +3,8 @@ package com.modoospace.space.domain;
 import static javax.persistence.FetchType.LAZY;
 
 import com.modoospace.common.BaseTimeEntity;
+import com.modoospace.common.exception.InvalidNumOfUserException;
+import com.modoospace.common.exception.LimitNumOfUserException;
 import com.modoospace.common.exception.NotOpenedFacilityException;
 import com.modoospace.member.domain.Member;
 import java.time.YearMonth;
@@ -34,6 +36,12 @@ public class Facility extends BaseTimeEntity {
     @Column(nullable = false)
     private Boolean reservationEnable;
 
+    @Column(nullable = false)
+    private Integer minUser;
+
+    @Column(nullable = false)
+    private Integer maxUser;
+
     private String description;
 
     @ManyToOne(fetch = LAZY)
@@ -47,29 +55,55 @@ public class Facility extends BaseTimeEntity {
     private WeekdaySettings weekdaySettings;
 
     @Embedded
-    private FacilitySchedules facilitySchedules;
+    private Schedules schedules;
 
     @Builder
-    public Facility(Long id, String name, Boolean reservationEnable, String description,
+    public Facility(Long id, String name, Boolean reservationEnable,
+        Integer minUser, Integer maxUser, String description,
         Space space, TimeSettings timeSettings, WeekdaySettings weekdaySettings,
-        FacilitySchedules facilitySchedules) {
+        Schedules schedules) {
         this.id = id;
         this.name = name;
         this.reservationEnable = reservationEnable;
+
+        validateUserNum(minUser, maxUser);
+        this.minUser = minUser;
+        this.maxUser = maxUser;
+
         this.description = description;
         this.space = space;
-
         this.timeSettings = timeSettings;
         timeSettings.setFacility(this);
-
         this.weekdaySettings = weekdaySettings;
         weekdaySettings.setFacility(this);
 
-        this.facilitySchedules = facilitySchedules;
-        if (facilitySchedules == null) {
-            this.facilitySchedules = FacilitySchedules
+        this.schedules = schedules;
+        if (schedules == null) {
+            this.schedules = Schedules
                 .create3MonthFacilitySchedules(timeSettings, weekdaySettings, YearMonth.now());
         }
+    }
+
+    public void validateUserNum(Integer minUser, Integer maxUser) {
+        if (!isValidUserNum(minUser)) {
+            throw new InvalidNumOfUserException(minUser);
+        }
+
+        if (!isValidUserNum(maxUser)) {
+            throw new InvalidNumOfUserException(maxUser);
+        }
+
+        if (!isValidMinMaxUserNum(minUser, maxUser)) {
+            throw new InvalidNumOfUserException(minUser, maxUser);
+        }
+    }
+
+    public boolean isValidUserNum(Integer userNum) {
+        return  userNum > 0;
+    }
+
+    public boolean isValidMinMaxUserNum(Integer minUser, Integer maxUser) {
+        return minUser <= maxUser;
     }
 
     public void update(Facility facility, Member loginMember) {
@@ -77,6 +111,8 @@ public class Facility extends BaseTimeEntity {
 
         this.name = facility.getName();
         this.reservationEnable = facility.getReservationEnable();
+        this.minUser = facility.getMinUser();
+        this.maxUser = facility.getMaxUser();
         this.description = facility.getDescription();
 
         if (!facility.getTimeSettings().isEmpty()) {
@@ -88,36 +124,31 @@ public class Facility extends BaseTimeEntity {
         }
 
         if (!facility.getTimeSettings().isEmpty() || !facility.getWeekdaySettings().isEmpty()) {
-            FacilitySchedules facilitySchedules = FacilitySchedules
+            Schedules schedules = Schedules
                 .create3MonthFacilitySchedules(this.timeSettings, this.weekdaySettings,
                     YearMonth.now());
-            this.facilitySchedules.update(facilitySchedules, this);
+            this.schedules.update(schedules, this);
         }
-    }
-
-    public FacilitySchedule addFacilitySchedule(FacilitySchedule createSchedule,
-        Member loginMember) {
-        verifyManagementPermission(loginMember);
-
-        return this.facilitySchedules.addFacilitySchedule(createSchedule);
-    }
-
-    public FacilitySchedule updateFacilitySchedule(FacilitySchedule updateSchedule,
-        FacilitySchedule schedule,
-        Member loginMember) {
-        verifyManagementPermission(loginMember);
-
-        return this.facilitySchedules.updateFacilitySchedule(updateSchedule, schedule);
     }
 
     public void create1MonthDefaultFacilitySchedules(YearMonth createYearMonth,
         Member loginMember) {
         verifyManagementPermission(loginMember);
 
-        FacilitySchedules facilitySchedules = FacilitySchedules
+        Schedules schedules = Schedules
             .create1MonthFacilitySchedules(this.timeSettings, this.weekdaySettings,
                 createYearMonth);
-        this.facilitySchedules.addAll(facilitySchedules, this);
+        this.schedules.addAll(schedules, this);
+    }
+
+    public void addSchedule(Schedule createSchedule, Member loginMember){
+        verifyManagementPermission(loginMember);
+        schedules.addSchedule(createSchedule);
+    }
+
+    public void updateSchedule(Schedule updateSchedule, Schedule schedule, Member loginMember) {
+        verifyManagementPermission(loginMember);
+        schedules.updateSchedule(updateSchedule, schedule);
     }
 
     public void verifyManagementPermission(Member loginMember) {
@@ -127,6 +158,12 @@ public class Facility extends BaseTimeEntity {
     public void verifyReservationEnable() {
         if (!this.reservationEnable) {
             throw new NotOpenedFacilityException();
+        }
+    }
+
+    public void verityNumOfUser(Integer numOfUser) {
+        if (numOfUser < minUser || numOfUser > maxUser) {
+            throw new LimitNumOfUserException();
         }
     }
 }

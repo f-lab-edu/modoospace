@@ -70,15 +70,19 @@ public class FacilityQueryRepositoryTest {
 
         FacilityCreateDto createRoomDto = FacilityCreateDto.builder()
             .name("스터디룸1")
-            .description("1~4인실 입니다.")
             .reservationEnable(true)
+            .minUser(1)
+            .maxUser(4)
+            .description("1~4인실 입니다.")
             .build();
         facilityRepository.save(createRoomDto.toEntity(space));
 
         FacilityCreateDto createRoomDto2 = FacilityCreateDto.builder()
             .name("스터디룸2")
-            .description("1~8인실 입니다.")
             .reservationEnable(true)
+            .minUser(1)
+            .maxUser(8)
+            .description("1~8인실 입니다.")
             .build();
         facilityRepository.save(createRoomDto2.toEntity(space));
     }

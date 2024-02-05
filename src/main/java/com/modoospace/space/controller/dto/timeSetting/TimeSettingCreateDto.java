@@ -2,8 +2,10 @@ package com.modoospace.space.controller.dto.timeSetting;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.modoospace.common.DateFormatManager;
+import com.modoospace.space.domain.TimeRange;
 import com.modoospace.space.domain.TimeSetting;
 import java.time.LocalTime;
+import javax.validation.constraints.NotNull;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
@@ -11,21 +13,20 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 public class TimeSettingCreateDto {
 
-  @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = DateFormatManager.TIME_FORMAT)
-  private LocalTime startTime = LocalTime.of(0, 0, 0);
+    @NotNull
+    private Integer startHour = 0;
 
-  @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = DateFormatManager.TIME_FORMAT)
-  private LocalTime endTime = LocalTime.of(23, 59, 59);
+    @NotNull
+    private Integer endHour = 24;
 
-  public TimeSettingCreateDto(LocalTime startTime, LocalTime endTime) {
-    this.startTime = startTime;
-    this.endTime = endTime;
-  }
+    public TimeSettingCreateDto(Integer startHour, Integer endHour) {
+        this.startHour = startHour;
+        this.endHour = endHour;
+    }
 
-  public TimeSetting toEntity() {
-    return TimeSetting.builder()
-        .startTime(startTime)
-        .endTime(endTime)
-        .build();
-  }
+    public TimeSetting toEntity() {
+        return TimeSetting.builder()
+            .timeRange(new TimeRange(startHour, endHour))
+            .build();
+    }
 }

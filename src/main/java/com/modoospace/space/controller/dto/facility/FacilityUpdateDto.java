@@ -21,48 +21,61 @@ import lombok.NoArgsConstructor;
 @Builder
 public class FacilityUpdateDto {
 
-  @NotEmpty
-  private String name;
+    @NotEmpty
+    private String name;
 
-  @NotNull
-  private Boolean reservationEnable;
+    @NotNull
+    private Boolean reservationEnable;
 
-  private String description;
+    @NotNull
+    private Integer minUser;
 
-  @Builder.Default
-  private List<TimeSettingCreateDto> timeSettings = new ArrayList<>();
+    @NotNull
+    private Integer maxUser;
 
-  @Builder.Default
-  private List<WeekdaySettingCreateDto> weekdaySettings = new ArrayList<>();
+    private String description;
 
-  public FacilityUpdateDto(String name, Boolean reservationEnable, String description,
-      List<TimeSettingCreateDto> timeSettings, List<WeekdaySettingCreateDto> weekdaySettings) {
-    this.name = name;
-    this.reservationEnable = reservationEnable;
-    this.description = description;
-    this.timeSettings = timeSettings;
-    this.weekdaySettings = weekdaySettings;
-  }
+    @Builder.Default
+    private List<TimeSettingCreateDto> timeSettings = new ArrayList<>();
 
-  public Facility toEntity() {
-    return Facility.builder()
-        .name(name)
-        .reservationEnable(reservationEnable)
-        .description(description)
-        .timeSettings(new TimeSettings(toTimeSettings(timeSettings)))
-        .weekdaySettings(new WeekdaySettings(toWeekdaySettings(weekdaySettings)))
-        .build();
-  }
+    @Builder.Default
+    private List<WeekdaySettingCreateDto> weekdaySettings = new ArrayList<>();
 
-  private List<TimeSetting> toTimeSettings(List<TimeSettingCreateDto> timeSettings) {
-    return timeSettings.stream()
-        .map(settingCreateDto -> settingCreateDto.toEntity())
-        .collect(Collectors.toList());
-  }
+    public FacilityUpdateDto(String name, Boolean reservationEnable,
+        Integer minUser, Integer maxUser, String description,
+        List<TimeSettingCreateDto> timeSettings, List<WeekdaySettingCreateDto> weekdaySettings) {
+        this.name = name;
+        this.reservationEnable = reservationEnable;
 
-  private List<WeekdaySetting> toWeekdaySettings(List<WeekdaySettingCreateDto> weekdaySettings) {
-    return weekdaySettings.stream()
-        .map(settingCreateDto -> settingCreateDto.toEntity())
-        .collect(Collectors.toList());
-  }
+        this.minUser = minUser;
+        this.maxUser = maxUser;
+        this.description = description;
+
+        this.timeSettings = timeSettings;
+        this.weekdaySettings = weekdaySettings;
+    }
+
+    public Facility toEntity() {
+        return Facility.builder()
+            .name(name)
+            .reservationEnable(reservationEnable)
+            .minUser(minUser)
+            .maxUser(maxUser)
+            .description(description)
+            .timeSettings(new TimeSettings(toTimeSettings(timeSettings)))
+            .weekdaySettings(new WeekdaySettings(toWeekdaySettings(weekdaySettings)))
+            .build();
+    }
+
+    private List<TimeSetting> toTimeSettings(List<TimeSettingCreateDto> timeSettings) {
+        return timeSettings.stream()
+            .map(settingCreateDto -> settingCreateDto.toEntity())
+            .collect(Collectors.toList());
+    }
+
+    private List<WeekdaySetting> toWeekdaySettings(List<WeekdaySettingCreateDto> weekdaySettings) {
+        return weekdaySettings.stream()
+            .map(settingCreateDto -> settingCreateDto.toEntity())
+            .collect(Collectors.toList());
+    }
 }

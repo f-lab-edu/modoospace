@@ -1,9 +1,6 @@
 package com.modoospace.space.controller.dto.timeSetting;
 
-import com.fasterxml.jackson.annotation.JsonFormat;
-import com.modoospace.common.DateFormatManager;
 import com.modoospace.space.domain.TimeSetting;
-import java.time.LocalTime;
 import java.util.List;
 import java.util.stream.Collectors;
 import javax.validation.constraints.NotNull;
@@ -15,35 +12,33 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 public class TimeSettingReadDto {
 
-  @NotNull
-  private Long id;
+    @NotNull
+    private Long id;
 
-  @NotNull
-  @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = DateFormatManager.TIME_FORMAT)
-  private LocalTime startTime;
+    @NotNull
+    private Integer startHour;
 
-  @NotNull
-  @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = DateFormatManager.TIME_FORMAT)
-  private LocalTime endTime;
+    @NotNull
+    private Integer endHour;
 
-  @Builder
-  public TimeSettingReadDto(Long id, LocalTime startTime, LocalTime endTime) {
-    this.id = id;
-    this.startTime = startTime;
-    this.endTime = endTime;
-  }
+    @Builder
+    public TimeSettingReadDto(Long id, Integer startHour, Integer endHour) {
+        this.id = id;
+        this.startHour = startHour;
+        this.endHour = endHour;
+    }
 
-  public static TimeSettingReadDto toDto(TimeSetting timeSetting) {
-    return TimeSettingReadDto.builder()
-        .id(timeSetting.getId())
-        .startTime(timeSetting.getStartTime())
-        .endTime(timeSetting.getEndTime())
-        .build();
-  }
+    public static TimeSettingReadDto toDto(TimeSetting timeSetting) {
+        return TimeSettingReadDto.builder()
+            .id(timeSetting.getId())
+            .startHour(timeSetting.getStartHour())
+            .endHour(timeSetting.getEndHour())
+            .build();
+    }
 
-  public static List<TimeSettingReadDto> toDtos(List<TimeSetting> timeSettings) {
-    return timeSettings.stream()
-        .map(TimeSettingReadDto::toDto)
-        .collect(Collectors.toList());
-  }
+    public static List<TimeSettingReadDto> toDtos(List<TimeSetting> timeSettings) {
+        return timeSettings.stream()
+            .map(TimeSettingReadDto::toDto)
+            .collect(Collectors.toList());
+    }
 }

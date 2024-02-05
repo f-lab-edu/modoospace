@@ -3,6 +3,7 @@ package com.modoospace.space.sevice;
 import com.modoospace.common.exception.NotFoundEntityException;
 import com.modoospace.member.domain.Member;
 import com.modoospace.member.service.MemberService;
+import com.modoospace.reservation.serivce.ReservationService;
 import com.modoospace.space.controller.dto.facility.FacilityCreateDto;
 import com.modoospace.space.controller.dto.facility.FacilityReadDetailDto;
 import com.modoospace.space.controller.dto.facility.FacilityReadDto;
@@ -25,6 +26,7 @@ public class FacilityService {
 
   private final MemberService memberService;
   private final SpaceRepository spaceRepository;
+  private final ReservationService reservationService;
   private final FacilityRepository facilityRepository;
   private final FacilityQueryRepository facilityQueryRepository;
 
