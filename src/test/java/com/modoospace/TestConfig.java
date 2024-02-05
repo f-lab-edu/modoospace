@@ -3,7 +3,7 @@ package com.modoospace;
 import com.modoospace.alarm.repository.AlarmQueryRepository;
 import com.modoospace.reservation.repository.ReservationQueryRepository;
 import com.modoospace.space.repository.FacilityQueryRepository;
-import com.modoospace.space.repository.FacilityScheduleQueryRepository;
+import com.modoospace.space.repository.ScheduleQueryRepository;
 import com.modoospace.space.repository.SpaceQueryRepository;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import javax.persistence.EntityManager;
@@ -38,8 +38,8 @@ public class TestConfig {
   }
 
   @Bean
-  public FacilityScheduleQueryRepository facilityScheduleQueryRepository() {
-    return new FacilityScheduleQueryRepository(jpaQueryFactory());
+  public ScheduleQueryRepository facilityScheduleQueryRepository() {
+    return new ScheduleQueryRepository(jpaQueryFactory());
   }
 
   @Bean

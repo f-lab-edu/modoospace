@@ -3,10 +3,13 @@ package com.modoospace.reservation.controller.dto;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.modoospace.common.DateFormatManager;
 import com.modoospace.member.domain.Member;
+import com.modoospace.reservation.domain.DateTimeRange;
 import com.modoospace.reservation.domain.Reservation;
+import com.modoospace.reservation.domain.ReservationStatus;
 import com.modoospace.space.domain.Facility;
-import java.time.LocalDateTime;
+import java.time.LocalDate;
 import javax.validation.constraints.NotNull;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
@@ -14,26 +17,38 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 public class ReservationCreateDto {
 
-  @NotNull
-  @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = DateFormatManager.DATETIME_FORMAT, timezone = "Asia/Seoul")
-  private LocalDateTime reservationStart;
+    @NotNull
+    private Integer numOfUser;
 
-  @NotNull
-  @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = DateFormatManager.DATETIME_FORMAT, timezone = "Asia/Seoul")
-  private LocalDateTime reservationEnd;
+    @NotNull
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = DateFormatManager.DATE_FORMAT)
+    private LocalDate startDate;
 
-  public ReservationCreateDto(LocalDateTime reservationStart,
-      LocalDateTime reservationEnd) {
-    this.reservationStart = reservationStart;
-    this.reservationEnd = reservationEnd;
-  }
+    private Integer startHour;
 
-  public Reservation toEntity(Facility facility, Member visitor) {
-    return Reservation.builder()
-        .reservationStart(reservationStart)
-        .reservationEnd(reservationEnd)
-        .visitor(visitor)
-        .facility(facility)
-        .build();
-  }
+    @NotNull
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = DateFormatManager.DATE_FORMAT)
+    private LocalDate endDate;
+
+    private Integer endHour;
+
+    @Builder
+    public ReservationCreateDto(Integer numOfUser, LocalDate startDate, Integer startHour,
+        LocalDate endDate, Integer endHour) {
+        this.numOfUser = numOfUser;
+        this.startDate = startDate;
+        this.startHour = startHour;
+        this.endDate = endDate;
+        this.endHour = endHour;
+    }
+
+    public Reservation toEntity(Facility facility, Member visitor) {
+        return Reservation.builder()
+            .numOfUser(numOfUser)
+            .dateTimeRange(new DateTimeRange(startDate, startHour, endDate, endHour))
+            .status(ReservationStatus.WAITING)
+            .visitor(visitor)
+            .facility(facility)
+            .build();
+    }
 }

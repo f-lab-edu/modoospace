@@ -2,7 +2,7 @@ package com.modoospace.reservation.controller;
 
 import com.modoospace.common.DateFormatManager;
 import com.modoospace.config.auth.LoginEmail;
-import com.modoospace.reservation.controller.dto.AvailabilityTimeResponseDto;
+import com.modoospace.reservation.controller.dto.AvailabilityTimeDto;
 import com.modoospace.reservation.controller.dto.ReservationCreateDto;
 import com.modoospace.reservation.controller.dto.ReservationReadDto;
 import com.modoospace.reservation.serivce.ReservationService;
@@ -35,10 +35,10 @@ public class VisitorsReservationController {
     }
 
     @GetMapping("/facilities/{facilityId}/availability")
-    public ResponseEntity<AvailabilityTimeResponseDto> getAvailabilityTime(
+    public ResponseEntity<AvailabilityTimeDto> getAvailabilityTime(
         @PathVariable Long facilityId,
         @RequestParam @DateTimeFormat(pattern = DateFormatManager.DATE_FORMAT) final LocalDate date) {
-        AvailabilityTimeResponseDto availableTimes = reservationService
+        AvailabilityTimeDto availableTimes = reservationService
             .getAvailabilityTime(facilityId, date);
         return ResponseEntity.ok().body(availableTimes);
     }

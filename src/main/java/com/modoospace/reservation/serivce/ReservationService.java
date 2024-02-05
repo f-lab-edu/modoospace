@@ -8,22 +8,21 @@ import com.modoospace.common.exception.NotOpenedFacilityException;
 import com.modoospace.member.domain.Member;
 import com.modoospace.member.domain.Role;
 import com.modoospace.member.service.MemberService;
-import com.modoospace.reservation.controller.dto.AvailabilityTimeResponseDto;
+import com.modoospace.reservation.controller.dto.AvailabilityTimeDto;
 import com.modoospace.reservation.controller.dto.ReservationCreateDto;
 import com.modoospace.reservation.controller.dto.ReservationReadDto;
 import com.modoospace.reservation.controller.dto.ReservationUpdateDto;
+import com.modoospace.reservation.controller.dto.TimeResponse;
 import com.modoospace.reservation.domain.Reservation;
 import com.modoospace.reservation.domain.ReservationRepository;
-import com.modoospace.reservation.domain.ReservationStatus;
 import com.modoospace.reservation.repository.ReservationQueryRepository;
+import com.modoospace.space.controller.dto.facility.FacilityReadDto;
 import com.modoospace.space.domain.Facility;
 import com.modoospace.space.domain.FacilityRepository;
-import com.modoospace.space.domain.FacilitySchedule;
-import com.modoospace.space.domain.FacilityScheduleRepository;
-import com.modoospace.space.repository.FacilityScheduleQueryRepository;
+import com.modoospace.space.domain.Schedule;
+import com.modoospace.space.domain.ScheduleRepository;
+import com.modoospace.space.repository.ScheduleQueryRepository;
 import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.time.LocalTime;
 import java.util.List;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
@@ -36,8 +35,8 @@ public class ReservationService {
 
     private final MemberService memberService;
     private final FacilityRepository facilityRepository;
-    private final FacilityScheduleRepository facilityScheduleRepository;
-    private final FacilityScheduleQueryRepository facilityScheduleQueryRepository;
+    private final ScheduleRepository scheduleRepository;
+    private final ScheduleQueryRepository scheduleQueryRepository;
     private final ReservationRepository reservationRepository;
     private final ReservationQueryRepository reservationQueryRepository;
     private final AlarmProducer alarmProducer;
@@ -47,9 +46,9 @@ public class ReservationService {
         String loginEmail) {
         Member visitor = memberService.findMemberByEmail(loginEmail);
         Facility facility = findFacilityById(facilityId);
-        verifyPermissionAndAvailability(visitor, facility, createDto);
-
         Reservation reservation = createDto.toEntity(facility, visitor);
+        verifyAvailability(facility, reservation);
+
         reservationRepository.save(reservation);
 
         AlarmEvent alarmEvent = AlarmEvent.toNewReservationAlarm(reservation);
@@ -58,96 +57,54 @@ public class ReservationService {
         return reservation.getId();
     }
 
-    private void verifyPermissionAndAvailability(Member visitor, Facility facility,
-        ReservationCreateDto createDto) {
-        visitor.verifyRolePermission(Role.VISITOR);
-        verifyFacilityAvailability(facility, createDto);
-        verifyReservationAvailability(facility, createDto);
+    private void verifyAvailability(Facility facility, Reservation reservation) {
+        verifyFacilitySchedulesOpen(facility, reservation);
+        verifyReservationAvailability(facility, reservation);
     }
 
-    private void verifyFacilityAvailability(Facility facility, ReservationCreateDto createDto) {
-        facility.verifyReservationEnable();
-        verifyFacilitySchedulesOpen(facility, createDto);
-    }
-
-    private void verifyFacilitySchedulesOpen(Facility facility, ReservationCreateDto createDto) {
-        Boolean isSchedulesOpen = facilityScheduleQueryRepository.isIncludingSchedule(
-            facility, createDto.getReservationStart(), createDto.getReservationEnd());
+    private void verifyFacilitySchedulesOpen(Facility facility, Reservation reservation) {
+        Boolean isSchedulesOpen = scheduleQueryRepository.isIncludingSchedule(
+            facility, reservation.getDateTimeRange());
 
         if (!isSchedulesOpen) {
             throw new NotOpenedFacilityException();
         }
     }
 
-    private void verifyReservationAvailability(Facility facility, ReservationCreateDto createDto) {
-        Boolean isOverlappingReservation = reservationQueryRepository.isOverlappingReservation(
-            facility, createDto.getReservationStart(), createDto.getReservationEnd());
+    private void verifyReservationAvailability(Facility facility, Reservation reservation) {
+        Boolean conflictingReservation = reservationQueryRepository.isConflictingReservation(
+            facility, reservation.getDateTimeRange());
 
-        if (isOverlappingReservation) {
+        if (conflictingReservation) {
             throw new ConflictingReservationException();
         }
     }
 
-    public AvailabilityTimeResponseDto getAvailabilityTime(Long facilityId, LocalDate searchDate) {
+    public AvailabilityTimeDto getAvailabilityTime(Long facilityId, LocalDate searchDate) {
         Facility facility = findFacilityById(facilityId);
-        List<FacilitySchedule> facilitySchedules = findOpenFacilitySchedules(facility, searchDate);
-        List<Reservation> reservations = findActiveReservations(facility, searchDate);
+        List<Schedule> schedules = scheduleRepository.findByFacilityAndDate(facility, searchDate);
+        List<Reservation> reservations = reservationQueryRepository.findActiveReservations(facility,
+            searchDate);
 
-        //이미 예약된 시간을 제외한 예약 가능한 시간 필터링
-        List<LocalTime> availableTimes = createHourlyTimeRange(facilitySchedules, reservations);
-
-        return AvailabilityTimeResponseDto.from(facility, availableTimes);
-    }
-
-    private List<FacilitySchedule> findOpenFacilitySchedules(Facility facility,
-        LocalDate requestDate) {
-        LocalDateTime startDateTime = requestDate.atTime(0, 0, 0);
-        LocalDateTime endDateTime = requestDate.atTime(23, 59, 59);
-
-        return facilityScheduleRepository.findByFacilityAndStartDateTimeBetween(
-            facility, startDateTime, endDateTime);
-    }
-
-    private List<Reservation> findActiveReservations(Facility facility, LocalDate requestDate) {
-        List<ReservationStatus> activeStatuses = ReservationStatus.getActiveStatuses();
-        LocalDateTime startDateTime = requestDate.atTime(0, 0, 0);
-        LocalDateTime endDateTime = requestDate.atTime(23, 59, 59);
-
-        return reservationRepository.findByFacilityAndStatusInAndReservationStartBetween(
-            facility, activeStatuses, startDateTime, endDateTime);
-    }
-
-    private List<LocalTime> createHourlyTimeRange(List<FacilitySchedule> facilitySchedules,
-        List<Reservation> reservations) {
-        List<LocalTime> localTimes = facilitySchedules.stream()
-            .flatMap(facilitySchedule -> facilitySchedule.createHourlyTimeRange().stream())
-            .collect(Collectors.toList());
-
-        return calculateHourlyTimeRange(localTimes, reservations);
-    }
-
-    private List<LocalTime> calculateHourlyTimeRange(List<LocalTime> localTimes,
-        List<Reservation> reservations) {
-        for (Reservation reservation : reservations) {
-            localTimes = localTimes.stream()
-                .filter(time -> !reservation.isReservationBetween(time))
-                .collect(Collectors.toList());
-        }
-        return localTimes;
+        FacilityReadDto facilityReadDto = FacilityReadDto.toDto(facility);
+        List<TimeResponse> timeResponse = TimeResponse.createTimeResponse(schedules, reservations,
+            searchDate);
+        return new AvailabilityTimeDto(facilityReadDto, timeResponse);
     }
 
     public ReservationReadDto findReservation(Long reservationId, String loginEmail) {
         Reservation reservation = findReservationById(reservationId);
         Member loginMember = memberService.findMemberByEmail(loginEmail);
         reservation.verifyReservationAccess(loginMember);
+
         return ReservationReadDto.toDto(reservation);
     }
 
     @Transactional
-    public void updateStatus(Long reservationId, String loginEmail) {
+    public void approveReservation(Long reservationId, String loginEmail) {
         Reservation reservation = findReservationById(reservationId);
         Member loginMember = memberService.findMemberByEmail(loginEmail);
-        reservation.approveReservation(loginMember);
+        reservation.approveAsHost(loginMember);
 
         AlarmEvent alarmEvent = AlarmEvent.toApprovedReservationAlarm(reservation);
         alarmProducer.send(alarmEvent);
@@ -159,6 +116,7 @@ public class ReservationService {
         Reservation reservation = findReservationById(reservationId);
         Member loginMember = memberService.findMemberByEmail(loginEmail);
         Reservation updatedReservation = reservationUpdateDto.toEntity(reservation);
+
         reservation.updateAsHost(updatedReservation, loginMember);
     }
 

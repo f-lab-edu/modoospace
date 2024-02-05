@@ -12,8 +12,4 @@ public interface ReservationRepository extends JpaRepository<Reservation, Long> 
   List<Reservation> findByVisitor(Member visitor);
 
   List<Reservation> findByFacilitySpaceHost(Member host);
-
-  List<Reservation> findByFacilityAndStatusInAndReservationStartBetween(
-      Facility facility, Collection<ReservationStatus> status, LocalDateTime reservationStart,
-      LocalDateTime reservationEnd);
 }

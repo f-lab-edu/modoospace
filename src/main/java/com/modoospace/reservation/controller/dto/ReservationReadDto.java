@@ -6,7 +6,7 @@ import com.modoospace.member.controller.dto.MemberReadDto;
 import com.modoospace.reservation.domain.Reservation;
 import com.modoospace.reservation.domain.ReservationStatus;
 import com.modoospace.space.controller.dto.facility.FacilityReadDto;
-import java.time.LocalDateTime;
+import java.time.LocalDate;
 import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.NotNull;
 import lombok.Builder;
@@ -17,45 +17,60 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 public class ReservationReadDto {
 
-  @NotNull
-  private Long id;
+    @NotNull
+    private Long id;
 
-  @NotNull
-  @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = DateFormatManager.DATETIME_FORMAT, timezone = "Asia/Seoul")
-  private LocalDateTime reservationStart;
+    @NotNull
+    private Integer numOrUser;
 
-  @NotNull
-  @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = DateFormatManager.DATETIME_FORMAT, timezone = "Asia/Seoul")
-  private LocalDateTime reservationEnd;
+    @NotNull
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = DateFormatManager.DATE_FORMAT)
+    private LocalDate startDate;
 
-  @NotEmpty
-  private ReservationStatus status;
+    private Integer startHour;
 
-  @NotEmpty
-  private FacilityReadDto facility;
+    @NotNull
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = DateFormatManager.DATE_FORMAT)
+    private LocalDate endDate;
 
-  @NotEmpty
-  private MemberReadDto member;
+    private Integer endHour;
 
-  @Builder
-  public ReservationReadDto(Long id, LocalDateTime reservationStart, LocalDateTime reservationEnd,
-      ReservationStatus status, FacilityReadDto facility, MemberReadDto member) {
-    this.id = id;
-    this.reservationStart = reservationStart;
-    this.reservationEnd = reservationEnd;
-    this.status = status;
-    this.facility = facility;
-    this.member = member;
-  }
+    @NotEmpty
+    private ReservationStatus status;
 
-  public static ReservationReadDto toDto(Reservation reservation) {
-    return ReservationReadDto.builder()
-        .id(reservation.getId())
-        .facility(FacilityReadDto.toDto(reservation.getFacility()))
-        .reservationStart(reservation.getReservationStart())
-        .reservationEnd(reservation.getReservationEnd())
-        .status(reservation.getStatus())
-        .member(MemberReadDto.toDto(reservation.getVisitor()))
-        .build();
-  }
+    @NotEmpty
+    private FacilityReadDto facility;
+
+    @NotEmpty
+    private MemberReadDto member;
+
+    @Builder
+    public ReservationReadDto(Long id, Integer numOrUser, LocalDate startDate, Integer startHour,
+        LocalDate endDate, Integer endHour, ReservationStatus status, FacilityReadDto facility,
+        MemberReadDto member) {
+        this.id = id;
+        this.numOrUser = numOrUser;
+        this.startDate = startDate;
+        this.startHour = startHour;
+        this.endDate = endDate;
+        this.endHour = endHour;
+        this.status = status;
+        this.facility = facility;
+        this.member = member;
+    }
+
+
+    public static ReservationReadDto toDto(Reservation reservation) {
+        return ReservationReadDto.builder()
+            .id(reservation.getId())
+            .numOrUser(reservation.getNumOfUser())
+            .startDate(reservation.getStartDate())
+            .startHour(reservation.getStartHour())
+            .endDate(reservation.getEndDate())
+            .endHour(reservation.getEndHour())
+            .status(reservation.getStatus())
+            .facility(FacilityReadDto.toDto(reservation.getFacility()))
+            .member(MemberReadDto.toDto(reservation.getVisitor()))
+            .build();
+    }
 }
