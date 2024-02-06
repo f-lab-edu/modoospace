@@ -6,8 +6,10 @@ import com.modoospace.reservation.domain.DateTimeRange;
 import com.modoospace.reservation.domain.Reservation;
 import com.modoospace.reservation.domain.ReservationStatus;
 import com.modoospace.space.domain.Facility;
+import com.querydsl.core.types.dsl.BooleanExpression;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Repository;
@@ -31,10 +33,26 @@ public class ReservationQueryRepository {
 
         return jpaQueryFactory
             .selectFrom(reservation)
-            .where(reservation.facility.eq(facility)
-                .and(reservation.status.ne(ReservationStatus.CANCELED))
-                .and(reservation.dateTimeRange.startDateTime.before(dateTimeRange.getEndDateTime()))
-                .and(reservation.dateTimeRange.endDateTime.after(dateTimeRange.getStartDateTime())))
+            .where(facilityEq(facility),
+                statusNe(ReservationStatus.CANCELED),
+                startDateTimeBefore(dateTimeRange.getEndDateTime()),
+                endDateTimeAfter(dateTimeRange.getStartDateTime()))
             .fetch();
+    }
+
+    private BooleanExpression facilityEq(Facility facility) {
+        return facility != null ? reservation.facility.eq(facility) : null;
+    }
+
+    private BooleanExpression statusNe(ReservationStatus status) {
+        return status != null ? reservation.status.ne(status) : null;
+    }
+
+    private BooleanExpression startDateTimeBefore(LocalDateTime dateTime) {
+        return dateTime != null ? reservation.dateTimeRange.startDateTime.before(dateTime) : null;
+    }
+
+    private BooleanExpression endDateTimeAfter(LocalDateTime dateTime) {
+        return dateTime != null ? reservation.dateTimeRange.endDateTime.after(dateTime) : null;
     }
 }

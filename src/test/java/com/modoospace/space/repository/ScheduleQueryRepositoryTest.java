@@ -8,7 +8,6 @@ import com.modoospace.member.domain.MemberRepository;
 import com.modoospace.member.domain.Role;
 import com.modoospace.reservation.domain.DateTimeRange;
 import com.modoospace.space.controller.dto.facility.FacilityCreateRequest;
-import com.modoospace.space.controller.dto.space.SpaceCreateUpdateRequest;
 import com.modoospace.space.domain.Category;
 import com.modoospace.space.domain.CategoryRepository;
 import com.modoospace.space.domain.Facility;
@@ -85,7 +84,7 @@ public class ScheduleQueryRepositoryTest {
             .maxUser(4)
             .description("1~4인실 입니다.")
             .build();
-        facilityRepository.save(createRequest.toEntity(space));
+        roomFacility = facilityRepository.save(createRequest.toEntity(space));
 
         now = LocalDate.now();
         tomorrow = LocalDate.now().plusDays(1);
@@ -149,12 +148,11 @@ public class ScheduleQueryRepositoryTest {
 
     private Schedule createTomorrowSchedule(Integer startHour, Integer endHour) {
         TimeRange timeRange = new TimeRange(startHour, endHour);
-        Schedule updateSchedule = Schedule.builder()
+        return Schedule.builder()
             .date(tomorrow)
             .timeRange(timeRange)
             .facility(roomFacility)
             .build();
-        return updateSchedule;
     }
 
     private void removeAndAddTomorrowSchedule(Schedule... schedule) {

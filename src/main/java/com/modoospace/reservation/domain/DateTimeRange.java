@@ -5,6 +5,7 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import javax.persistence.Embeddable;
+import javax.validation.constraints.NotNull;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -14,11 +15,14 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class DateTimeRange {
 
+    @NotNull
     private LocalDateTime startDateTime;
 
+    @NotNull
     private LocalDateTime endDateTime;
 
-    public DateTimeRange(LocalDate startDate, Integer startHour, LocalDate endDate, Integer endHour) {
+    public DateTimeRange(LocalDate startDate, Integer startHour, LocalDate endDate,
+        Integer endHour) {
         this(LocalDateTime.of(startDate, LocalTime.of(startHour, 0)),
             LocalDateTime.of(endDate, LocalTime.of(endHour - 1, 59)));
     }

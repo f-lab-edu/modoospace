@@ -3,6 +3,7 @@ package com.modoospace.space.domain;
 import com.modoospace.common.exception.InvalidTimeRangeException;
 import java.time.LocalTime;
 import javax.persistence.Embeddable;
+import javax.validation.constraints.NotNull;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -12,8 +13,10 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class TimeRange {
 
+    @NotNull
     private LocalTime startTime;
 
+    @NotNull
     private LocalTime endTime;
 
     public TimeRange(Integer start, Integer end) {

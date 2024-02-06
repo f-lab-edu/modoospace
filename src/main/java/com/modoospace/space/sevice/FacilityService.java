@@ -29,7 +29,8 @@ public class FacilityService {
     private final FacilityQueryRepository facilityQueryRepository;
 
     @Transactional
-    public Long createFacility(Long spaceId, FacilityCreateRequest createRequest, String loginEmail) {
+    public Long createFacility(Long spaceId, FacilityCreateRequest createRequest,
+        String loginEmail) {
         Member host = memberService.findMemberByEmail(loginEmail);
         Space space = findSpaceById(spaceId);
         space.verifyManagementPermission(host);
@@ -65,8 +66,6 @@ public class FacilityService {
     public void deleteFacility(Long facilityId, String loginEmail) {
         Member loginMember = memberService.findMemberByEmail(loginEmail);
         Facility facility = findFacilityById(facilityId);
-
-        // TODO: 예약이 존재하는지 확인이 필요합니다.
 
         facility.verifyManagementPermission(loginMember);
         facilityRepository.delete(facility);

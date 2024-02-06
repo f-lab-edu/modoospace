@@ -98,11 +98,11 @@ public class Facility extends BaseTimeEntity {
         }
     }
 
-    public boolean isValidUserNum(Integer userNum) {
-        return  userNum > 0;
+    private boolean isValidUserNum(Integer userNum) {
+        return userNum > 0;
     }
 
-    public boolean isValidMinMaxUserNum(Integer minUser, Integer maxUser) {
+    private boolean isValidMinMaxUserNum(Integer minUser, Integer maxUser) {
         return minUser <= maxUser;
     }
 
@@ -135,13 +135,12 @@ public class Facility extends BaseTimeEntity {
         Member loginMember) {
         verifyManagementPermission(loginMember);
 
-        Schedules schedules = Schedules
-            .create1MonthFacilitySchedules(this.timeSettings, this.weekdaySettings,
-                createYearMonth);
+        Schedules schedules = Schedules.create1MonthFacilitySchedules(
+            this.timeSettings, this.weekdaySettings, createYearMonth);
         this.schedules.addAll(schedules, this);
     }
 
-    public void addSchedule(Schedule createSchedule, Member loginMember){
+    public void addSchedule(Schedule createSchedule, Member loginMember) {
         verifyManagementPermission(loginMember);
         schedules.addSchedule(createSchedule);
     }
