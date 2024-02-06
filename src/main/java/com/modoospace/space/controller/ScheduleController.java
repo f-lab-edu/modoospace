@@ -2,9 +2,9 @@ package com.modoospace.space.controller;
 
 import com.modoospace.common.DateFormatManager;
 import com.modoospace.config.auth.LoginEmail;
-import com.modoospace.space.controller.dto.facilitySchedule.ScheduleCreateUpdateDto;
-import com.modoospace.space.controller.dto.facilitySchedule.ScheduleReadDto;
-import com.modoospace.space.sevice.FacilityScheduleService;
+import com.modoospace.space.controller.dto.schedule.ScheduleCreateUpdateRequest;
+import com.modoospace.space.controller.dto.schedule.ScheduleResponse;
+import com.modoospace.space.sevice.ScheduleService;
 import java.time.LocalDate;
 import java.time.YearMonth;
 import java.util.List;
@@ -25,72 +25,69 @@ import org.springframework.web.bind.annotation.RestController;
 @RequiredArgsConstructor
 @RestController
 @RequestMapping("/api/v1/facilities/{facilityId}/schedules")
-public class FacilityScheduleController {
+public class ScheduleController {
 
-    private final FacilityScheduleService facilityScheduleService;
+    private final ScheduleService scheduleService;
 
     @PostMapping()
     public ResponseEntity<Void> create(@PathVariable Long facilityId,
-        @RequestBody @Valid ScheduleCreateUpdateDto createDto,
+        @RequestBody @Valid ScheduleCreateUpdateRequest createRequest,
         @LoginEmail String loginEmail) {
-        facilityScheduleService
-            .createSchedule(facilityId, createDto, loginEmail);
+        scheduleService.createSchedule(facilityId, createRequest, loginEmail);
         return ResponseEntity.ok().build();
     }
 
     @GetMapping("/{scheduleId}")
-    public ResponseEntity<ScheduleReadDto> find(@PathVariable Long scheduleId) {
-        ScheduleReadDto scheduleReadDto = facilityScheduleService
-            .findFacilitySchedule(scheduleId);
-        return ResponseEntity.ok().body(scheduleReadDto);
+    public ResponseEntity<ScheduleResponse> find(@PathVariable Long scheduleId) {
+        ScheduleResponse schedule = scheduleService.findSchedule(scheduleId);
+        return ResponseEntity.ok().body(schedule);
     }
 
     @PutMapping("/{scheduleId}")
     public ResponseEntity<Void> update(@PathVariable Long scheduleId,
-        @RequestBody @Valid ScheduleCreateUpdateDto updateDto,
+        @RequestBody @Valid ScheduleCreateUpdateRequest updateRequest,
         @LoginEmail String loginEmail) {
-        facilityScheduleService.updateFacilitySchedule(scheduleId, updateDto, loginEmail);
+        scheduleService.updateSchedule(scheduleId, updateRequest, loginEmail);
         return ResponseEntity.noContent().build();
     }
 
     @DeleteMapping("/{scheduleId}")
     public ResponseEntity<Void> delete(@PathVariable Long scheduleId,
         @LoginEmail String loginEmail) {
-        facilityScheduleService.deleteFacilitySchedule(scheduleId, loginEmail);
+        scheduleService.deleteSchedule(scheduleId, loginEmail);
         return ResponseEntity.noContent().build();
     }
 
     @GetMapping("/day")
-    public ResponseEntity<List<ScheduleReadDto>> find1Day(@PathVariable Long facilityId,
+    public ResponseEntity<List<ScheduleResponse>> find1Day(@PathVariable Long facilityId,
         @RequestParam @DateTimeFormat(pattern = DateFormatManager.DATE_FORMAT) final LocalDate date) {
-        List<ScheduleReadDto> scheduleReadDtos = facilityScheduleService
-            .find1DayFacilitySchedules(facilityId, date);
-        return ResponseEntity.ok().body(scheduleReadDtos);
+        List<ScheduleResponse> schedules = scheduleService
+            .find1DaySchedules(facilityId, date);
+        return ResponseEntity.ok().body(schedules);
     }
 
     @PostMapping("/month")
     public ResponseEntity<Void> create1MonthDefault(@PathVariable Long facilityId,
         @RequestParam @DateTimeFormat(pattern = DateFormatManager.YEARMONTH_FORMAT) final YearMonth yearMonth,
         @LoginEmail String loginEmail) {
-        facilityScheduleService
-            .create1MonthDefaultFacilitySchedules(facilityId, yearMonth, loginEmail);
+        scheduleService.create1MonthDefaultSchedules(facilityId, yearMonth, loginEmail);
         return ResponseEntity.noContent().build();
     }
 
     @GetMapping("/month")
-    public ResponseEntity<List<ScheduleReadDto>> find1Month(@PathVariable Long facilityId,
+    public ResponseEntity<List<ScheduleResponse>> find1Month(@PathVariable Long facilityId,
         @RequestParam @DateTimeFormat(pattern = DateFormatManager.YEARMONTH_FORMAT) final YearMonth yearMonth) {
-        List<ScheduleReadDto> scheduleReadDtos = facilityScheduleService
-            .find1MonthFacilitySchedules(facilityId, yearMonth);
-        return ResponseEntity.ok().body(scheduleReadDtos);
+        List<ScheduleResponse> schedules = scheduleService
+            .find1MonthSchedules(facilityId, yearMonth);
+        return ResponseEntity.ok().body(schedules);
     }
 
     @DeleteMapping("/month")
     public ResponseEntity<Void> delete1Month(@PathVariable Long facilityId,
         @RequestParam @DateTimeFormat(pattern = DateFormatManager.YEARMONTH_FORMAT) final YearMonth yearMonth,
         @LoginEmail String loginEmail) {
-        facilityScheduleService
-            .delete1MonthFacilitySchedules(facilityId, yearMonth, loginEmail);
+        scheduleService
+            .delete1MonthSchedules(facilityId, yearMonth, loginEmail);
         return ResponseEntity.noContent().build();
     }
 }

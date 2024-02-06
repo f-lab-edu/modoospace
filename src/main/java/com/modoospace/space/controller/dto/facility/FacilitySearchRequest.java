@@ -10,13 +10,13 @@ import lombok.Setter;
 @Getter
 @Setter
 @NoArgsConstructor
-public class FacilitySearchDto {
+public class FacilitySearchRequest {
 
   private String name;
 
   private Boolean reservationEnable;
 
-  public FacilitySearchDto(String name, Boolean reservationEnable) {
+  public FacilitySearchRequest(String name, Boolean reservationEnable) {
     this.name = name;
     this.reservationEnable = reservationEnable;
   }

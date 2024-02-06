@@ -8,15 +8,15 @@ import com.modoospace.common.exception.NotOpenedFacilityException;
 import com.modoospace.member.domain.Member;
 import com.modoospace.member.domain.Role;
 import com.modoospace.member.service.MemberService;
-import com.modoospace.reservation.controller.dto.AvailabilityTimeDto;
-import com.modoospace.reservation.controller.dto.ReservationCreateDto;
-import com.modoospace.reservation.controller.dto.ReservationReadDto;
-import com.modoospace.reservation.controller.dto.ReservationUpdateDto;
+import com.modoospace.reservation.controller.dto.AvailabilityTimeResponse;
+import com.modoospace.reservation.controller.dto.ReservationCreateRequest;
+import com.modoospace.reservation.controller.dto.ReservationResponse;
+import com.modoospace.reservation.controller.dto.ReservationUpdateRequest;
 import com.modoospace.reservation.controller.dto.TimeResponse;
 import com.modoospace.reservation.domain.Reservation;
 import com.modoospace.reservation.domain.ReservationRepository;
 import com.modoospace.reservation.repository.ReservationQueryRepository;
-import com.modoospace.space.controller.dto.facility.FacilityReadDto;
+import com.modoospace.space.controller.dto.facility.FacilityResponse;
 import com.modoospace.space.domain.Facility;
 import com.modoospace.space.domain.FacilityRepository;
 import com.modoospace.space.domain.Schedule;
@@ -42,16 +42,16 @@ public class ReservationService {
     private final AlarmProducer alarmProducer;
 
     @Transactional
-    public Long createReservation(ReservationCreateDto createDto, Long facilityId,
+    public Long createReservation(ReservationCreateRequest createRequest, Long facilityId,
         String loginEmail) {
         Member visitor = memberService.findMemberByEmail(loginEmail);
         Facility facility = findFacilityById(facilityId);
-        Reservation reservation = createDto.toEntity(facility, visitor);
+        Reservation reservation = createRequest.toEntity(facility, visitor);
         verifyAvailability(facility, reservation);
 
         reservationRepository.save(reservation);
 
-        AlarmEvent alarmEvent = AlarmEvent.toNewReservationAlarm(reservation);
+        AlarmEvent alarmEvent = AlarmEvent.ofNewReservationAlarm(reservation);
         alarmProducer.send(alarmEvent);
 
         return reservation.getId();
@@ -80,24 +80,23 @@ public class ReservationService {
         }
     }
 
-    public AvailabilityTimeDto getAvailabilityTime(Long facilityId, LocalDate searchDate) {
+    public AvailabilityTimeResponse getAvailabilityTime(Long facilityId, LocalDate searchDate) {
         Facility facility = findFacilityById(facilityId);
         List<Schedule> schedules = scheduleRepository.findByFacilityAndDate(facility, searchDate);
         List<Reservation> reservations = reservationQueryRepository.findActiveReservations(facility,
             searchDate);
 
-        FacilityReadDto facilityReadDto = FacilityReadDto.toDto(facility);
         List<TimeResponse> timeResponse = TimeResponse.createTimeResponse(schedules, reservations,
             searchDate);
-        return new AvailabilityTimeDto(facilityReadDto, timeResponse);
+        return new AvailabilityTimeResponse(FacilityResponse.of(facility), timeResponse);
     }
 
-    public ReservationReadDto findReservation(Long reservationId, String loginEmail) {
+    public ReservationResponse findReservation(Long reservationId, String loginEmail) {
         Reservation reservation = findReservationById(reservationId);
         Member loginMember = memberService.findMemberByEmail(loginEmail);
         reservation.verifyReservationAccess(loginMember);
 
-        return ReservationReadDto.toDto(reservation);
+        return ReservationResponse.of(reservation);
     }
 
     @Transactional
@@ -106,21 +105,21 @@ public class ReservationService {
         Member loginMember = memberService.findMemberByEmail(loginEmail);
         reservation.approveAsHost(loginMember);
 
-        AlarmEvent alarmEvent = AlarmEvent.toApprovedReservationAlarm(reservation);
+        AlarmEvent alarmEvent = AlarmEvent.ofApprovedReservationAlarm(reservation);
         alarmProducer.send(alarmEvent);
     }
 
     @Transactional
-    public void updateReservation(Long reservationId, ReservationUpdateDto reservationUpdateDto,
+    public void updateReservation(Long reservationId, ReservationUpdateRequest updateRequest,
         String loginEmail) {
         Reservation reservation = findReservationById(reservationId);
         Member loginMember = memberService.findMemberByEmail(loginEmail);
-        Reservation updatedReservation = reservationUpdateDto.toEntity(reservation);
+        Reservation updatedReservation = updateRequest.toEntity(reservation);
 
         reservation.updateAsHost(updatedReservation, loginMember);
     }
 
-    public List<ReservationReadDto> findAllAsVisitorByAdmin(Long memberId, String loginEmail) {
+    public List<ReservationResponse> findAllAsVisitorByAdmin(Long memberId, String loginEmail) {
         Member admin = memberService.findMemberByEmail(loginEmail);
         admin.verifyRolePermission(Role.ADMIN);
 
@@ -128,22 +127,22 @@ public class ReservationService {
         return findAllAsVisitor(visitor);
     }
 
-    public List<ReservationReadDto> findAllAsVisitor(String loginEmail) {
+    public List<ReservationResponse> findAllAsVisitor(String loginEmail) {
         Member visitor = memberService.findMemberByEmail(loginEmail);
         visitor.verifyRolePermission(Role.VISITOR);
 
         return findAllAsVisitor(visitor);
     }
 
-    private List<ReservationReadDto> findAllAsVisitor(Member visitor) {
+    private List<ReservationResponse> findAllAsVisitor(Member visitor) {
         List<Reservation> reservations = reservationRepository.findByVisitor(visitor);
 
         return reservations.stream()
-            .map(ReservationReadDto::toDto)
+            .map(ReservationResponse::of)
             .collect(Collectors.toList());
     }
 
-    public List<ReservationReadDto> findAllAsHostByAdmin(Long memberId, String loginEmail) {
+    public List<ReservationResponse> findAllAsHostByAdmin(Long memberId, String loginEmail) {
         Member admin = memberService.findMemberByEmail(loginEmail);
         admin.verifyRolePermission(Role.ADMIN);
 
@@ -151,18 +150,18 @@ public class ReservationService {
         return findAllAsHost(host);
     }
 
-    public List<ReservationReadDto> findAllAsHost(String loginEmail) {
+    public List<ReservationResponse> findAllAsHost(String loginEmail) {
         Member host = memberService.findMemberByEmail(loginEmail);
         host.verifyRolePermission(Role.HOST);
 
         return findAllAsHost(host);
     }
 
-    private List<ReservationReadDto> findAllAsHost(Member host) {
+    private List<ReservationResponse> findAllAsHost(Member host) {
         List<Reservation> reservations = reservationRepository.findByFacilitySpaceHost(host);
 
         return reservations.stream()
-            .map(ReservationReadDto::toDto)
+            .map(ReservationResponse::of)
             .collect(Collectors.toList());
     }
 
@@ -172,7 +171,7 @@ public class ReservationService {
         Reservation reservation = findReservationById(reservationId);
         reservation.cancelAsVisitor(loginMember);
 
-        AlarmEvent alarmEvent = AlarmEvent.toCancelReservationAlarm(reservation);
+        AlarmEvent alarmEvent = AlarmEvent.ofCancelReservationAlarm(reservation);
         alarmProducer.send(alarmEvent);
     }
 

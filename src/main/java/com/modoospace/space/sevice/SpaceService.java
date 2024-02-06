@@ -3,9 +3,9 @@ package com.modoospace.space.sevice;
 import com.modoospace.common.exception.NotFoundEntityException;
 import com.modoospace.member.domain.Member;
 import com.modoospace.member.service.MemberService;
-import com.modoospace.space.controller.dto.space.SpaceCreateUpdateDto;
-import com.modoospace.space.controller.dto.space.SpaceReadDto;
-import com.modoospace.space.controller.dto.space.SpaceSearchDto;
+import com.modoospace.space.controller.dto.space.SpaceCreateUpdateRequest;
+import com.modoospace.space.controller.dto.space.SpaceResponse;
+import com.modoospace.space.controller.dto.space.SpaceSearchRequest;
 import com.modoospace.space.domain.Category;
 import com.modoospace.space.domain.CategoryRepository;
 import com.modoospace.space.domain.Space;
@@ -27,33 +27,33 @@ public class SpaceService {
   private final SpaceQueryRepository spaceQueryRepository;
 
   @Transactional
-  public Long createSpace(Long categoryId, SpaceCreateUpdateDto createDto, String loginEmail) {
+  public Long createSpace(Long categoryId, SpaceCreateUpdateRequest createRequest, String loginEmail) {
     Member host = memberService.findMemberByEmail(loginEmail);
     Category category = findCategoryById(categoryId);
 
-    Space space = createDto.toEntity(category, host);
+    Space space = createRequest.toEntity(category, host);
     spaceRepository.save(space);
 
     return space.getId();
   }
 
-  public Page<SpaceReadDto> searchSpace(SpaceSearchDto searchDto, Pageable pageable) {
+  public Page<SpaceResponse> searchSpace(SpaceSearchRequest searchDto, Pageable pageable) {
     Page<Space> spaces = spaceQueryRepository.searchSpace(searchDto, pageable);
 
-    return spaces.map(SpaceReadDto::toDto);
+    return spaces.map(SpaceResponse::of);
   }
 
-  public SpaceReadDto findSpace(Long spaceId) {
+  public SpaceResponse findSpace(Long spaceId) {
     Space space = findSpaceById(spaceId);
 
-    return SpaceReadDto.toDto(space);
+    return SpaceResponse.of(space);
   }
 
   @Transactional
-  public void updateSpace(Long spaceId, SpaceCreateUpdateDto updateDto, String loginEmail) {
+  public void updateSpace(Long spaceId, SpaceCreateUpdateRequest updateRequest, String loginEmail) {
     Member loginMember = memberService.findMemberByEmail(loginEmail);
     Space space = findSpaceById(spaceId);
-    Space updatedSpace = updateDto.toEntity(space.getCategory(), space.getHost());
+    Space updatedSpace = updateRequest.toEntity(space.getCategory(), space.getHost());
 
     space.update(updatedSpace, loginMember);
   }

@@ -13,7 +13,7 @@ import lombok.NoArgsConstructor;
 
 @Getter
 @NoArgsConstructor
-public class ReservationUpdateDto {
+public class ReservationUpdateRequest {
 
     @NotNull
     private Integer numOfUser;
@@ -33,7 +33,7 @@ public class ReservationUpdateDto {
     private ReservationStatus status;
 
     @Builder
-    public ReservationUpdateDto(Integer numOfUser, LocalDate startDate, Integer startHour,
+    public ReservationUpdateRequest(Integer numOfUser, LocalDate startDate, Integer startHour,
         LocalDate endDate, Integer endHour, ReservationStatus status) {
         this.numOfUser = numOfUser;
         this.startDate = startDate;

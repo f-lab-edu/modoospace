@@ -1,13 +1,15 @@
 package com.modoospace.space.controller.dto.facility;
 
-import com.modoospace.space.controller.dto.timeSetting.TimeSettingCreateDto;
-import com.modoospace.space.controller.dto.weekdaySetting.WeekdaySettingCreateDto;
+import com.modoospace.space.controller.dto.timeSetting.TimeSettingCreateRequest;
+import com.modoospace.space.controller.dto.weekdaySetting.WeekdaySettingCreateRequest;
 import com.modoospace.space.domain.Facility;
+import com.modoospace.space.domain.Space;
 import com.modoospace.space.domain.TimeSetting;
 import com.modoospace.space.domain.TimeSettings;
 import com.modoospace.space.domain.WeekdaySetting;
 import com.modoospace.space.domain.WeekdaySettings;
-import java.util.ArrayList;
+import java.time.DayOfWeek;
+import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 import javax.validation.constraints.NotEmpty;
@@ -19,7 +21,7 @@ import lombok.NoArgsConstructor;
 @Getter
 @NoArgsConstructor
 @Builder
-public class FacilityUpdateDto {
+public class FacilityCreateRequest {
 
     @NotEmpty
     private String name;
@@ -36,14 +38,22 @@ public class FacilityUpdateDto {
     private String description;
 
     @Builder.Default
-    private List<TimeSettingCreateDto> timeSettings = new ArrayList<>();
+    private List<TimeSettingCreateRequest> timeSettings = Arrays.asList(new TimeSettingCreateRequest());
 
     @Builder.Default
-    private List<WeekdaySettingCreateDto> weekdaySettings = new ArrayList<>();
+    private List<WeekdaySettingCreateRequest> weekdaySettings = Arrays.asList(
+        new WeekdaySettingCreateRequest(DayOfWeek.MONDAY),
+        new WeekdaySettingCreateRequest(DayOfWeek.TUESDAY),
+        new WeekdaySettingCreateRequest(DayOfWeek.WEDNESDAY),
+        new WeekdaySettingCreateRequest(DayOfWeek.THURSDAY),
+        new WeekdaySettingCreateRequest(DayOfWeek.FRIDAY),
+        new WeekdaySettingCreateRequest(DayOfWeek.SATURDAY),
+        new WeekdaySettingCreateRequest(DayOfWeek.SUNDAY)
+    );
 
-    public FacilityUpdateDto(String name, Boolean reservationEnable,
+    public FacilityCreateRequest(String name, Boolean reservationEnable,
         Integer minUser, Integer maxUser, String description,
-        List<TimeSettingCreateDto> timeSettings, List<WeekdaySettingCreateDto> weekdaySettings) {
+        List<TimeSettingCreateRequest> timeSettings, List<WeekdaySettingCreateRequest> weekdaySettings) {
         this.name = name;
         this.reservationEnable = reservationEnable;
 
@@ -55,27 +65,28 @@ public class FacilityUpdateDto {
         this.weekdaySettings = weekdaySettings;
     }
 
-    public Facility toEntity() {
+    public Facility toEntity(Space space) {
         return Facility.builder()
             .name(name)
             .reservationEnable(reservationEnable)
             .minUser(minUser)
             .maxUser(maxUser)
             .description(description)
+            .space(space)
             .timeSettings(new TimeSettings(toTimeSettings(timeSettings)))
             .weekdaySettings(new WeekdaySettings(toWeekdaySettings(weekdaySettings)))
             .build();
     }
 
-    private List<TimeSetting> toTimeSettings(List<TimeSettingCreateDto> timeSettings) {
+    private List<TimeSetting> toTimeSettings(List<TimeSettingCreateRequest> timeSettings) {
         return timeSettings.stream()
-            .map(settingCreateDto -> settingCreateDto.toEntity())
+            .map(settingcreateRequest -> settingcreateRequest.toEntity())
             .collect(Collectors.toList());
     }
 
-    private List<WeekdaySetting> toWeekdaySettings(List<WeekdaySettingCreateDto> weekdaySettings) {
+    private List<WeekdaySetting> toWeekdaySettings(List<WeekdaySettingCreateRequest> weekdaySettings) {
         return weekdaySettings.stream()
-            .map(settingCreateDto -> settingCreateDto.toEntity())
+            .map(settingcreateRequest -> settingcreateRequest.toEntity())
             .collect(Collectors.toList());
     }
 }

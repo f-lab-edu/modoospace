@@ -10,7 +10,7 @@ import lombok.NoArgsConstructor;
 
 @Getter
 @NoArgsConstructor
-public class WeekdaySettingReadDto {
+public class WeekdaySettingResponse {
 
   @NotNull
   private Long id;
@@ -18,18 +18,18 @@ public class WeekdaySettingReadDto {
   @NotNull
   private DayOfWeek weekday;
 
-  public WeekdaySettingReadDto(Long id, DayOfWeek weekday) {
+  public WeekdaySettingResponse(Long id, DayOfWeek weekday) {
     this.id = id;
     this.weekday = weekday;
   }
 
-  public static WeekdaySettingReadDto toDto(WeekdaySetting weekdaySetting) {
-    return new WeekdaySettingReadDto(weekdaySetting.getId(), weekdaySetting.getWeekday());
+  public static WeekdaySettingResponse of(WeekdaySetting weekdaySetting) {
+    return new WeekdaySettingResponse(weekdaySetting.getId(), weekdaySetting.getWeekday());
   }
 
-  public static List<WeekdaySettingReadDto> toDtos(List<WeekdaySetting> weekdaySettings) {
+  public static List<WeekdaySettingResponse> of(List<WeekdaySetting> weekdaySettings) {
     return weekdaySettings.stream()
-        .map(WeekdaySettingReadDto::toDto)
+        .map(WeekdaySettingResponse::of)
         .collect(Collectors.toList());
   }
 }

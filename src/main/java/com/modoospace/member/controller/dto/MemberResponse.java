@@ -9,7 +9,7 @@ import lombok.NoArgsConstructor;
 
 @Getter
 @NoArgsConstructor
-public class MemberReadDto {
+public class MemberResponse {
 
   @NotNull
   private Long id;
@@ -21,14 +21,14 @@ public class MemberReadDto {
   private String email;
 
   @Builder
-  public MemberReadDto(Long id, String name, String email) {
+  public MemberResponse(Long id, String name, String email) {
     this.id = id;
     this.name = name;
     this.email = email;
   }
 
-  public static MemberReadDto toDto(Member member) {
-    return MemberReadDto.builder()
+  public static MemberResponse of(Member member) {
+    return MemberResponse.builder()
         .id(member.getId())
         .name(member.getName())
         .email(member.getEmail())

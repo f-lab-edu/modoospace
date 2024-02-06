@@ -7,11 +7,11 @@ import com.modoospace.member.domain.Member;
 import com.modoospace.member.domain.MemberRepository;
 import com.modoospace.member.domain.Role;
 import com.modoospace.reservation.domain.DateTimeRange;
-import com.modoospace.space.controller.dto.facility.FacilityCreateDto;
-import com.modoospace.space.controller.dto.facility.FacilityUpdateDto;
-import com.modoospace.space.controller.dto.space.SpaceCreateUpdateDto;
-import com.modoospace.space.controller.dto.timeSetting.TimeSettingCreateDto;
-import com.modoospace.space.controller.dto.weekdaySetting.WeekdaySettingCreateDto;
+import com.modoospace.space.controller.dto.facility.FacilityCreateRequest;
+import com.modoospace.space.controller.dto.facility.FacilityUpdateRequest;
+import com.modoospace.space.controller.dto.space.SpaceCreateUpdateRequest;
+import com.modoospace.space.controller.dto.timeSetting.TimeSettingCreateRequest;
+import com.modoospace.space.controller.dto.weekdaySetting.WeekdaySettingCreateRequest;
 import com.modoospace.space.domain.Category;
 import com.modoospace.space.domain.CategoryRepository;
 import com.modoospace.space.domain.Facility;
@@ -68,15 +68,15 @@ class FacilityServiceTest {
             .build();
         memberRepository.save(hostMember);
 
-        Category category = Category.builder()
-            .name("스터디 공간")
-            .build();
+        Category category = new Category("스터디 공간");
         categoryRepository.save(category);
-        SpaceCreateUpdateDto spaceCreateDto = SpaceCreateUpdateDto.builder()
+
+        space = Space.builder()
             .name("공간이름")
             .description("설명")
+            .category(category)
+            .host(hostMember)
             .build();
-        space = spaceCreateDto.toEntity(category, hostMember);
         spaceRepository.save(space);
 
         now = LocalDate.now();
@@ -91,15 +91,15 @@ class FacilityServiceTest {
     @DisplayName("시설 생성 시 Setting시간을 선택하지않으면 24시간 예약이 가능한 시설이 생성된다.")
     @Test
     public void createFacility_24HourOpen_ifNotSelectSetting() {
-        FacilityCreateDto createDto = createFacility(true);
+        FacilityCreateRequest createRequest = createFacility(true);
 
         Long facilityId = facilityService
-            .createFacility(space.getId(), createDto, hostMember.getEmail());
+            .createFacility(space.getId(), createRequest, hostMember.getEmail());
 
         Facility facility = facilityRepository.findById(facilityId).get();
 
         assertThat(facility.getId()).isEqualTo(facilityId);
-        assertThatFacilityInfo(facility, createDto);
+        assertThatFacilityInfo(facility, createRequest);
         assertThat(scheduleQueryRepository.isIncludingSchedule(facility,
             new DateTimeRange(now, 0, now.plusDays(2), 24))).isTrue();
     }
@@ -107,19 +107,19 @@ class FacilityServiceTest {
     @DisplayName("시설 생성 시 시간, 요일 Setting에 맞게 예약이 가능한 시설이 생성된다.")
     @Test
     public void createFacility() {
-        List<TimeSettingCreateDto> timeSettings = createTimeSetting(9, 21);
-        List<WeekdaySettingCreateDto> weekdaySettings = createWeekDaySetting(DayOfWeek.MONDAY,
+        List<TimeSettingCreateRequest> timeSettings = createTimeSetting(9, 21);
+        List<WeekdaySettingCreateRequest> weekdaySettings = createWeekDaySetting(DayOfWeek.MONDAY,
             DayOfWeek.TUESDAY, DayOfWeek.WEDNESDAY, DayOfWeek.THURSDAY, DayOfWeek.FRIDAY
         );
-        FacilityCreateDto createDto = createFacilityWithSetting(false, timeSettings,
+        FacilityCreateRequest createRequest = createFacilityWithSetting(false, timeSettings,
             weekdaySettings);
 
         Long facilityId = facilityService
-            .createFacility(space.getId(), createDto, hostMember.getEmail());
+            .createFacility(space.getId(), createRequest, hostMember.getEmail());
 
         Facility facility = facilityRepository.findById(facilityId).get();
         assertThat(facility.getId()).isEqualTo(facilityId);
-        assertThatFacilityInfo(facility, createDto);
+        assertThatFacilityInfo(facility, createRequest);
         assertThat(scheduleQueryRepository.isIncludingSchedule(facility,
             new DateTimeRange(now, 9, now, 21))).isTrue();
     }
@@ -127,10 +127,10 @@ class FacilityServiceTest {
     @DisplayName("시설 정보를 업데이트한다.")
     @Test
     public void updateFacility() {
-        FacilityCreateDto createDto = createFacility(false);
+        FacilityCreateRequest createRequest = createFacility(false);
         Long facilityId = facilityService
-            .createFacility(space.getId(), createDto, hostMember.getEmail());
-        FacilityUpdateDto updateDto = FacilityUpdateDto.builder()
+            .createFacility(space.getId(), createRequest, hostMember.getEmail());
+        FacilityUpdateRequest updateRequest = FacilityUpdateRequest.builder()
             .name("스터디룸2")
             .reservationEnable(true)
             .minUser(3)
@@ -139,11 +139,11 @@ class FacilityServiceTest {
             .build();
 
         facilityService
-            .updateFacility(facilityId, updateDto, hostMember.getEmail());
+            .updateFacility(facilityId, updateRequest, hostMember.getEmail());
 
         Facility facility = facilityRepository.findById(facilityId).get();
         assertThat(facility.getId()).isEqualTo(facilityId);
-        assertThatFacilityInfo(facility, updateDto);
+        assertThatFacilityInfo(facility, updateRequest);
         assertThat(scheduleQueryRepository.isIncludingSchedule(facility,
             new DateTimeRange(now, 0, now.plusDays(2), 24))).isTrue();
     }
@@ -151,15 +151,15 @@ class FacilityServiceTest {
     @DisplayName("시설 정보와 세팅정보도 함께 업데이트한다.")
     @Test
     public void updateFacility_withSetting() {
-        FacilityCreateDto createDto = createFacility(false);
+        FacilityCreateRequest createRequest = createFacility(false);
         Long facilityId = facilityService
-            .createFacility(space.getId(), createDto, hostMember.getEmail());
-        List<TimeSettingCreateDto> timeSettings = createTimeSetting(9, 21);
-        List<WeekdaySettingCreateDto> weekdaySettings = createWeekDaySetting(
+            .createFacility(space.getId(), createRequest, hostMember.getEmail());
+        List<TimeSettingCreateRequest> timeSettings = createTimeSetting(9, 21);
+        List<WeekdaySettingCreateRequest> weekdaySettings = createWeekDaySetting(
             DayOfWeek.MONDAY, DayOfWeek.TUESDAY, DayOfWeek.WEDNESDAY, DayOfWeek.THURSDAY,
             DayOfWeek.FRIDAY
         );
-        FacilityUpdateDto updateDto = FacilityUpdateDto.builder()
+        FacilityUpdateRequest updateRequest = FacilityUpdateRequest.builder()
             .name("스터디룸2")
             .reservationEnable(true)
             .minUser(3)
@@ -170,17 +170,17 @@ class FacilityServiceTest {
             .build();
 
         facilityService
-            .updateFacility(facilityId, updateDto, hostMember.getEmail());
+            .updateFacility(facilityId, updateRequest, hostMember.getEmail());
 
         Facility facility = facilityRepository.findById(facilityId).get();
         assertThat(facility.getId()).isEqualTo(facilityId);
-        assertThatFacilityInfo(facility, updateDto);
+        assertThatFacilityInfo(facility, updateRequest);
         assertThat(scheduleQueryRepository.isIncludingSchedule(facility,
             new DateTimeRange(now, 9, now, 21))).isTrue();
     }
 
-    private FacilityCreateDto createFacility(Boolean enable) {
-        return FacilityCreateDto.builder()
+    private FacilityCreateRequest createFacility(Boolean enable) {
+        return FacilityCreateRequest.builder()
             .name("스터디룸1")
             .reservationEnable(enable)
             .minUser(1)
@@ -189,10 +189,10 @@ class FacilityServiceTest {
             .build();
     }
 
-    private FacilityCreateDto createFacilityWithSetting(Boolean enable,
-        List<TimeSettingCreateDto> timeSettings,
-        List<WeekdaySettingCreateDto> weekdaySettings) {
-        return FacilityCreateDto.builder()
+    private FacilityCreateRequest createFacilityWithSetting(Boolean enable,
+        List<TimeSettingCreateRequest> timeSettings,
+        List<WeekdaySettingCreateRequest> weekdaySettings) {
+        return FacilityCreateRequest.builder()
             .name("스터디룸1")
             .reservationEnable(enable)
             .minUser(1)
@@ -203,17 +203,17 @@ class FacilityServiceTest {
             .build();
     }
 
-    private List<TimeSettingCreateDto> createTimeSetting(Integer start, Integer end) {
-        return Arrays.asList(new TimeSettingCreateDto(start, end));
+    private List<TimeSettingCreateRequest> createTimeSetting(Integer start, Integer end) {
+        return Arrays.asList(new TimeSettingCreateRequest(start, end));
     }
 
-    private List<WeekdaySettingCreateDto> createWeekDaySetting(DayOfWeek... dayOfWeeks) {
+    private List<WeekdaySettingCreateRequest> createWeekDaySetting(DayOfWeek... dayOfWeeks) {
         return Arrays.stream(dayOfWeeks)
-            .map(WeekdaySettingCreateDto::new)
+            .map(WeekdaySettingCreateRequest::new)
             .collect(Collectors.toList());
     }
 
-    private void assertThatFacilityInfo(Facility facility, FacilityCreateDto dto) {
+    private void assertThatFacilityInfo(Facility facility, FacilityCreateRequest dto) {
         assertAll(
             () -> assertThat(facility.getName()).isEqualTo(dto.getName()),
             () -> assertThat(facility.getReservationEnable()).isEqualTo(
@@ -224,7 +224,7 @@ class FacilityServiceTest {
         );
     }
 
-    private void assertThatFacilityInfo(Facility facility, FacilityUpdateDto dto) {
+    private void assertThatFacilityInfo(Facility facility, FacilityUpdateRequest dto) {
         assertAll(
             () -> assertThat(facility.getName()).isEqualTo(dto.getName()),
             () -> assertThat(facility.getReservationEnable()).isEqualTo(

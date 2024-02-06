@@ -9,7 +9,7 @@ import lombok.NoArgsConstructor;
 
 @Getter
 @NoArgsConstructor
-public class FacilityReadDto {
+public class FacilityResponse {
 
     @NotNull
     private Long id;
@@ -29,7 +29,7 @@ public class FacilityReadDto {
     private String description;
 
     @Builder
-    public FacilityReadDto(Long id, String name, Boolean reservationEnable,
+    public FacilityResponse(Long id, String name, Boolean reservationEnable,
         Integer minUser, Integer maxUser, String description) {
         this.id = id;
         this.name = name;
@@ -40,8 +40,8 @@ public class FacilityReadDto {
         this.description = description;
     }
 
-    public static FacilityReadDto toDto(Facility facility) {
-        return FacilityReadDto.builder()
+    public static FacilityResponse of(Facility facility) {
+        return FacilityResponse.builder()
             .id(facility.getId())
             .name(facility.getName())
             .reservationEnable(facility.getReservationEnable())

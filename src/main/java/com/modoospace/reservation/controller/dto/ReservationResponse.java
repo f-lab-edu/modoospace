@@ -2,10 +2,10 @@ package com.modoospace.reservation.controller.dto;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.modoospace.common.DateFormatManager;
-import com.modoospace.member.controller.dto.MemberReadDto;
+import com.modoospace.member.controller.dto.MemberResponse;
 import com.modoospace.reservation.domain.Reservation;
 import com.modoospace.reservation.domain.ReservationStatus;
-import com.modoospace.space.controller.dto.facility.FacilityReadDto;
+import com.modoospace.space.controller.dto.facility.FacilityResponse;
 import java.time.LocalDate;
 import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.NotNull;
@@ -15,7 +15,7 @@ import lombok.NoArgsConstructor;
 
 @Getter
 @NoArgsConstructor
-public class ReservationReadDto {
+public class ReservationResponse {
 
     @NotNull
     private Long id;
@@ -39,15 +39,15 @@ public class ReservationReadDto {
     private ReservationStatus status;
 
     @NotEmpty
-    private FacilityReadDto facility;
+    private FacilityResponse facility;
 
     @NotEmpty
-    private MemberReadDto member;
+    private MemberResponse member;
 
     @Builder
-    public ReservationReadDto(Long id, Integer numOrUser, LocalDate startDate, Integer startHour,
-        LocalDate endDate, Integer endHour, ReservationStatus status, FacilityReadDto facility,
-        MemberReadDto member) {
+    public ReservationResponse(Long id, Integer numOrUser, LocalDate startDate, Integer startHour,
+        LocalDate endDate, Integer endHour, ReservationStatus status, FacilityResponse facility,
+        MemberResponse member) {
         this.id = id;
         this.numOrUser = numOrUser;
         this.startDate = startDate;
@@ -60,8 +60,8 @@ public class ReservationReadDto {
     }
 
 
-    public static ReservationReadDto toDto(Reservation reservation) {
-        return ReservationReadDto.builder()
+    public static ReservationResponse of(Reservation reservation) {
+        return ReservationResponse.builder()
             .id(reservation.getId())
             .numOrUser(reservation.getNumOfUser())
             .startDate(reservation.getStartDate())
@@ -69,8 +69,8 @@ public class ReservationReadDto {
             .endDate(reservation.getEndDate())
             .endHour(reservation.getEndHour())
             .status(reservation.getStatus())
-            .facility(FacilityReadDto.toDto(reservation.getFacility()))
-            .member(MemberReadDto.toDto(reservation.getVisitor()))
+            .facility(FacilityResponse.of(reservation.getFacility()))
+            .member(MemberResponse.of(reservation.getVisitor()))
             .build();
     }
 }

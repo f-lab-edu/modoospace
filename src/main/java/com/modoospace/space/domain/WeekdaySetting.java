@@ -21,44 +21,47 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class WeekdaySetting {
 
-  @Id
-  @GeneratedValue
-  @Column(name = "weekday_setting_id")
-  private Long id;
+    @Id
+    @GeneratedValue
+    @Column(name = "weekday_setting_id")
+    private Long id;
 
-  @Enumerated(EnumType.STRING)
-  @Column(nullable = false)
-  private DayOfWeek weekday;
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
+    private DayOfWeek weekday;
 
-  @ManyToOne(fetch = FetchType.LAZY)
-  @JoinColumn(name = "facility_id")
-  private Facility facility;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "facility_id")
+    private Facility facility;
 
-  @Builder
-  public WeekdaySetting(Long id, DayOfWeek weekday, Facility facility) {
-    this.id = id;
-    this.weekday = weekday;
-    this.facility = facility;
-  }
-
-  public void setFacility(Facility facility) {
-    this.facility = facility;
-  }
-
-  public void verifyDuplicated(WeekdaySetting compareWeekdaySetting) {
-    if (weekday.equals(compareWeekdaySetting.getWeekday())) {
-      throw new DuplicatedWeekdayException(weekday);
+    public WeekdaySetting(DayOfWeek dayOfWeek) {
+        this(null, dayOfWeek, null);
     }
-  }
 
-  public boolean isEqualWeekday(DayOfWeek weekday) {
-    return this.weekday.equals(weekday);
-  }
+    public WeekdaySetting(Long id, DayOfWeek weekday, Facility facility) {
+        this.id = id;
+        this.weekday = weekday;
+        this.facility = facility;
+    }
 
-  @Override
-  public String toString() {
-    return "WeekdaySetting{" +
-        "weekday=" + weekday +
-        '}';
-  }
+    public void setFacility(Facility facility) {
+        this.facility = facility;
+    }
+
+    public void verifyDuplicated(WeekdaySetting compareWeekdaySetting) {
+        if (weekday.equals(compareWeekdaySetting.getWeekday())) {
+            throw new DuplicatedWeekdayException(weekday);
+        }
+    }
+
+    public boolean isEqualWeekday(DayOfWeek weekday) {
+        return this.weekday.equals(weekday);
+    }
+
+    @Override
+    public String toString() {
+        return "WeekdaySetting{" +
+            "weekday=" + weekday +
+            '}';
+    }
 }

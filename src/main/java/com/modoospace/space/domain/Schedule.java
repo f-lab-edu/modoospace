@@ -23,7 +23,7 @@ public class Schedule {
 
     @Id
     @GeneratedValue
-    @Column(name = "facility_schedule_id")
+    @Column(name = "schedule_id")
     private Long id;
 
     @Column(nullable = false)
@@ -36,6 +36,10 @@ public class Schedule {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "facility_id")
     private Facility facility;
+
+    public Schedule(LocalDate date, TimeRange timeRange) {
+        this(null, date, timeRange, null);
+    }
 
     @Builder
     public Schedule(Long id, LocalDate date, TimeRange timeRange, Facility facility) {

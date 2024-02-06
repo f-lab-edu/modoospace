@@ -6,10 +6,10 @@ import com.modoospace.TestConfig;
 import com.modoospace.member.domain.Member;
 import com.modoospace.member.domain.MemberRepository;
 import com.modoospace.member.domain.Role;
-import com.modoospace.space.controller.dto.facility.FacilityCreateDto;
-import com.modoospace.space.controller.dto.facility.FacilityReadDto;
-import com.modoospace.space.controller.dto.facility.FacilitySearchDto;
-import com.modoospace.space.controller.dto.space.SpaceCreateUpdateDto;
+import com.modoospace.space.controller.dto.facility.FacilityCreateRequest;
+import com.modoospace.space.controller.dto.facility.FacilityResponse;
+import com.modoospace.space.controller.dto.facility.FacilitySearchRequest;
+import com.modoospace.space.controller.dto.space.SpaceCreateUpdateRequest;
 import com.modoospace.space.domain.Category;
 import com.modoospace.space.domain.CategoryRepository;
 import com.modoospace.space.domain.FacilityRepository;
@@ -56,46 +56,46 @@ public class FacilityQueryRepositoryTest {
             .build();
         memberRepository.save(hostMember);
 
-        Category category = Category.builder()
-            .name("스터디 공간")
-            .build();
+        Category category = new Category("스터디 공간");
         categoryRepository.save(category);
 
-        SpaceCreateUpdateDto spaceCreateDto = SpaceCreateUpdateDto.builder()
+        space = Space.builder()
             .name("공간이름")
             .description("설명")
+            .category(category)
+            .host(hostMember)
             .build();
-        space = spaceCreateDto.toEntity(category, hostMember);
         spaceRepository.save(space);
 
-        FacilityCreateDto createRoomDto = FacilityCreateDto.builder()
+        // TimeSetting, WeekSetting 기본값이 필요하여 Request 사용.
+        FacilityCreateRequest createRequest = FacilityCreateRequest.builder()
             .name("스터디룸1")
             .reservationEnable(true)
             .minUser(1)
             .maxUser(4)
             .description("1~4인실 입니다.")
             .build();
-        facilityRepository.save(createRoomDto.toEntity(space));
+        facilityRepository.save(createRequest.toEntity(space));
 
-        FacilityCreateDto createRoomDto2 = FacilityCreateDto.builder()
+        FacilityCreateRequest createRequest2 = FacilityCreateRequest.builder()
             .name("스터디룸2")
             .reservationEnable(true)
             .minUser(1)
             .maxUser(8)
             .description("1~8인실 입니다.")
             .build();
-        facilityRepository.save(createRoomDto2.toEntity(space));
+        facilityRepository.save(createRequest2.toEntity(space));
     }
 
     @DisplayName("검색 조건에 맞는 시설을 반환한다.")
     @Test
     public void searchFacility() {
-        FacilitySearchDto searchDto = new FacilitySearchDto();
-        searchDto.setName("스터디");
-        searchDto.setReservationEnable(true);
+        FacilitySearchRequest searchRequest = new FacilitySearchRequest();
+        searchRequest.setName("스터디");
+        searchRequest.setReservationEnable(true);
 
-        Page<FacilityReadDto> resultPage = facilityQueryRepository
-            .searchFacility(space.getId(), searchDto, PageRequest.of(0, 10));
+        Page<FacilityResponse> resultPage = facilityQueryRepository
+            .searchFacility(space.getId(), searchRequest, PageRequest.of(0, 10));
 
         assertThat(resultPage.getContent()).extracting("name")
             .containsExactly("스터디룸1", "스터디룸2");
@@ -104,11 +104,11 @@ public class FacilityQueryRepositoryTest {
     @DisplayName("검색 조건에 맞는 시설이 없다면 빈 페이지를 반환한다.")
     @Test
     public void searchFacility_emptyPage() {
-        FacilitySearchDto searchDto = new FacilitySearchDto();
-        searchDto.setReservationEnable(false);
+        FacilitySearchRequest searchRequest = new FacilitySearchRequest();
+        searchRequest.setReservationEnable(false);
 
-        Page<FacilityReadDto> resultPage = facilityQueryRepository
-            .searchFacility(space.getId(), searchDto, PageRequest.of(0, 10));
+        Page<FacilityResponse> resultPage = facilityQueryRepository
+            .searchFacility(space.getId(), searchRequest, PageRequest.of(0, 10));
 
         assertThat(resultPage.getContent()).isEmpty();
     }

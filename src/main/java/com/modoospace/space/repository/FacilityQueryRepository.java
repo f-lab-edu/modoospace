@@ -2,8 +2,8 @@ package com.modoospace.space.repository;
 
 import static com.modoospace.space.domain.QFacility.facility;
 
-import com.modoospace.space.controller.dto.facility.FacilityReadDto;
-import com.modoospace.space.controller.dto.facility.FacilitySearchDto;
+import com.modoospace.space.controller.dto.facility.FacilityResponse;
+import com.modoospace.space.controller.dto.facility.FacilitySearchRequest;
 import com.modoospace.space.domain.Facility;
 import com.querydsl.core.types.Projections;
 import com.querydsl.core.types.dsl.BooleanExpression;
@@ -22,12 +22,12 @@ public class FacilityQueryRepository {
 
     private final JPAQueryFactory jpaQueryFactory;
 
-    public Page<FacilityReadDto> searchFacility(Long spaceId, FacilitySearchDto searchDto,
+    public Page<FacilityResponse> searchFacility(Long spaceId, FacilitySearchRequest searchRequest,
         Pageable pageable) {
 
-        List<FacilityReadDto> content = jpaQueryFactory
+        List<FacilityResponse> content = jpaQueryFactory
             .select(
-                Projections.constructor(FacilityReadDto.class
+                Projections.constructor(FacilityResponse.class
                     , facility.id
                     , facility.name
                     , facility.reservationEnable
@@ -37,8 +37,8 @@ public class FacilityQueryRepository {
             )
             .from(facility)
             .where(spaceIdEq(spaceId)
-                , nameContains(searchDto.getName())
-                , reservationEnableEq(searchDto.getReservationEnable()))
+                , nameContains(searchRequest.getName())
+                , reservationEnableEq(searchRequest.getReservationEnable()))
             .offset(pageable.getOffset())
             .limit(pageable.getPageSize())
             .fetch();
@@ -46,8 +46,8 @@ public class FacilityQueryRepository {
         JPAQuery<Facility> countQuery = jpaQueryFactory
             .selectFrom(facility)
             .where(spaceIdEq(spaceId)
-                , nameContains(searchDto.getName())
-                , reservationEnableEq(searchDto.getReservationEnable()));
+                , nameContains(searchRequest.getName())
+                , reservationEnableEq(searchRequest.getReservationEnable()));
 
         return PageableExecutionUtils.getPage(content, pageable, countQuery::fetchCount);
     }

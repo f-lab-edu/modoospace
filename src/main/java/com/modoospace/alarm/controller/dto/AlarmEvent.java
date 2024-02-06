@@ -32,7 +32,7 @@ public class AlarmEvent {
         this.alarmType = alarmType;
     }
 
-    public static AlarmEvent toNewReservationAlarm(Reservation reservation) {
+    public static AlarmEvent ofNewReservationAlarm(Reservation reservation) {
         return AlarmEvent.builder()
             .email(reservation.getHost().getEmail())
             .reservationId(reservation.getId())
@@ -41,7 +41,7 @@ public class AlarmEvent {
             .build();
     }
 
-    public static AlarmEvent toApprovedReservationAlarm(Reservation reservation) {
+    public static AlarmEvent ofApprovedReservationAlarm(Reservation reservation) {
         return AlarmEvent.builder()
             .email(reservation.getVisitor().getEmail())
             .reservationId(reservation.getId())
@@ -50,7 +50,7 @@ public class AlarmEvent {
             .build();
     }
 
-    public static AlarmEvent toCancelReservationAlarm(Reservation reservation) {
+    public static AlarmEvent ofCancelReservationAlarm(Reservation reservation) {
         return AlarmEvent.builder()
             .email(reservation.getHost().getEmail())
             .reservationId(reservation.getId())

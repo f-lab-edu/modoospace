@@ -10,20 +10,15 @@ import org.junit.jupiter.api.Test;
 
 class WeekdaySettingTest {
 
-  @DisplayName("Weekday세팅값을 요일 순으로 정렬한다.")
-  @Test
-  public void WeekdaySetting_Sort() {
-    WeekdaySetting weekdaySetting1 = WeekdaySetting.builder()
-        .weekday(DayOfWeek.SATURDAY)
-        .build();
-    WeekdaySetting weekdaySetting2 = WeekdaySetting.builder()
-        .weekday(DayOfWeek.TUESDAY)
-        .build();
-    List<WeekdaySetting> weekdaySettings = Arrays.asList(weekdaySetting1, weekdaySetting2);
+    @DisplayName("Weekday세팅값을 요일 순으로 정렬한다.")
+    @Test
+    public void WeekdaySetting_Sort() {
+        List<WeekdaySetting> weekdaySettings = Arrays.asList(
+            new WeekdaySetting(DayOfWeek.SATURDAY), new WeekdaySetting(DayOfWeek.TUESDAY));
 
-    Collections.sort(weekdaySettings, Comparator.comparing(WeekdaySetting::getWeekday));
+        Collections.sort(weekdaySettings, Comparator.comparing(WeekdaySetting::getWeekday));
 
-    System.out.println(weekdaySettings);
-  }
+        System.out.println(weekdaySettings);
+    }
 
 }

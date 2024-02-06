@@ -10,7 +10,7 @@ import lombok.NoArgsConstructor;
 
 @Getter
 @NoArgsConstructor
-public class TimeSettingReadDto {
+public class TimeSettingResponse {
 
     @NotNull
     private Long id;
@@ -22,23 +22,23 @@ public class TimeSettingReadDto {
     private Integer endHour;
 
     @Builder
-    public TimeSettingReadDto(Long id, Integer startHour, Integer endHour) {
+    public TimeSettingResponse(Long id, Integer startHour, Integer endHour) {
         this.id = id;
         this.startHour = startHour;
         this.endHour = endHour;
     }
 
-    public static TimeSettingReadDto toDto(TimeSetting timeSetting) {
-        return TimeSettingReadDto.builder()
+    public static TimeSettingResponse of(TimeSetting timeSetting) {
+        return TimeSettingResponse.builder()
             .id(timeSetting.getId())
             .startHour(timeSetting.getStartHour())
             .endHour(timeSetting.getEndHour())
             .build();
     }
 
-    public static List<TimeSettingReadDto> toDtos(List<TimeSetting> timeSettings) {
+    public static List<TimeSettingResponse> of(List<TimeSetting> timeSettings) {
         return timeSettings.stream()
-            .map(TimeSettingReadDto::toDto)
+            .map(TimeSettingResponse::of)
             .collect(Collectors.toList());
     }
 }

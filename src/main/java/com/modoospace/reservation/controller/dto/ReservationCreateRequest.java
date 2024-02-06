@@ -15,7 +15,7 @@ import lombok.NoArgsConstructor;
 
 @Getter
 @NoArgsConstructor
-public class ReservationCreateDto {
+public class ReservationCreateRequest {
 
     @NotNull
     private Integer numOfUser;
@@ -33,7 +33,7 @@ public class ReservationCreateDto {
     private Integer endHour;
 
     @Builder
-    public ReservationCreateDto(Integer numOfUser, LocalDate startDate, Integer startHour,
+    public ReservationCreateRequest(Integer numOfUser, LocalDate startDate, Integer startHour,
         LocalDate endDate, Integer endHour) {
         this.numOfUser = numOfUser;
         this.startDate = startDate;

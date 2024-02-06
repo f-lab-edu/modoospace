@@ -18,10 +18,9 @@ import com.modoospace.space.domain.WeekdaySetting;
 import com.modoospace.space.domain.WeekdaySettings;
 import java.time.DayOfWeek;
 import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.time.LocalTime;
 import java.util.Arrays;
 import java.util.List;
+import java.util.stream.Collectors;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -38,8 +37,6 @@ public class ReservationTest {
     private Facility enableFacility;
 
     private Facility notEnableFacility;
-
-    private DateTimeRange dateTimeRange;
 
     @BeforeEach
     public void setUp() {
@@ -76,35 +73,17 @@ public class ReservationTest {
             .host(hostMember)
             .build();
 
-        List<TimeSetting> timeSettings = Arrays.asList(TimeSetting.builder()
-            .timeRange(new TimeRange(0, 24))
-            .build());
-
-        List<WeekdaySetting> weekdaySettings = Arrays.asList(
-            WeekdaySetting.builder()
-                .weekday(DayOfWeek.MONDAY)
-                .build(),
-            WeekdaySetting.builder()
-                .weekday(DayOfWeek.TUESDAY)
-                .build(),
-            WeekdaySetting.builder()
-                .weekday(DayOfWeek.WEDNESDAY)
-                .build(),
-            WeekdaySetting.builder()
-                .weekday(DayOfWeek.THURSDAY)
-                .build(),
-            WeekdaySetting.builder()
-                .weekday(DayOfWeek.FRIDAY)
-                .build());
-
+        TimeSettings timeSettings = createTimeSettings(new TimeRange(0, 24));
+        WeekdaySettings weekDaySettings = createWeekDaySettings(DayOfWeek.MONDAY, DayOfWeek.TUESDAY,
+            DayOfWeek.WEDNESDAY, DayOfWeek.THURSDAY, DayOfWeek.FRIDAY);
         enableFacility = Facility.builder()
             .name("스터디룸 1~3인실")
             .reservationEnable(true)
             .minUser(1)
             .maxUser(3)
             .description("1~3인실 입니다.")
-            .timeSettings(new TimeSettings(timeSettings))
-            .weekdaySettings(new WeekdaySettings(weekdaySettings))
+            .timeSettings(timeSettings)
+            .weekdaySettings(weekDaySettings)
             .space(space)
             .build();
 
@@ -114,17 +93,31 @@ public class ReservationTest {
             .minUser(4)
             .maxUser(6)
             .description("4~6인실 입니다.")
-            .timeSettings(new TimeSettings(timeSettings))
-            .weekdaySettings(new WeekdaySettings(weekdaySettings))
+            .timeSettings(timeSettings)
+            .weekdaySettings(weekDaySettings)
             .space(space)
             .build();
+    }
 
-        dateTimeRange = new DateTimeRange(LocalDate.now(), 14, LocalDate.now(), 17);
+    private TimeSettings createTimeSettings(TimeRange... timeRanges) {
+        List<TimeSetting> timeSettings = Arrays.stream(timeRanges)
+            .map(TimeSetting::new)
+            .collect(Collectors.toList());
+        return new TimeSettings(timeSettings);
+    }
+
+    private WeekdaySettings createWeekDaySettings(DayOfWeek... dayOfWeeks) {
+        List<WeekdaySetting> weekdaySettings = Arrays.stream(dayOfWeeks)
+            .map(WeekdaySetting::new)
+            .collect(Collectors.toList());
+        return new WeekdaySettings(weekdaySettings);
     }
 
     @DisplayName("최소인원 미만이면 예약을 생성할 수 없다.")
     @Test
     public void createReservation_throwException_ifSmallMinUser() {
+        DateTimeRange dateTimeRange = new DateTimeRange(
+            LocalDate.now(), 14, LocalDate.now(), 17);
         assertThatThrownBy(() -> Reservation.builder()
             .numOfUser(0)
             .dateTimeRange(dateTimeRange)
@@ -136,6 +129,8 @@ public class ReservationTest {
     @DisplayName("최대인원 초과이면 예약을 생성할 수 없다.")
     @Test
     public void createReservation_throwException_ifBigMaxUser() {
+        DateTimeRange dateTimeRange = new DateTimeRange(
+            LocalDate.now(), 14, LocalDate.now(), 17);
         assertThatThrownBy(() -> Reservation.builder()
             .numOfUser(4)
             .dateTimeRange(dateTimeRange)
@@ -147,6 +142,8 @@ public class ReservationTest {
     @DisplayName("시설이 열리지 않았으면 예약을 생성할 수 없다.")
     @Test
     public void createReservation_throwException_ifNotOpenFacility() {
+        DateTimeRange dateTimeRange = new DateTimeRange(
+            LocalDate.now(), 14, LocalDate.now(), 17);
         assertThatThrownBy(() -> Reservation.builder()
             .numOfUser(4)
             .dateTimeRange(dateTimeRange)
@@ -159,6 +156,8 @@ public class ReservationTest {
     @DisplayName("호스트는 예약을 승인할 수 있다.")
     @Test
     public void approve_ifHost() {
+        DateTimeRange dateTimeRange = new DateTimeRange(
+            LocalDate.now(), 14, LocalDate.now(), 17);
         Reservation reservation = Reservation.builder()
             .numOfUser(2)
             .dateTimeRange(dateTimeRange)
@@ -174,6 +173,8 @@ public class ReservationTest {
     @DisplayName("관리자는 예약을 승인할 수 있다.")
     @Test
     public void approve_ifAdmin() {
+        DateTimeRange dateTimeRange = new DateTimeRange(
+            LocalDate.now(), 14, LocalDate.now(), 17);
         Reservation reservation = Reservation.builder()
             .numOfUser(2)
             .dateTimeRange(dateTimeRange)
@@ -189,6 +190,8 @@ public class ReservationTest {
     @DisplayName("호스트는 예약을 수정할 수 있다.")
     @Test
     public void update_ifHost() {
+        DateTimeRange dateTimeRange = new DateTimeRange(
+            LocalDate.now(), 14, LocalDate.now(), 17);
         Reservation reservation = Reservation.builder()
             .numOfUser(2)
             .dateTimeRange(dateTimeRange)
@@ -196,9 +199,8 @@ public class ReservationTest {
             .facility(enableFacility)
             .build();
 
-        LocalDateTime startDateTime = LocalDateTime.of(LocalDate.now(), LocalTime.of(17, 0));
-        DateTimeRange updateDateTimeRange = new DateTimeRange(startDateTime,
-            startDateTime.plusHours(5));
+        DateTimeRange updateDateTimeRange = new DateTimeRange(
+            LocalDate.now(), 17, LocalDate.now(), 22);
         Reservation updateReservation = Reservation.builder()
             .numOfUser(3)
             .dateTimeRange(updateDateTimeRange)
@@ -219,6 +221,8 @@ public class ReservationTest {
     @DisplayName("방문자는 예약을 취소할 수 있다.")
     @Test
     public void cancel_ifVisitor() {
+        DateTimeRange dateTimeRange = new DateTimeRange(
+            LocalDate.now(), 14, LocalDate.now(), 17);
         Reservation reservation = Reservation.builder()
             .numOfUser(2)
             .dateTimeRange(dateTimeRange)
@@ -234,6 +238,8 @@ public class ReservationTest {
     @DisplayName("방문자가 아닌자는 예약을 취소할 수 있다.")
     @Test
     public void cancel_throwException_ifVisitor() {
+        DateTimeRange dateTimeRange = new DateTimeRange(
+            LocalDate.now(), 14, LocalDate.now(), 17);
         Reservation reservation = Reservation.builder()
             .numOfUser(2)
             .dateTimeRange(dateTimeRange)
@@ -248,6 +254,8 @@ public class ReservationTest {
     @DisplayName("예약에 접근이 가능한자인지 검증한다.")
     @Test
     public void verifyReservationAccess_ifAdminHostVisitor() {
+        DateTimeRange dateTimeRange = new DateTimeRange(
+            LocalDate.now(), 14, LocalDate.now(), 17);
         Reservation reservation = Reservation.builder()
             .numOfUser(2)
             .dateTimeRange(dateTimeRange)
@@ -263,6 +271,8 @@ public class ReservationTest {
     @DisplayName("예약에 접근이 불가능한자면 예외를 던진다.")
     @Test
     public void verifyReservationAccess_throwException_ifNotVisitor() {
+        DateTimeRange dateTimeRange = new DateTimeRange(
+            LocalDate.now(), 14, LocalDate.now(), 17);
         Reservation reservation = Reservation.builder()
             .numOfUser(2)
             .dateTimeRange(dateTimeRange)
@@ -277,17 +287,16 @@ public class ReservationTest {
     @DisplayName("예약이 해당 시간 사이에 있는지 체크한다.")
     @Test
     public void isBetween_true() {
-        LocalDateTime startDateTime = LocalDateTime.of(LocalDate.now(), LocalTime.of(17, 0));
-        DateTimeRange customDateTimeRange = new DateTimeRange(startDateTime,
-            startDateTime.plusHours(5));
+        DateTimeRange dateTimeRange = new DateTimeRange(
+            LocalDate.now(), 17, LocalDate.now(), 22);
         Reservation reservation = Reservation.builder()
             .numOfUser(2)
-            .dateTimeRange(customDateTimeRange)
+            .dateTimeRange(dateTimeRange)
             .visitor(visitorMember)
             .facility(enableFacility)
             .build();
 
-        assertThat(reservation.isBetween(customDateTimeRange.getStartDate(), 15)).isFalse();
-        assertThat(reservation.isBetween(customDateTimeRange.getStartDate(), 17)).isTrue();
+        assertThat(reservation.isBetween(LocalDate.now(), 15)).isFalse();
+        assertThat(reservation.isBetween(LocalDate.now(), 17)).isTrue();
     }
 }

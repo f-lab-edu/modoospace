@@ -9,8 +9,8 @@ import com.modoospace.member.domain.Role;
 import com.modoospace.reservation.domain.DateTimeRange;
 import com.modoospace.reservation.domain.Reservation;
 import com.modoospace.reservation.domain.ReservationRepository;
-import com.modoospace.space.controller.dto.facility.FacilityCreateDto;
-import com.modoospace.space.controller.dto.space.SpaceCreateUpdateDto;
+import com.modoospace.space.controller.dto.facility.FacilityCreateRequest;
+import com.modoospace.space.controller.dto.space.SpaceCreateUpdateRequest;
 import com.modoospace.space.domain.Category;
 import com.modoospace.space.domain.CategoryRepository;
 import com.modoospace.space.domain.Facility;
@@ -18,8 +18,6 @@ import com.modoospace.space.domain.FacilityRepository;
 import com.modoospace.space.domain.Space;
 import com.modoospace.space.domain.SpaceRepository;
 import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.time.LocalTime;
 import java.util.List;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -74,26 +72,26 @@ public class ReservationQueryRepositoryTest {
             .build();
         memberRepository.save(visitorMember);
 
-        Category category = Category.builder()
-            .name("스터디 공간")
-            .build();
+        Category category = new Category("스터디 공간");
         categoryRepository.save(category);
 
-        SpaceCreateUpdateDto spaceCreateDto = SpaceCreateUpdateDto.builder()
+        Space space = Space.builder()
             .name("공간이름")
             .description("설명")
+            .category(category)
+            .host(hostMember)
             .build();
-        Space space = spaceCreateDto.toEntity(category, hostMember);
         spaceRepository.save(space);
 
-        FacilityCreateDto createRoomDto = FacilityCreateDto.builder()
+        // TimeSetting, WeekSetting 기본값이 필요하여 Request 사용.
+        FacilityCreateRequest createRequest = FacilityCreateRequest.builder()
             .name("스터디룸")
             .reservationEnable(true)
             .minUser(1)
             .maxUser(4)
             .description("1~4인실 입니다.")
             .build();
-        facility = facilityRepository.save(createRoomDto.toEntity(space));
+        facility = facilityRepository.save(createRequest.toEntity(space));
 
         now = LocalDate.now();
     }

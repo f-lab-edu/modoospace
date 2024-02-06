@@ -131,7 +131,7 @@ public class Facility extends BaseTimeEntity {
         }
     }
 
-    public void create1MonthDefaultFacilitySchedules(YearMonth createYearMonth,
+    public void create1MonthDefaultSchedules(YearMonth createYearMonth,
         Member loginMember) {
         verifyManagementPermission(loginMember);
 

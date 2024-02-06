@@ -2,7 +2,7 @@ package com.modoospace.alarm.repository;
 
 import static com.modoospace.alarm.domain.QAlarm.alarm;
 
-import com.modoospace.alarm.controller.dto.AlarmReadDto;
+import com.modoospace.alarm.controller.dto.AlarmResponse;
 import com.modoospace.alarm.domain.Alarm;
 import com.modoospace.member.domain.Member;
 import com.querydsl.core.types.Projections;
@@ -24,11 +24,11 @@ public class AlarmQueryRepository {
   private final JPAQueryFactory jpaQueryFactory;
 
   @Cacheable(cacheNames = "searchAlarms", key = "#member.email +':'+ #pageable.pageNumber")
-  public Page<AlarmReadDto> searchByMember(Member member, Pageable pageable) {
+  public Page<AlarmResponse> searchByMember(Member member, Pageable pageable) {
 
-    List<AlarmReadDto> content = jpaQueryFactory
+    List<AlarmResponse> content = jpaQueryFactory
         .select(
-            Projections.constructor(AlarmReadDto.class
+            Projections.constructor(AlarmResponse.class
                 , alarm.id
                 , alarm.reservationId
                 , alarm.facilityName

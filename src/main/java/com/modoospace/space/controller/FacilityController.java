@@ -1,11 +1,11 @@
 package com.modoospace.space.controller;
 
 import com.modoospace.config.auth.LoginEmail;
-import com.modoospace.space.controller.dto.facility.FacilityCreateDto;
-import com.modoospace.space.controller.dto.facility.FacilityReadDetailDto;
-import com.modoospace.space.controller.dto.facility.FacilityReadDto;
-import com.modoospace.space.controller.dto.facility.FacilitySearchDto;
-import com.modoospace.space.controller.dto.facility.FacilityUpdateDto;
+import com.modoospace.space.controller.dto.facility.FacilityCreateRequest;
+import com.modoospace.space.controller.dto.facility.FacilityDetailResponse;
+import com.modoospace.space.controller.dto.facility.FacilityResponse;
+import com.modoospace.space.controller.dto.facility.FacilitySearchRequest;
+import com.modoospace.space.controller.dto.facility.FacilityUpdateRequest;
 import com.modoospace.space.sevice.FacilityService;
 import java.net.URI;
 import javax.validation.Valid;
@@ -31,32 +31,32 @@ public class FacilityController {
 
   @PostMapping()
   public ResponseEntity<Void> create(@PathVariable Long spaceId,
-      @RequestBody @Valid FacilityCreateDto createDto,
+      @RequestBody @Valid FacilityCreateRequest createRequest,
       @LoginEmail String loginEmail) {
-    Long facilityId = facilityService.createFacility(spaceId, createDto, loginEmail);
+    Long facilityId = facilityService.createFacility(spaceId, createRequest, loginEmail);
     return ResponseEntity
         .created(URI.create("/api/v1/spaces/" + spaceId + "/facilities/" + facilityId)).build();
   }
 
   @GetMapping()
-  public ResponseEntity<Page<FacilityReadDto>> search(@PathVariable Long spaceId,
-      FacilitySearchDto searchDto, Pageable pageable) {
-    Page<FacilityReadDto> facilityReadDtos = facilityService
+  public ResponseEntity<Page<FacilityResponse>> search(@PathVariable Long spaceId,
+      FacilitySearchRequest searchDto, Pageable pageable) {
+    Page<FacilityResponse> facilityReadDtos = facilityService
         .searchFacility(spaceId, searchDto, pageable);
     return ResponseEntity.ok().body(facilityReadDtos);
   }
 
   @GetMapping("/{facilityId}")
-  public ResponseEntity<FacilityReadDetailDto> find(@PathVariable Long facilityId) {
-    FacilityReadDetailDto facilityReadDto = facilityService.findFacility(facilityId);
+  public ResponseEntity<FacilityDetailResponse> find(@PathVariable Long facilityId) {
+    FacilityDetailResponse facilityReadDto = facilityService.findFacility(facilityId);
     return ResponseEntity.ok().body(facilityReadDto);
   }
 
   @PutMapping("/{facilityId}")
   public ResponseEntity<Void> update(@PathVariable Long facilityId,
-      @RequestBody @Valid FacilityUpdateDto updateDto,
+      @RequestBody @Valid FacilityUpdateRequest updateRequest,
       @LoginEmail String loginEmail) {
-    facilityService.updateFacility(facilityId, updateDto, loginEmail);
+    facilityService.updateFacility(facilityId, updateRequest, loginEmail);
     return ResponseEntity.noContent().build();
   }
 

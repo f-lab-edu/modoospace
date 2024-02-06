@@ -8,13 +8,13 @@ import lombok.NoArgsConstructor;
 
 @Getter
 @NoArgsConstructor
-public class MemberUpdateDto {
+public class MemberUpdateRequest {
 
   @NotNull
   private Role role;
 
   @Builder
-  public MemberUpdateDto(@NotNull Role role) {
+  public MemberUpdateRequest(@NotNull Role role) {
     this.role = role;
   }
 }

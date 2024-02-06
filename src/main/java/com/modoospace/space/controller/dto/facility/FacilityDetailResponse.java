@@ -1,8 +1,8 @@
 package com.modoospace.space.controller.dto.facility;
 
-import com.modoospace.space.controller.dto.facilitySchedule.ScheduleReadDto;
-import com.modoospace.space.controller.dto.timeSetting.TimeSettingReadDto;
-import com.modoospace.space.controller.dto.weekdaySetting.WeekdaySettingReadDto;
+import com.modoospace.space.controller.dto.schedule.ScheduleResponse;
+import com.modoospace.space.controller.dto.timeSetting.TimeSettingResponse;
+import com.modoospace.space.controller.dto.weekdaySetting.WeekdaySettingResponse;
 import com.modoospace.space.domain.Facility;
 import java.util.List;
 import javax.validation.constraints.NotEmpty;
@@ -13,7 +13,7 @@ import lombok.NoArgsConstructor;
 
 @Getter
 @NoArgsConstructor
-public class FacilityReadDetailDto {
+public class FacilityDetailResponse {
 
     @NotNull
     private Long id;
@@ -33,20 +33,20 @@ public class FacilityReadDetailDto {
     private String description;
 
     @NotEmpty
-    private List<TimeSettingReadDto> timeSettings;
+    private List<TimeSettingResponse> timeSettings;
 
     @NotEmpty
-    private List<WeekdaySettingReadDto> weekdaySettings;
+    private List<WeekdaySettingResponse> weekdaySettings;
 
     @NotEmpty
-    private List<ScheduleReadDto> facilitySchedules;
+    private List<ScheduleResponse> facilitySchedules;
 
     @Builder
-    public FacilityReadDetailDto(Long id, String name, Boolean reservationEnable,
+    public FacilityDetailResponse(Long id, String name, Boolean reservationEnable,
         Integer minUser, Integer maxUser, String description,
-        List<TimeSettingReadDto> timeSettings,
-        List<WeekdaySettingReadDto> weekdaySettings,
-        List<ScheduleReadDto> facilitySchedules) {
+        List<TimeSettingResponse> timeSettings,
+        List<WeekdaySettingResponse> weekdaySettings,
+        List<ScheduleResponse> facilitySchedules) {
         this.id = id;
         this.name = name;
         this.reservationEnable = reservationEnable;
@@ -60,18 +60,18 @@ public class FacilityReadDetailDto {
         this.facilitySchedules = facilitySchedules;
     }
 
-    public static FacilityReadDetailDto toDto(Facility facility) {
-        return FacilityReadDetailDto.builder()
+    public static FacilityDetailResponse of(Facility facility) {
+        return FacilityDetailResponse.builder()
             .id(facility.getId())
             .name(facility.getName())
             .reservationEnable(facility.getReservationEnable())
             .minUser(facility.getMinUser())
             .maxUser(facility.getMaxUser())
             .description(facility.getDescription())
-            .timeSettings(TimeSettingReadDto.toDtos(facility.getTimeSettings().getTimeSettings()))
+            .timeSettings(TimeSettingResponse.of(facility.getTimeSettings().getTimeSettings()))
             .weekdaySettings(
-                WeekdaySettingReadDto.toDtos(facility.getWeekdaySettings().getWeekdaySettings()))
-            .facilitySchedules(ScheduleReadDto.toDtos(facility.getSchedules()
+                WeekdaySettingResponse.of(facility.getWeekdaySettings().getWeekdaySettings()))
+            .facilitySchedules(ScheduleResponse.of(facility.getSchedules()
                 .getSchedules()))
             .build();
     }

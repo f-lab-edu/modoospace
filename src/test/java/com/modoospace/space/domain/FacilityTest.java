@@ -1,7 +1,6 @@
 package com.modoospace.space.domain;
 
 import java.time.DayOfWeek;
-import java.time.LocalTime;
 import java.util.Arrays;
 import java.util.List;
 import org.junit.jupiter.api.DisplayName;
@@ -13,26 +12,12 @@ class FacilityTest {
     @Test
     public void createFacility_24HourOpen_ifNotSelectSetting() {
 
-        List<TimeSetting> timeSettings = Arrays.asList(TimeSetting.builder()
-                .timeRange(new TimeRange(9, 12))
-                .build(),
-            TimeSetting.builder()
-                .timeRange(new TimeRange(14, 20))
-                .build());
+        List<TimeSetting> timeSettings = Arrays.asList(
+            new TimeSetting(new TimeRange(9, 12)), new TimeSetting(new TimeRange(14, 20)));
 
         List<WeekdaySetting> weekdaySettings = Arrays.asList(
-            WeekdaySetting.builder()
-                .weekday(DayOfWeek.WEDNESDAY)
-                .build(),
-            WeekdaySetting.builder()
-                .weekday(DayOfWeek.THURSDAY)
-                .build(),
-            WeekdaySetting.builder()
-                .weekday(DayOfWeek.FRIDAY)
-                .build(),
-            WeekdaySetting.builder()
-                .weekday(DayOfWeek.SATURDAY)
-                .build());
+            new WeekdaySetting(DayOfWeek.WEDNESDAY), new WeekdaySetting(DayOfWeek.THURSDAY),
+            new WeekdaySetting(DayOfWeek.FRIDAY), new WeekdaySetting(DayOfWeek.SATURDAY));
 
         Facility facility = Facility.builder()
             .name("테스트")

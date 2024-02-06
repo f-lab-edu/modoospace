@@ -4,7 +4,7 @@ import static com.modoospace.member.domain.QMember.member;
 import static com.modoospace.space.domain.QCategory.category;
 import static com.modoospace.space.domain.QSpace.space;
 
-import com.modoospace.space.controller.dto.space.SpaceSearchDto;
+import com.modoospace.space.controller.dto.space.SpaceSearchRequest;
 import com.modoospace.space.domain.Space;
 import com.querydsl.core.types.dsl.BooleanExpression;
 import com.querydsl.jpa.impl.JPAQuery;
@@ -22,18 +22,18 @@ public class SpaceQueryRepository {
 
   private final JPAQueryFactory jpaQueryFactory;
 
-  public Page<Space> searchSpace(SpaceSearchDto searchDto, Pageable pageable) {
+  public Page<Space> searchSpace(SpaceSearchRequest searchRequest, Pageable pageable) {
 
     List<Space> content = jpaQueryFactory
         .selectFrom(space)
         .join(space.host, member).fetchJoin()
         .join(space.category, category).fetchJoin()
-        .where(nameContains(searchDto.getName())
-            , depthFirstEq(searchDto.getDepthFirst())
-            , depthSecondEq(searchDto.getDepthSecond())
-            , depthThirdEq(searchDto.getDepthThird())
-            , hostIdEq(searchDto.getHostId())
-            , categoryIdEq(searchDto.getCategoryId())
+        .where(nameContains(searchRequest.getName())
+            , depthFirstEq(searchRequest.getDepthFirst())
+            , depthSecondEq(searchRequest.getDepthSecond())
+            , depthThirdEq(searchRequest.getDepthThird())
+            , hostIdEq(searchRequest.getHostId())
+            , categoryIdEq(searchRequest.getCategoryId())
         )
         .offset(pageable.getOffset())
         .limit(pageable.getPageSize())
@@ -41,12 +41,12 @@ public class SpaceQueryRepository {
 
     JPAQuery<Space> countQuery = jpaQueryFactory
         .selectFrom(space)
-        .where(nameContains(searchDto.getName())
-            , depthFirstEq(searchDto.getDepthFirst())
-            , depthSecondEq(searchDto.getDepthSecond())
-            , depthThirdEq(searchDto.getDepthThird())
-            , hostIdEq(searchDto.getHostId())
-            , categoryIdEq(searchDto.getCategoryId())
+        .where(nameContains(searchRequest.getName())
+            , depthFirstEq(searchRequest.getDepthFirst())
+            , depthSecondEq(searchRequest.getDepthSecond())
+            , depthThirdEq(searchRequest.getDepthThird())
+            , hostIdEq(searchRequest.getHostId())
+            , categoryIdEq(searchRequest.getCategoryId())
         );
 
     return PageableExecutionUtils.getPage(content, pageable, countQuery::fetchCount);

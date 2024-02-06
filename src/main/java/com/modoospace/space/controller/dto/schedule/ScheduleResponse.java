@@ -1,4 +1,4 @@
-package com.modoospace.space.controller.dto.facilitySchedule;
+package com.modoospace.space.controller.dto.schedule;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.modoospace.common.DateFormatManager;
@@ -15,7 +15,7 @@ import lombok.ToString;
 @Getter
 @NoArgsConstructor
 @ToString
-public class ScheduleReadDto {
+public class ScheduleResponse {
 
     @NotNull
     private Long id;
@@ -28,16 +28,15 @@ public class ScheduleReadDto {
     private Integer endHour;
 
     @Builder
-    public ScheduleReadDto(Long id, LocalDate date, Integer startHour, Integer endHour) {
+    public ScheduleResponse(Long id, LocalDate date, Integer startHour, Integer endHour) {
         this.id = id;
         this.date = date;
         this.startHour = startHour;
         this.endHour = endHour;
     }
 
-
-    public static ScheduleReadDto toDto(Schedule schedule) {
-        return ScheduleReadDto.builder()
+    public static ScheduleResponse of(Schedule schedule) {
+        return ScheduleResponse.builder()
             .id(schedule.getId())
             .date(schedule.getDate())
             .startHour(schedule.getStartHour())
@@ -45,9 +44,9 @@ public class ScheduleReadDto {
             .build();
     }
 
-    public static List<ScheduleReadDto> toDtos(List<Schedule> schedules) {
+    public static List<ScheduleResponse> of(List<Schedule> schedules) {
         return schedules.stream()
-            .map(ScheduleReadDto::toDto)
+            .map(ScheduleResponse::of)
             .collect(Collectors.toList());
     }
 }

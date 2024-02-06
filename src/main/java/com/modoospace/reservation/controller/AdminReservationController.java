@@ -1,8 +1,8 @@
 package com.modoospace.reservation.controller;
 
 import com.modoospace.config.auth.LoginEmail;
-import com.modoospace.reservation.controller.dto.ReservationReadDto;
-import com.modoospace.reservation.controller.dto.ReservationUpdateDto;
+import com.modoospace.reservation.controller.dto.ReservationResponse;
+import com.modoospace.reservation.controller.dto.ReservationUpdateRequest;
 import com.modoospace.reservation.serivce.ReservationService;
 import java.util.List;
 import javax.validation.Valid;
@@ -20,39 +20,39 @@ import org.springframework.web.bind.annotation.RestController;
 @RequestMapping("/api/v1/admin/reservations")
 public class AdminReservationController {
 
-  private final ReservationService reservationService;
+    private final ReservationService reservationService;
 
-  @GetMapping("/visitor/{memberId}")
-  public ResponseEntity<List<ReservationReadDto>> findAllAsMember(@PathVariable Long memberId,
-      @LoginEmail final String loginEmail) {
-    List<ReservationReadDto> reservationList = reservationService
-        .findAllAsVisitorByAdmin(memberId, loginEmail);
-    return ResponseEntity.ok().body(reservationList);
-  }
+    @GetMapping("/visitor/{memberId}")
+    public ResponseEntity<List<ReservationResponse>> findAllAsMember(@PathVariable Long memberId,
+        @LoginEmail final String loginEmail) {
+        List<ReservationResponse> reservations = reservationService
+            .findAllAsVisitorByAdmin(memberId, loginEmail);
+        return ResponseEntity.ok().body(reservations);
+    }
 
-  @GetMapping("/host/{memberId}")
-  public ResponseEntity<List<ReservationReadDto>> findAllAsHost(@PathVariable Long memberId,
-      @LoginEmail final String loginEmail) {
-    List<ReservationReadDto> reservationList = reservationService
-        .findAllAsHostByAdmin(memberId, loginEmail);
-    return ResponseEntity.ok().body(reservationList);
-  }
+    @GetMapping("/host/{memberId}")
+    public ResponseEntity<List<ReservationResponse>> findAllAsHost(@PathVariable Long memberId,
+        @LoginEmail final String loginEmail) {
+        List<ReservationResponse> reservations = reservationService
+            .findAllAsHostByAdmin(memberId, loginEmail);
+        return ResponseEntity.ok().body(reservations);
+    }
 
-  @PutMapping("/{reservationId}")
-  public ResponseEntity<Void> update(
-      @PathVariable Long reservationId,
-      @RequestBody @Valid ReservationUpdateDto reservationCreateDto,
-      @LoginEmail String loginEmail) {
+    @PutMapping("/{reservationId}")
+    public ResponseEntity<Void> update(
+        @PathVariable Long reservationId,
+        @RequestBody @Valid ReservationUpdateRequest updateRequest,
+        @LoginEmail String loginEmail) {
 
-    reservationService.updateReservation(reservationId, reservationCreateDto, loginEmail);
-    return ResponseEntity.ok().build();
-  }
+        reservationService.updateReservation(reservationId, updateRequest, loginEmail);
+        return ResponseEntity.ok().build();
+    }
 
-  @GetMapping("/{reservationId}")
-  public ResponseEntity<ReservationReadDto> find(@PathVariable Long reservationId,
-      @LoginEmail final String loginEmail) {
-    ReservationReadDto reservationReadDto = reservationService
-        .findReservation(reservationId, loginEmail);
-    return ResponseEntity.ok().body(reservationReadDto);
-  }
+    @GetMapping("/{reservationId}")
+    public ResponseEntity<ReservationResponse> find(@PathVariable Long reservationId,
+        @LoginEmail final String loginEmail) {
+        ReservationResponse reservation = reservationService
+            .findReservation(reservationId, loginEmail);
+        return ResponseEntity.ok().body(reservation);
+    }
 }

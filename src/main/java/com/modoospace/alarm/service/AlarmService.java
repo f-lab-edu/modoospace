@@ -1,7 +1,7 @@
 package com.modoospace.alarm.service;
 
 import com.modoospace.alarm.controller.dto.AlarmEvent;
-import com.modoospace.alarm.controller.dto.AlarmReadDto;
+import com.modoospace.alarm.controller.dto.AlarmResponse;
 import com.modoospace.alarm.domain.Alarm;
 import com.modoospace.alarm.domain.AlarmRepository;
 import com.modoospace.alarm.repository.AlarmQueryRepository;
@@ -32,7 +32,7 @@ public class AlarmService {
   private final AlarmQueryRepository alarmQueryRepository;
   private final EmitterCacheRepository emitterRepository;
 
-  public Page<AlarmReadDto> searchAlarms(String loginEmail, Pageable pageable) {
+  public Page<AlarmResponse> searchAlarms(String loginEmail, Pageable pageable) {
     Member loginMember = memberService.findMemberByEmail(loginEmail);
 
     return alarmQueryRepository.searchByMember(loginMember, pageable);

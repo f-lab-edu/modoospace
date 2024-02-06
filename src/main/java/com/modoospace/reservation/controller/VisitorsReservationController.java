@@ -2,9 +2,9 @@ package com.modoospace.reservation.controller;
 
 import com.modoospace.common.DateFormatManager;
 import com.modoospace.config.auth.LoginEmail;
-import com.modoospace.reservation.controller.dto.AvailabilityTimeDto;
-import com.modoospace.reservation.controller.dto.ReservationCreateDto;
-import com.modoospace.reservation.controller.dto.ReservationReadDto;
+import com.modoospace.reservation.controller.dto.AvailabilityTimeResponse;
+import com.modoospace.reservation.controller.dto.ReservationCreateRequest;
+import com.modoospace.reservation.controller.dto.ReservationResponse;
 import com.modoospace.reservation.serivce.ReservationService;
 import java.time.LocalDate;
 import java.util.List;
@@ -29,16 +29,16 @@ public class VisitorsReservationController {
     private final ReservationService reservationService;
 
     @GetMapping
-    public ResponseEntity<List<ReservationReadDto>> findAll(@LoginEmail final String loginEmail) {
-        List<ReservationReadDto> reservationList = reservationService.findAllAsVisitor(loginEmail);
-        return ResponseEntity.ok().body(reservationList);
+    public ResponseEntity<List<ReservationResponse>> findAll(@LoginEmail final String loginEmail) {
+        List<ReservationResponse> reservations = reservationService.findAllAsVisitor(loginEmail);
+        return ResponseEntity.ok().body(reservations);
     }
 
     @GetMapping("/facilities/{facilityId}/availability")
-    public ResponseEntity<AvailabilityTimeDto> getAvailabilityTime(
+    public ResponseEntity<AvailabilityTimeResponse> getAvailabilityTime(
         @PathVariable Long facilityId,
         @RequestParam @DateTimeFormat(pattern = DateFormatManager.DATE_FORMAT) final LocalDate date) {
-        AvailabilityTimeDto availableTimes = reservationService
+        AvailabilityTimeResponse availableTimes = reservationService
             .getAvailabilityTime(facilityId, date);
         return ResponseEntity.ok().body(availableTimes);
     }
@@ -46,18 +46,18 @@ public class VisitorsReservationController {
     @PostMapping("/facilities/{facilityId}")
     public ResponseEntity<Long> createReservation(@PathVariable Long facilityId,
         @LoginEmail String loginEmail,
-        @RequestBody @Valid ReservationCreateDto createDto) {
-        Long reservation = reservationService.createReservation(
-            createDto, facilityId, loginEmail);
-        return ResponseEntity.ok().body(reservation);
+        @RequestBody @Valid ReservationCreateRequest createRequest) {
+        Long reservationId = reservationService.createReservation(
+            createRequest, facilityId, loginEmail);
+        return ResponseEntity.ok().body(reservationId);
     }
 
     @GetMapping("/{reservationId}")
-    public ResponseEntity<ReservationReadDto> find(@PathVariable Long reservationId,
+    public ResponseEntity<ReservationResponse> find(@PathVariable Long reservationId,
         @LoginEmail String loginEmail) {
-        ReservationReadDto reservationReadDto = reservationService.findReservation(
+        ReservationResponse reservation = reservationService.findReservation(
             reservationId, loginEmail);
-        return ResponseEntity.ok().body(reservationReadDto);
+        return ResponseEntity.ok().body(reservation);
     }
 
     @PutMapping("/{reservationId}/cancel")

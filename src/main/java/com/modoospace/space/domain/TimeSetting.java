@@ -35,7 +35,10 @@ public class TimeSetting {
     @JoinColumn(name = "facility_id")
     private Facility facility;
 
-    @Builder
+    public TimeSetting(TimeRange timeRange) {
+        this(null, timeRange, null);
+    }
+
     public TimeSetting(Long id, TimeRange timeRange, Facility facility) {
         this.id = id;
         this.timeRange = timeRange;

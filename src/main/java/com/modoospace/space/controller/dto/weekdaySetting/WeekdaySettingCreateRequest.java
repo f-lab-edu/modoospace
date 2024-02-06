@@ -7,17 +7,15 @@ import lombok.NoArgsConstructor;
 
 @Getter
 @NoArgsConstructor
-public class WeekdaySettingCreateDto {
+public class WeekdaySettingCreateRequest {
 
   private DayOfWeek weekday;
 
-  public WeekdaySettingCreateDto(DayOfWeek weekday) {
+  public WeekdaySettingCreateRequest(DayOfWeek weekday) {
     this.weekday = weekday;
   }
 
   public WeekdaySetting toEntity() {
-    return WeekdaySetting.builder()
-        .weekday(weekday)
-        .build();
+    return new WeekdaySetting(weekday);
   }
 }

@@ -9,11 +9,10 @@ import com.modoospace.common.exception.NotFoundEntityException;
 import com.modoospace.member.domain.Member;
 import com.modoospace.member.domain.MemberRepository;
 import com.modoospace.member.domain.Role;
-import com.modoospace.space.controller.dto.facility.FacilityCreateDto;
-import com.modoospace.space.controller.dto.facilitySchedule.ScheduleCreateUpdateDto;
-import com.modoospace.space.controller.dto.facilitySchedule.ScheduleReadDto;
-import com.modoospace.space.controller.dto.space.SpaceCreateUpdateDto;
-import com.modoospace.space.controller.dto.timeSetting.TimeSettingCreateDto;
+import com.modoospace.space.controller.dto.facility.FacilityCreateRequest;
+import com.modoospace.space.controller.dto.schedule.ScheduleCreateUpdateRequest;
+import com.modoospace.space.controller.dto.schedule.ScheduleResponse;
+import com.modoospace.space.controller.dto.timeSetting.TimeSettingCreateRequest;
 import com.modoospace.space.domain.Category;
 import com.modoospace.space.domain.CategoryRepository;
 import com.modoospace.space.domain.Facility;
@@ -24,7 +23,6 @@ import java.time.LocalDate;
 import java.time.YearMonth;
 import java.util.Arrays;
 import java.util.List;
-import javax.persistence.EntityManager;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -39,7 +37,7 @@ import org.springframework.transaction.annotation.Transactional;
 public class ScheduleServiceTest {
 
     @Autowired
-    private FacilityScheduleService facilityScheduleService;
+    private ScheduleService scheduleService;
 
     @Autowired
     private MemberRepository memberRepository;
@@ -53,12 +51,7 @@ public class ScheduleServiceTest {
     @Autowired
     private FacilityRepository facilityRepository;
 
-    @Autowired
-    private EntityManager em;
-
     private Member hostMember;
-
-    private Space space;
 
     private Facility facility;
 
@@ -76,146 +69,155 @@ public class ScheduleServiceTest {
         memberRepository.save(hostMember);
         memberRepository.flush();
 
-        Category category = Category.builder()
-            .name("스터디 공간")
-            .build();
+        Category category = new Category("스터디 공간");
         categoryRepository.save(category);
 
-        SpaceCreateUpdateDto spaceCreateDto = SpaceCreateUpdateDto.builder()
+        Space space = Space.builder()
             .name("공간이름")
             .description("설명")
+            .category(category)
+            .host(hostMember)
             .build();
-        space = spaceCreateDto.toEntity(category, hostMember);
         spaceRepository.save(space);
 
-        FacilityCreateDto createDto = FacilityCreateDto.builder()
+        // TimeSetting, WeekSetting 기본값이 필요하여 Request 사용.
+        FacilityCreateRequest createRequest = FacilityCreateRequest.builder()
             .name("스터디룸1")
             .reservationEnable(true)
             .minUser(1)
             .maxUser(4)
             .description("1~4인실 입니다.")
-            .timeSettings(Arrays.asList(new TimeSettingCreateDto(9, 18)))
+            .timeSettings(Arrays.asList(new TimeSettingCreateRequest(9, 18)))
             .build();
-        facility = createDto.toEntity(space);
-        facilityRepository.save(facility);
+        facility = facilityRepository.save(createRequest.toEntity(space));
 
         nowDate = LocalDate.now();
         nowYearMonth = YearMonth.now();
-
-        em.flush();
     }
 
     @DisplayName("시설 스케줄 데이터를 생성한다.")
     @Test
     public void createFacilitySchedule() {
-        ScheduleCreateUpdateDto createDto = new ScheduleCreateUpdateDto(nowDate, 19, 24);
+        ScheduleCreateUpdateRequest createRequest = new ScheduleCreateUpdateRequest(nowDate, 19,
+            24);
 
-        facilityScheduleService
-            .createSchedule(facility.getId(), createDto, hostMember.getEmail());
+        scheduleService.createSchedule(
+            facility.getId(), createRequest, hostMember.getEmail());
 
-        List<ScheduleReadDto> retSchedules = facilityScheduleService.find1DayFacilitySchedules(
-            facility.getId(), nowDate);
+        ScheduleResponse retSchedule = scheduleService.find1DaySchedules(
+            facility.getId(), nowDate).get(1);
         assertAll(
-            () -> assertThat(retReadDto.getStartHour()).isEqualTo(19),
-            () -> assertThat(retReadDto.getEndHour()).isEqualTo(24)
+            () -> assertThat(retSchedule.getStartHour()).isEqualTo(19),
+            () -> assertThat(retSchedule.getEndHour()).isEqualTo(24)
         );
     }
 
     @DisplayName("시설 스케줄 데이터를 생성한다. 하지만 범위가 연속적이므로 합쳐서 저장된다.")
     @Test
     public void createFacilitySchedule_merge() {
-        ScheduleCreateUpdateDto createDto = new ScheduleCreateUpdateDto(nowDate, 18, 24);
+        ScheduleCreateUpdateRequest createRequest = new ScheduleCreateUpdateRequest(nowDate, 18,
+            24);
 
-        Long createdId = facilityScheduleService
-            .createSchedule(facility.getId(), createDto, hostMember.getEmail());
+        scheduleService.createSchedule(
+            facility.getId(), createRequest, hostMember.getEmail());
 
-        ScheduleReadDto retReadDto = facilityScheduleService
-            .findFacilitySchedule(createdId);
+        ScheduleResponse retSchedule = scheduleService.find1DaySchedules(
+            facility.getId(), nowDate).get(0);
         assertAll(
-            () -> assertThat(retReadDto.getStartHour()).isEqualTo(9),
-            () -> assertThat(retReadDto.getEndHour()).isEqualTo(24)
+            () -> assertThat(retSchedule.getStartHour()).isEqualTo(9),
+            () -> assertThat(retSchedule.getEndHour()).isEqualTo(24)
         );
     }
 
     @DisplayName("시설 스케줄을 생성 시 기존 스케줄과 겹친다면 예외를 던진다.")
     @Test
     public void createFacilitySchedule_throwException_ifConflict() {
-        ScheduleCreateUpdateDto createDto = new ScheduleCreateUpdateDto(nowDate, 16, 24);
+        ScheduleCreateUpdateRequest createRequest = new ScheduleCreateUpdateRequest(
+            nowDate, 16, 24);
 
-        assertThatThrownBy(() -> facilityScheduleService
-            .createSchedule(facility.getId(), createDto, hostMember.getEmail()))
+        assertThatThrownBy(() -> scheduleService
+            .createSchedule(facility.getId(), createRequest, hostMember.getEmail()))
             .isInstanceOf(ConflictingTimeException.class);
     }
 
     @DisplayName("시설 스케줄을 업데이트 한다.")
     @Test
     public void updateFacilitySchedule() {
-        ScheduleCreateUpdateDto updateDto = new ScheduleCreateUpdateDto(nowDate, 0, 24);
-        ScheduleReadDto targetSchedule = facilityScheduleService
-            .find1DayFacilitySchedules(facility.getId(), nowDate).get(0);
+        ScheduleCreateUpdateRequest updateRequest = new ScheduleCreateUpdateRequest(
+            nowDate, 0, 24);
+        ScheduleResponse targetSchedule = scheduleService.find1DaySchedules(
+            facility.getId(), nowDate).get(0);
 
-        Long updatedId = facilityScheduleService
-            .updateFacilitySchedule(targetSchedule.getId(), updateDto, hostMember.getEmail());
+        scheduleService
+            .updateSchedule(targetSchedule.getId(), updateRequest, hostMember.getEmail());
 
-        ScheduleReadDto retReadDto = facilityScheduleService
-            .findFacilitySchedule(updatedId);
+        ScheduleResponse retSchedule = scheduleService.find1DaySchedules(
+            facility.getId(), nowDate).get(0);
         assertAll(
-            () -> assertThat(retReadDto.getStartHour()).isEqualTo(0),
-            () -> assertThat(retReadDto.getEndHour()).isEqualTo(24)
+            () -> assertThat(retSchedule.getStartHour()).isEqualTo(0),
+            () -> assertThat(retSchedule.getEndHour()).isEqualTo(24)
         );
     }
 
     @DisplayName("시설 스케줄을 업데이트 한다. 하지만 범위가 연속적이므로 합쳐서 저장된다.")
     @Test
     public void updateFacilitySchedule_merge() {
-        ScheduleCreateUpdateDto createDto = new ScheduleCreateUpdateDto(nowDate, 20, 24);
-        Long createdId = facilityScheduleService
-            .createSchedule(facility.getId(), createDto, hostMember.getEmail());
-        ScheduleCreateUpdateDto updateDto = new ScheduleCreateUpdateDto(nowDate, 18, 24);
+        ScheduleCreateUpdateRequest createRequest = new ScheduleCreateUpdateRequest(
+            nowDate, 20, 24);
+        scheduleService.createSchedule(
+            facility.getId(), createRequest, hostMember.getEmail());
+        ScheduleResponse createSchedule = scheduleService.find1DaySchedules(
+            facility.getId(), nowDate).get(1);
+        ScheduleCreateUpdateRequest updateRequest = new ScheduleCreateUpdateRequest(
+            nowDate, 18, 24);
 
-        Long updatedId = facilityScheduleService
-            .updateFacilitySchedule(createdId, updateDto, hostMember.getEmail());
+        scheduleService.updateSchedule(
+            createSchedule.getId(), updateRequest, hostMember.getEmail());
 
-        ScheduleReadDto retReadDto = facilityScheduleService
-            .findFacilitySchedule(updatedId);
+        ScheduleResponse retSchedule = scheduleService.find1DaySchedules(
+            facility.getId(), nowDate).get(0);
         assertAll(
-            () -> assertThat(retReadDto.getStartHour()).isEqualTo(9),
-            () -> assertThat(retReadDto.getEndHour()).isEqualTo(24)
+            () -> assertThat(retSchedule.getStartHour()).isEqualTo(9),
+            () -> assertThat(retSchedule.getEndHour()).isEqualTo(24)
         );
     }
 
     @DisplayName("시설 스케줄을 업데이트 시 기존 스케줄과 겹친다면 예외를 던진다.")
     @Test
     public void updateFacilitySchedule_throwException_ifConflict() {
-        ScheduleCreateUpdateDto createDto = new ScheduleCreateUpdateDto(nowDate, 20, 24);
-        Long createdId = facilityScheduleService
-            .createSchedule(facility.getId(), createDto, hostMember.getEmail());
-        ScheduleCreateUpdateDto updateDto = new ScheduleCreateUpdateDto(nowDate, 16, 24);
+        ScheduleCreateUpdateRequest createRequest = new ScheduleCreateUpdateRequest(
+            nowDate, 20, 24);
+        scheduleService.createSchedule(
+            facility.getId(), createRequest, hostMember.getEmail());
+        ScheduleCreateUpdateRequest updateRequest = new ScheduleCreateUpdateRequest(
+            nowDate, 16, 24);
+        ScheduleResponse createSchedule = scheduleService.find1DaySchedules(
+            facility.getId(), nowDate).get(1);
 
-        assertThatThrownBy(() -> facilityScheduleService
-            .updateFacilitySchedule(createdId, updateDto, hostMember.getEmail()))
+        assertThatThrownBy(() -> scheduleService.updateSchedule(
+            createSchedule.getId(), updateRequest, hostMember.getEmail()))
             .isInstanceOf(ConflictingTimeException.class);
     }
 
     @DisplayName("시설 스케줄을 삭제한다.")
     @Test
     public void deleteFacilitySchedule() {
-        ScheduleReadDto targetSchedule = facilityScheduleService
-            .find1DayFacilitySchedules(facility.getId(), nowDate).get(0);
+        ScheduleResponse targetSchedule = scheduleService
+            .find1DaySchedules(facility.getId(), nowDate).get(0);
 
-        facilityScheduleService.deleteFacilitySchedule(targetSchedule.getId(),
-            hostMember.getEmail());
+        scheduleService.deleteSchedule(
+            targetSchedule.getId(), hostMember.getEmail());
 
         assertThatThrownBy(
-            () -> facilityScheduleService.findFacilitySchedule(targetSchedule.getId()))
+            () -> scheduleService.findSchedule(targetSchedule.getId()))
             .isInstanceOf(NotFoundEntityException.class);
     }
 
     @DisplayName("하루 치 스케줄데이터를 조회한다.")
     @Test
     public void find1DayFacilitySchedules() {
-        List<ScheduleReadDto> facilitySchedules = facilityScheduleService
-            .find1DayFacilitySchedules(facility.getId(), nowDate);
+        List<ScheduleResponse> facilitySchedules = scheduleService.find1DaySchedules(
+            facility.getId(), nowDate);
 
         assertThat(facilitySchedules).hasSize(1);
     }
@@ -225,17 +227,16 @@ public class ScheduleServiceTest {
     public void create1MonthDefaultFacilitySchedules_plus3Month() {
         YearMonth createYearMonth = nowYearMonth.plusMonths(3);
 
-        facilityScheduleService
-            .create1MonthDefaultFacilitySchedules(facility.getId(), createYearMonth,
-                hostMember.getEmail());
+        scheduleService.create1MonthDefaultSchedules(
+            facility.getId(), createYearMonth, hostMember.getEmail());
 
-        List<ScheduleReadDto> retReadDtos = facilityScheduleService
-            .find1MonthFacilitySchedules(facility.getId(), createYearMonth);
+        List<ScheduleResponse> retReponses = scheduleService.find1MonthSchedules(
+            facility.getId(), createYearMonth);
         assertAll(
-            () -> assertThat(retReadDtos.size()).isEqualTo(createYearMonth.lengthOfMonth()),
-            () -> assertThat(retReadDtos.get(0).getDate())
+            () -> assertThat(retReponses.size()).isEqualTo(createYearMonth.lengthOfMonth()),
+            () -> assertThat(retReponses.get(0).getDate())
                 .isEqualTo(createYearMonth.atDay(1)),
-            () -> assertThat(retReadDtos.get(retReadDtos.size() - 1).getDate())
+            () -> assertThat(retReponses.get(retReponses.size() - 1).getDate())
                 .isEqualTo(createYearMonth.atEndOfMonth())
         );
     }
@@ -243,8 +244,8 @@ public class ScheduleServiceTest {
     @DisplayName("1달 치 스케줄데이터를 조회한다.")
     @Test
     public void find1MonthFacilitySchedules() {
-        List<ScheduleReadDto> facilitySchedules = facilityScheduleService
-            .find1MonthFacilitySchedules(facility.getId(), nowYearMonth);
+        List<ScheduleResponse> facilitySchedules = scheduleService.find1MonthSchedules(
+            facility.getId(), nowYearMonth);
 
         assertThat(facilitySchedules).hasSize(nowYearMonth.lengthOfMonth());
     }
@@ -254,18 +255,17 @@ public class ScheduleServiceTest {
     public void create1MonthDefaultFacilitySchedules_plus2Month() {
         YearMonth createYearMonth = nowYearMonth.plusMonths(2);
 
-        facilityScheduleService
-            .create1MonthDefaultFacilitySchedules(facility.getId(), createYearMonth,
-                hostMember.getEmail());
+        scheduleService.create1MonthDefaultSchedules(
+            facility.getId(), createYearMonth, hostMember.getEmail());
 
-        List<ScheduleReadDto> retReadDtos = facilityScheduleService
-            .find1MonthFacilitySchedules(facility.getId(), createYearMonth);
+        List<ScheduleResponse> retResponses = scheduleService.find1MonthSchedules(
+            facility.getId(), createYearMonth);
         assertAll(
-            () -> assertThat(retReadDtos.size()).isEqualTo(createYearMonth.lengthOfMonth()),
-            () -> assertThat(retReadDtos.get(0).getDate())
+            () -> assertThat(retResponses.size()).isEqualTo(createYearMonth.lengthOfMonth()),
+            () -> assertThat(retResponses.get(0).getDate())
                 .isEqualTo(createYearMonth.atDay(1)),
             () -> assertThat(
-                retReadDtos.get(retReadDtos.size() - 1).getDate())
+                retResponses.get(retResponses.size() - 1).getDate())
                 .isEqualTo(createYearMonth.atEndOfMonth())
         );
     }
@@ -275,12 +275,11 @@ public class ScheduleServiceTest {
     public void delete1MonthFacilitySchedules() {
         YearMonth deleteYearMonth = nowYearMonth.plusMonths(2);
 
-        facilityScheduleService
-            .delete1MonthFacilitySchedules(facility.getId(), deleteYearMonth,
-                hostMember.getEmail());
+        scheduleService.delete1MonthSchedules(
+            facility.getId(), deleteYearMonth, hostMember.getEmail());
 
-        List<ScheduleReadDto> retReadDtos = facilityScheduleService
-            .find1MonthFacilitySchedules(facility.getId(), deleteYearMonth);
-        assertThat(retReadDtos).isEmpty();
+        List<ScheduleResponse> retResponses = scheduleService
+            .find1MonthSchedules(facility.getId(), deleteYearMonth);
+        assertThat(retResponses).isEmpty();
     }
 }

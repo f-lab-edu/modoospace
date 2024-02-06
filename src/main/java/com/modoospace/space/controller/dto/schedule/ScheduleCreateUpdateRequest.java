@@ -1,4 +1,4 @@
-package com.modoospace.space.controller.dto.facilitySchedule;
+package com.modoospace.space.controller.dto.schedule;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.modoospace.common.DateFormatManager;
@@ -12,7 +12,7 @@ import lombok.NoArgsConstructor;
 
 @Getter
 @NoArgsConstructor
-public class ScheduleCreateUpdateDto {
+public class ScheduleCreateUpdateRequest {
 
     @NotNull
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = DateFormatManager.DATE_FORMAT)
@@ -24,7 +24,7 @@ public class ScheduleCreateUpdateDto {
     @NotNull
     private Integer endHour;
 
-    public ScheduleCreateUpdateDto(LocalDate date, Integer startHour, Integer endHour) {
+    public ScheduleCreateUpdateRequest(LocalDate date, Integer startHour, Integer endHour) {
         this.date = date;
         this.startHour = startHour;
         this.endHour = endHour;

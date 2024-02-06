@@ -3,13 +3,12 @@ package com.modoospace.space.sevice;
 import com.modoospace.common.exception.NotFoundEntityException;
 import com.modoospace.member.domain.Member;
 import com.modoospace.member.service.MemberService;
-import com.modoospace.space.controller.dto.facilitySchedule.ScheduleReadDto;
-import com.modoospace.space.controller.dto.facilitySchedule.ScheduleCreateUpdateDto;
+import com.modoospace.space.controller.dto.schedule.ScheduleResponse;
+import com.modoospace.space.controller.dto.schedule.ScheduleCreateUpdateRequest;
 import com.modoospace.space.domain.Facility;
 import com.modoospace.space.domain.FacilityRepository;
 import com.modoospace.space.domain.Schedule;
 import com.modoospace.space.domain.ScheduleRepository;
-import com.modoospace.space.domain.Schedules;
 import com.modoospace.space.repository.ScheduleQueryRepository;
 import java.time.LocalDate;
 import java.time.YearMonth;
@@ -21,7 +20,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 @RequiredArgsConstructor
 @Service
-public class FacilityScheduleService {
+public class ScheduleService {
 
     private final MemberService memberService;
     private final FacilityRepository facilityRepository;
@@ -29,83 +28,63 @@ public class FacilityScheduleService {
     private final ScheduleQueryRepository scheduleQueryRepository;
 
     @Transactional
-    public void createSchedule(Long facilityId, ScheduleCreateUpdateDto createDto,
+    public void createSchedule(Long facilityId, ScheduleCreateUpdateRequest createRequest,
         String loginEmail) {
         Member loginMember = memberService.findMemberByEmail(loginEmail);
         Facility facility = findFacilityById(facilityId);
 
-        facility.addSchedule(createDto.toEntity(facility), loginMember);
+        facility.addSchedule(createRequest.toEntity(facility), loginMember);
     }
 
 
-    public ScheduleReadDto findFacilitySchedule(Long facilityScheduleId) {
-        Schedule schedule = findFacilityScheduleById(facilityScheduleId);
+    public ScheduleResponse findSchedule(Long facilityScheduleId) {
+        Schedule schedule = findScheduleById(facilityScheduleId);
 
-        return ScheduleReadDto.toDto(schedule);
+        return ScheduleResponse.of(schedule);
     }
 
     @Transactional
-    public void updateFacilitySchedule(Long facilityScheduleId, ScheduleCreateUpdateDto updateDto,
+    public void updateSchedule(Long facilityScheduleId, ScheduleCreateUpdateRequest updateRequest,
         String loginEmail) {
         Member loginMember = memberService.findMemberByEmail(loginEmail);
-        Schedule schedule = findFacilityScheduleById(facilityScheduleId);
+        Schedule schedule = findScheduleById(facilityScheduleId);
         Facility facility = schedule.getFacility();
 
-        facility.updateSchedule(updateDto.toEntity(facility), schedule, loginMember);
+        facility.updateSchedule(updateRequest.toEntity(facility), schedule, loginMember);
     }
 
     @Transactional
-    public void deleteFacilitySchedule(Long facilityScheduleId, String loginEmail) {
+    public void deleteSchedule(Long facilityScheduleId, String loginEmail) {
         Member loginMember = memberService.findMemberByEmail(loginEmail);
-        Schedule schedule = findFacilityScheduleById(facilityScheduleId);
+        Schedule schedule = findScheduleById(facilityScheduleId);
         Facility facility = schedule.getFacility();
         facility.verifyManagementPermission(loginMember);
 
         scheduleRepository.delete(schedule);
     }
 
-    public List<ScheduleReadDto> find1DayFacilitySchedules(Long facilityId,
+    public List<ScheduleResponse> find1DaySchedules(Long facilityId,
         LocalDate findDate) {
         Facility facility = findFacilityById(facilityId);
         List<Schedule> schedules = scheduleQueryRepository
             .find1DaySchedules(facility, findDate);
 
         return schedules.stream()
-            .map(facilitySchedule -> ScheduleReadDto.toDto(facilitySchedule))
+            .map(facilitySchedule -> ScheduleResponse.of(facilitySchedule))
             .collect(Collectors.toList());
     }
 
     @Transactional
-    public void create1MonthDefaultFacilitySchedules(Long facilityId, YearMonth createYearMonth,
+    public void create1MonthDefaultSchedules(Long facilityId, YearMonth createYearMonth,
         String loginEmail) {
         Member loginMember = memberService.findMemberByEmail(loginEmail);
         Facility facility = findFacilityById(facilityId);
 
-        delete1MonthFacilitySchedules(facility, createYearMonth, loginMember);
-        facility.create1MonthDefaultFacilitySchedules(createYearMonth, loginMember);
+        delete1MonthSchedules(facility, createYearMonth, loginMember);
+        facility.create1MonthDefaultSchedules(createYearMonth, loginMember);
     }
 
-    public List<ScheduleReadDto> find1MonthFacilitySchedules(Long facilityId,
-        YearMonth findYearMonth) {
-        Facility facility = findFacilityById(facilityId);
-        List<Schedule> schedules = scheduleQueryRepository
-            .find1MonthSchedules(facility, findYearMonth);
-
-        return schedules.stream()
-            .map(facilitySchedule -> ScheduleReadDto.toDto(facilitySchedule))
-            .collect(Collectors.toList());
-    }
-
-    @Transactional
-    public void delete1MonthFacilitySchedules(Long facilityId, YearMonth deleteYearMonth,
-        String loginEmail) {
-        Member loginMember = memberService.findMemberByEmail(loginEmail);
-        Facility facility = findFacilityById(facilityId);
-
-        delete1MonthFacilitySchedules(facility, deleteYearMonth, loginMember);
-    }
-
-    private void delete1MonthFacilitySchedules(Facility facility, YearMonth deleteYearMonth,
+    private void delete1MonthSchedules(Facility facility, YearMonth deleteYearMonth,
         Member loginMember) {
         facility.verifyManagementPermission(loginMember);
 
@@ -117,15 +96,36 @@ public class FacilityScheduleService {
         }
     }
 
+    public List<ScheduleResponse> find1MonthSchedules(Long facilityId,
+        YearMonth findYearMonth) {
+        Facility facility = findFacilityById(facilityId);
+        List<Schedule> schedules = scheduleQueryRepository
+            .find1MonthSchedules(facility, findYearMonth);
+
+        return schedules.stream()
+            .map(facilitySchedule -> ScheduleResponse.of(facilitySchedule))
+            .collect(Collectors.toList());
+    }
+
+    @Transactional
+    public void delete1MonthSchedules(Long facilityId, YearMonth deleteYearMonth,
+        String loginEmail) {
+        Member loginMember = memberService.findMemberByEmail(loginEmail);
+        Facility facility = findFacilityById(facilityId);
+        facility.verifyManagementPermission(loginMember);
+
+        scheduleQueryRepository.delete1MonthSchedules(facility, deleteYearMonth);
+    }
+
     private Facility findFacilityById(Long facilityId) {
         Facility facility = facilityRepository.findById(facilityId)
             .orElseThrow(() -> new NotFoundEntityException("시설", facilityId));
         return facility;
     }
 
-    private Schedule findFacilityScheduleById(Long facilityScheduleId) {
-        Schedule schedule = scheduleRepository.findById(facilityScheduleId)
-            .orElseThrow(() -> new NotFoundEntityException("시설스케줄", facilityScheduleId));
+    private Schedule findScheduleById(Long scheduleId) {
+        Schedule schedule = scheduleRepository.findById(scheduleId)
+            .orElseThrow(() -> new NotFoundEntityException("시설스케줄", scheduleId));
         return schedule;
     }
 }

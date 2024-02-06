@@ -8,7 +8,7 @@ import lombok.NoArgsConstructor;
 
 @Getter
 @NoArgsConstructor
-public class CategoryReadDto {
+public class CategoryResponse {
 
   @NotNull
   private Long id;
@@ -16,12 +16,12 @@ public class CategoryReadDto {
   @NotEmpty
   private String name;
 
-  public CategoryReadDto(Long id, String name) {
+  public CategoryResponse(Long id, String name) {
     this.id = id;
     this.name = name;
   }
 
-  public static CategoryReadDto toDto(Category category) {
-    return new CategoryReadDto(category.getId(), category.getName());
+  public static CategoryResponse of(Category category) {
+    return new CategoryResponse(category.getId(), category.getName());
   }
 }
