@@ -21,63 +21,61 @@ import org.springframework.transaction.annotation.Transactional;
 @Service
 public class SpaceService {
 
-  private final MemberService memberService;
-  private final SpaceRepository spaceRepository;
-  private final CategoryRepository categoryRepository;
-  private final SpaceQueryRepository spaceQueryRepository;
+    private final MemberService memberService;
+    private final SpaceRepository spaceRepository;
+    private final CategoryRepository categoryRepository;
+    private final SpaceQueryRepository spaceQueryRepository;
 
-  @Transactional
-  public Long createSpace(Long categoryId, SpaceCreateUpdateRequest createRequest, String loginEmail) {
-    Member host = memberService.findMemberByEmail(loginEmail);
-    Category category = findCategoryById(categoryId);
+    @Transactional
+    public Long createSpace(Long categoryId, SpaceCreateUpdateRequest createRequest,
+        String loginEmail) {
+        Member host = memberService.findMemberByEmail(loginEmail);
+        Category category = findCategoryById(categoryId);
 
-    Space space = createRequest.toEntity(category, host);
-    spaceRepository.save(space);
+        Space space = createRequest.toEntity(category, host);
+        spaceRepository.save(space);
 
-    return space.getId();
-  }
+        return space.getId();
+    }
 
-  public Page<SpaceResponse> searchSpace(SpaceSearchRequest searchDto, Pageable pageable) {
-    Page<Space> spaces = spaceQueryRepository.searchSpace(searchDto, pageable);
+    public Page<SpaceResponse> searchSpace(SpaceSearchRequest searchDto, Pageable pageable) {
+        Page<Space> spaces = spaceQueryRepository.searchSpace(searchDto, pageable);
 
-    return spaces.map(SpaceResponse::of);
-  }
+        return spaces.map(SpaceResponse::of);
+    }
 
-  public SpaceResponse findSpace(Long spaceId) {
-    Space space = findSpaceById(spaceId);
+    public SpaceResponse findSpace(Long spaceId) {
+        Space space = findSpaceById(spaceId);
 
-    return SpaceResponse.of(space);
-  }
+        return SpaceResponse.of(space);
+    }
 
-  @Transactional
-  public void updateSpace(Long spaceId, SpaceCreateUpdateRequest updateRequest, String loginEmail) {
-    Member loginMember = memberService.findMemberByEmail(loginEmail);
-    Space space = findSpaceById(spaceId);
-    Space updatedSpace = updateRequest.toEntity(space.getCategory(), space.getHost());
+    @Transactional
+    public void updateSpace(Long spaceId, SpaceCreateUpdateRequest updateRequest,
+        String loginEmail) {
+        Member loginMember = memberService.findMemberByEmail(loginEmail);
+        Space space = findSpaceById(spaceId);
+        Space updatedSpace = updateRequest.toEntity(space.getCategory(), space.getHost());
 
-    space.update(updatedSpace, loginMember);
-  }
+        space.update(updatedSpace, loginMember);
+    }
 
-  @Transactional
-  public void deleteSpace(Long spaceId, String loginEmail) {
-    Member loginMember = memberService.findMemberByEmail(loginEmail);
-    Space space = findSpaceById(spaceId);
+    @Transactional
+    public void deleteSpace(Long spaceId, String loginEmail) {
+        Member loginMember = memberService.findMemberByEmail(loginEmail);
+        Space space = findSpaceById(spaceId);
 
-    // TODO: 예약이 존재하는지 확인이 필요합니다.
+        space.verifyDeletePermission(loginMember);
+        spaceRepository.delete(space);
+    }
 
-    space.verifyManagementPermission(loginMember);
-    spaceRepository.delete(space);
-  }
+    private Space findSpaceById(Long spaceId) {
+        return spaceRepository.findById(spaceId)
+            .orElseThrow(() -> new NotFoundEntityException("공간", spaceId));
+    }
 
-  private Space findSpaceById(Long spaceId) {
-    Space space = spaceRepository.findById(spaceId)
-        .orElseThrow(() -> new NotFoundEntityException("공간", spaceId));
-    return space;
-  }
-
-  private Category findCategoryById(Long categoryId) {
-    Category category = categoryRepository.findById(categoryId)
-        .orElseThrow(() -> new NotFoundEntityException("카테고리", categoryId));
-    return category;
-  }
+    private Category findCategoryById(Long categoryId) {
+        return categoryRepository.findById(categoryId)
+            .orElseThrow(() -> new NotFoundEntityException("카테고리", categoryId));
+    }
 }
