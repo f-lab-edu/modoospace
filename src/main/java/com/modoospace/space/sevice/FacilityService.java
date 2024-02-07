@@ -13,6 +13,7 @@ import com.modoospace.space.domain.FacilityRepository;
 import com.modoospace.space.domain.Space;
 import com.modoospace.space.domain.SpaceRepository;
 import com.modoospace.space.repository.FacilityQueryRepository;
+import com.modoospace.space.repository.ScheduleQueryRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -26,14 +27,15 @@ public class FacilityService {
     private final MemberService memberService;
     private final SpaceRepository spaceRepository;
     private final FacilityRepository facilityRepository;
+    private final ScheduleQueryRepository scheduleQueryRepository;
     private final FacilityQueryRepository facilityQueryRepository;
 
     @Transactional
     public Long createFacility(Long spaceId, FacilityCreateRequest createRequest,
         String loginEmail) {
-        Member host = memberService.findMemberByEmail(loginEmail);
+        Member loginMember = memberService.findMemberByEmail(loginEmail);
         Space space = findSpaceById(spaceId);
-        space.verifyManagementPermission(host);
+        space.verifyManagementPermission(loginMember);
 
         Facility facility = createRequest.toEntity(space);
         facilityRepository.save(facility);
@@ -57,17 +59,21 @@ public class FacilityService {
         String loginEmail) {
         Member loginMember = memberService.findMemberByEmail(loginEmail);
         Facility facility = findFacilityById(facilityId);
-        Facility updatedFacility = updateRequest.toEntity();
+        facility.verifyManagementPermission(loginMember);
 
-        facility.update(updatedFacility, loginMember);
+        Facility updatedFacility = updateRequest.toEntity();
+        if (updatedFacility.shouldCreateSchedules()) { // TODO : 성능 비교 필요.
+            scheduleQueryRepository.deleteSchedules(facility);
+        }
+        facility.update(updatedFacility);
     }
 
     @Transactional
     public void deleteFacility(Long facilityId, String loginEmail) {
         Member loginMember = memberService.findMemberByEmail(loginEmail);
         Facility facility = findFacilityById(facilityId);
-
         facility.verifyManagementPermission(loginMember);
+
         facilityRepository.delete(facility);
     }
 

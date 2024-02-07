@@ -107,6 +107,13 @@ public class ScheduleQueryRepository {
             .execute();
     }
 
+    public void deleteSchedules(Facility facility) {
+        jpaQueryFactory
+            .delete(schedule)
+            .where(facilityEq(facility))
+            .execute();
+    }
+
     private BooleanExpression facilityEq(Facility facility) {
         return facility != null ? schedule.facility.eq(facility) : null;
     }

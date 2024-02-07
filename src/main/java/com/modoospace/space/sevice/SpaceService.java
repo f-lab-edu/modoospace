@@ -55,17 +55,18 @@ public class SpaceService {
         String loginEmail) {
         Member loginMember = memberService.findMemberByEmail(loginEmail);
         Space space = findSpaceById(spaceId);
-        Space updatedSpace = updateRequest.toEntity(space.getCategory(), space.getHost());
+        space.verifyManagementPermission(loginMember);
 
-        space.update(updatedSpace, loginMember);
+        Space updatedSpace = updateRequest.toEntity(space.getCategory(), space.getHost());
+        space.update(updatedSpace);
     }
 
     @Transactional
     public void deleteSpace(Long spaceId, String loginEmail) {
         Member loginMember = memberService.findMemberByEmail(loginEmail);
         Space space = findSpaceById(spaceId);
-
         space.verifyDeletePermission(loginMember);
+
         spaceRepository.delete(space);
     }
 

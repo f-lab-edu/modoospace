@@ -34,8 +34,9 @@ public class ScheduleService {
         String loginEmail) {
         Member loginMember = memberService.findMemberByEmail(loginEmail);
         Facility facility = findFacilityById(facilityId);
+        facility.verifyManagementPermission(loginMember);
 
-        facility.addSchedule(createRequest.toEntity(facility), loginMember);
+        facility.addSchedule(createRequest.toEntity(facility));
     }
 
     public ScheduleResponse findSchedule(Long facilityScheduleId) {
@@ -50,8 +51,9 @@ public class ScheduleService {
         Member loginMember = memberService.findMemberByEmail(loginEmail);
         Schedule schedule = findScheduleById(facilityScheduleId);
         Facility facility = schedule.getFacility();
+        facility.verifyManagementPermission(loginMember);
 
-        facility.updateSchedule(updateRequest.toEntity(facility), schedule, loginMember);
+        facility.updateSchedule(updateRequest.toEntity(facility), schedule);
     }
 
     @Transactional
@@ -80,14 +82,15 @@ public class ScheduleService {
         String loginEmail) {
         Member loginMember = memberService.findMemberByEmail(loginEmail);
         Facility facility = findFacilityById(facilityId);
+        facility.verifyManagementPermission(loginMember);
 
         // 문제 : 쿼리를 직접날려 삭제를 실행했기때문에, 영속성컨테이너의 facility의 스케줄데이터는 그대로.
-        delete1MonthSchedules(facility, createYearMonth, loginMember);
+        scheduleQueryRepository.delete1MonthSchedules(facility, createYearMonth);
         // 해결 : 영속성 컨텍스트를 비운 후 엔티티를 다시 조회하여 데이터 일관성을 보장.
         // 다른방식 : 엔티티의 데이터를 코드로 직접 삭제해줘도 된다.
         em.clear();
         facility = findFacilityById(facilityId);
-        facility.create1MonthDefaultSchedules(createYearMonth, loginMember);
+        facility.create1MonthDefaultSchedules(createYearMonth);
     }
 
 
@@ -107,12 +110,6 @@ public class ScheduleService {
         String loginEmail) {
         Member loginMember = memberService.findMemberByEmail(loginEmail);
         Facility facility = findFacilityById(facilityId);
-
-        delete1MonthSchedules(facility, deleteYearMonth, loginMember);
-    }
-
-    private void delete1MonthSchedules(Facility facility, YearMonth deleteYearMonth,
-        Member loginMember) {
         facility.verifyManagementPermission(loginMember);
 
         scheduleQueryRepository.delete1MonthSchedules(facility, deleteYearMonth);

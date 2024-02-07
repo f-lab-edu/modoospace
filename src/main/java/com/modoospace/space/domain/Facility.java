@@ -106,24 +106,22 @@ public class Facility extends BaseTimeEntity {
         return minUser <= maxUser;
     }
 
-    public void update(Facility facility, Member loginMember) {
-        verifyManagementPermission(loginMember);
-
+    public void update(Facility facility) {
         this.name = facility.getName();
         this.reservationEnable = facility.getReservationEnable();
         this.minUser = facility.getMinUser();
         this.maxUser = facility.getMaxUser();
         this.description = facility.getDescription();
 
-        if (!facility.getTimeSettings().isEmpty()) {
+        if (facility.shouldUpdateTimeSettings()) {
             this.timeSettings.update(facility.getTimeSettings(), this);
         }
 
-        if (!facility.getWeekdaySettings().isEmpty()) {
+        if (facility.shouldUpdateWeekdaySettings()) {
             this.weekdaySettings.update(facility.getWeekdaySettings(), this);
         }
 
-        if (!facility.getTimeSettings().isEmpty() || !facility.getWeekdaySettings().isEmpty()) {
+        if (facility.shouldCreateSchedules()) {
             Schedules schedules = Schedules
                 .create3MonthFacilitySchedules(this.timeSettings, this.weekdaySettings,
                     YearMonth.now());
@@ -131,22 +129,29 @@ public class Facility extends BaseTimeEntity {
         }
     }
 
-    public void create1MonthDefaultSchedules(YearMonth createYearMonth,
-        Member loginMember) {
-        verifyManagementPermission(loginMember);
+    private boolean shouldUpdateTimeSettings() {
+        return !timeSettings.isEmpty();
+    }
 
+    private boolean shouldUpdateWeekdaySettings() {
+        return !weekdaySettings.isEmpty();
+    }
+
+    public boolean shouldCreateSchedules() {
+        return shouldUpdateTimeSettings() || shouldUpdateWeekdaySettings();
+    }
+
+    public void create1MonthDefaultSchedules(YearMonth createYearMonth) {
         Schedules schedules = Schedules.create1MonthFacilitySchedules(
             this.timeSettings, this.weekdaySettings, createYearMonth);
         this.schedules.addAll(schedules, this);
     }
 
-    public void addSchedule(Schedule createSchedule, Member loginMember) {
-        verifyManagementPermission(loginMember);
+    public void addSchedule(Schedule createSchedule) {
         schedules.addSchedule(createSchedule);
     }
 
-    public void updateSchedule(Schedule updateSchedule, Schedule schedule, Member loginMember) {
-        verifyManagementPermission(loginMember);
+    public void updateSchedule(Schedule updateSchedule, Schedule schedule) {
         schedules.updateSchedule(updateSchedule, schedule);
     }
 
