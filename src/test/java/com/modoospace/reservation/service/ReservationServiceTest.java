@@ -12,27 +12,24 @@ import com.modoospace.member.domain.Member;
 import com.modoospace.member.domain.MemberRepository;
 import com.modoospace.member.domain.Role;
 import com.modoospace.member.service.MemberService;
-import com.modoospace.reservation.controller.dto.AvailabilityTimeResponseDto;
-import com.modoospace.reservation.controller.dto.ReservationCreateDto;
-import com.modoospace.reservation.controller.dto.ReservationReadDto;
+import com.modoospace.reservation.controller.dto.AvailabilityTimeResponse;
+import com.modoospace.reservation.controller.dto.ReservationCreateRequest;
+import com.modoospace.reservation.controller.dto.ReservationResponse;
 import com.modoospace.reservation.domain.ReservationRepository;
 import com.modoospace.reservation.domain.ReservationStatus;
 import com.modoospace.reservation.repository.ReservationQueryRepository;
 import com.modoospace.reservation.serivce.ReservationService;
-import com.modoospace.space.controller.dto.facility.FacilityCreateDto;
-import com.modoospace.space.controller.dto.space.SpaceCreateUpdateDto;
-import com.modoospace.space.controller.dto.timeSetting.TimeSettingCreateDto;
+import com.modoospace.space.controller.dto.facility.FacilityCreateRequest;
+import com.modoospace.space.controller.dto.timeSetting.TimeSettingCreateRequest;
 import com.modoospace.space.domain.Category;
 import com.modoospace.space.domain.CategoryRepository;
 import com.modoospace.space.domain.Facility;
 import com.modoospace.space.domain.FacilityRepository;
-import com.modoospace.space.domain.FacilityScheduleRepository;
-import com.modoospace.space.domain.FacilityType;
+import com.modoospace.space.domain.ScheduleRepository;
 import com.modoospace.space.domain.Space;
 import com.modoospace.space.domain.SpaceRepository;
-import com.modoospace.space.repository.FacilityScheduleQueryRepository;
-import java.time.LocalDateTime;
-import java.time.LocalTime;
+import com.modoospace.space.repository.ScheduleQueryRepository;
+import java.time.LocalDate;
 import java.util.Arrays;
 import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
@@ -48,243 +45,203 @@ import org.springframework.transaction.annotation.Transactional;
 @Transactional
 public class ReservationServiceTest {
 
-  @Autowired
-  private MemberRepository memberRepository;
+    @Autowired
+    private MemberRepository memberRepository;
 
-  @Autowired
-  private CategoryRepository categoryRepository;
+    @Autowired
+    private CategoryRepository categoryRepository;
 
-  @Autowired
-  private SpaceRepository spaceRepository;
+    @Autowired
+    private SpaceRepository spaceRepository;
 
-  @Autowired
-  private FacilityRepository facilityRepository;
+    @Autowired
+    private FacilityRepository facilityRepository;
 
-  private Member visitorMember;
+    private Member visitorMember;
 
-  private Member hostMember;
+    private Member hostMember;
 
-  private Facility roomFacility;
+    private Facility facility1;
 
-  private Facility seatFacility;
+    private Facility facility2;
 
-  private LocalDateTime now;
+    private ReservationService reservationService;
 
-  private ReservationService reservationService;
+    @Autowired
+    private MemberService memberService;
 
-  // TODO : AlarmProducer mock객체를 Injection하기 위해 테스트에 사용되지 않는
-  //        하지만 ReservationService에 결합된 클래스들을 가져오는게 맞는걸까?
-  @Autowired
-  private MemberService memberService;
+    @Autowired
+    private ScheduleRepository scheduleRepository;
 
-  @Autowired
-  private FacilityScheduleRepository facilityScheduleRepository;
+    @Autowired
+    private ScheduleQueryRepository scheduleQueryRepository;
 
-  @Autowired
-  private FacilityScheduleQueryRepository facilityScheduleQueryRepository;
+    @Autowired
+    private ReservationRepository reservationRepository;
 
-  @Autowired
-  private ReservationRepository reservationRepository;
+    @Autowired
+    private ReservationQueryRepository reservationQueryRepository;
 
-  @Autowired
-  private ReservationQueryRepository reservationQueryRepository;
+    private LocalDate now;
 
-  @BeforeEach
-  public void setUp() {
-    AlarmProducer alarmProducerMock = mock(AlarmProducer.class);
-    reservationService = new ReservationService(memberService, facilityRepository,
-        facilityScheduleRepository, facilityScheduleQueryRepository, reservationRepository,
-        reservationQueryRepository, alarmProducerMock);
+    @BeforeEach
+    public void setUp() {
+        AlarmProducer alarmProducerMock = mock(AlarmProducer.class);
+        reservationService = new ReservationService(memberService, facilityRepository,
+            scheduleRepository, scheduleQueryRepository, reservationRepository,
+            reservationQueryRepository, alarmProducerMock);
 
-    hostMember = Member.builder()
-        .email("host@email")
-        .name("host")
-        .role(Role.HOST)
-        .build();
-    memberRepository.save(hostMember);
+        hostMember = Member.builder()
+            .email("host@email")
+            .name("host")
+            .role(Role.HOST)
+            .build();
+        memberRepository.save(hostMember);
 
-    visitorMember = Member.builder()
-        .email("visitor@email")
-        .name("visitor")
-        .role(Role.VISITOR)
-        .build();
-    memberRepository.save(visitorMember);
+        visitorMember = Member.builder()
+            .email("visitor@email")
+            .name("visitor")
+            .role(Role.VISITOR)
+            .build();
+        memberRepository.save(visitorMember);
 
-    Category category = Category.builder()
-        .name("스터디 공간")
-        .build();
-    categoryRepository.save(category);
+        Category category = new Category("스터디 공간");
+        categoryRepository.save(category);
 
-    SpaceCreateUpdateDto spaceCreateDto = SpaceCreateUpdateDto.builder()
-        .name("공간이름")
-        .description("설명")
-        .build();
-    Space space = spaceCreateDto.toEntity(category, hostMember);
-    spaceRepository.save(space);
+        Space space = Space.builder()
+            .name("공간이름")
+            .description("설명")
+            .category(category)
+            .host(hostMember)
+            .build();
+        spaceRepository.save(space);
 
-    FacilityCreateDto createRoomDto = FacilityCreateDto.builder()
-        .name("스터디룸")
-        .facilityType(FacilityType.ROOM)
-        .description("1~4인실 입니다.")
-        .reservationEnable(true)
-        .timeSettings(Arrays
-            .asList(new TimeSettingCreateDto(LocalTime.of(9, 0, 0), LocalTime.of(23, 59, 59))))
-        .build();
-    roomFacility = facilityRepository.save(createRoomDto.toEntity(space));
+        // TimeSetting, WeekSetting 기본값이 필요하여 Request 사용.
+        FacilityCreateRequest createRequest1 = FacilityCreateRequest.builder()
+            .name("스터디룸")
+            .reservationEnable(true)
+            .minUser(1)
+            .maxUser(4)
+            .description("1~4인실 입니다.")
+            .timeSettings(
+                Arrays.asList(new TimeSettingCreateRequest(9, 24))
+            )
+            .build();
+        facility1 = facilityRepository.save(createRequest1.toEntity(space));
 
-    FacilityCreateDto createSeatDto = FacilityCreateDto.builder()
-        .name("스터디좌석")
-        .facilityType(FacilityType.SEAT)
-        .description("개인좌석입니다.")
-        .reservationEnable(true)
-        .timeSettings(Arrays
-            .asList(new TimeSettingCreateDto(LocalTime.of(0, 0, 0), LocalTime.of(23, 59, 59))))
-        .build();
-    seatFacility = facilityRepository.save(createSeatDto.toEntity(space));
+        FacilityCreateRequest createRequest2 = FacilityCreateRequest.builder()
+            .name("스터디룸2")
+            .reservationEnable(true)
+            .minUser(3)
+            .maxUser(6)
+            .description("3~6인실 입니다.")
+            .build();
+        facility2 = facilityRepository.save(createRequest2.toEntity(space));
 
-    now = LocalDateTime.now();
-  }
+        now = LocalDate.now();
+    }
 
-  @DisplayName("특정 날짜의 예약가능시간을 조회할 수 있다.")
-  @Test
-  public void getAvailableTimes() {
-    AvailabilityTimeResponseDto retDto = reservationService
-        .getAvailabilityTime(roomFacility.getId(), now.toLocalDate());
+    @DisplayName("예약가능한 시간을 조회한다.(9시~24시)")
+    @Test
+    public void getAvailabilityTime() {
+        AvailabilityTimeResponse retResponse = reservationService.getAvailabilityTime(facility1.getId(),
+            now);
 
-    // 09:00:00 ~ 23:59:59
-    Assertions.assertThat(retDto.getAvailableTimes()).hasSize(15);
-  }
+        // 9~23
+        Assertions.assertThat(retResponse.getTimeResponses().stream()
+                .filter(timeResponse -> timeResponse.getAvailable()))
+            .hasSize(15);
+    }
 
-  @DisplayName("특정 날짜의 예약가능시간을 조회할 수 있다.(24시간 오픈)")
-  @Test
-  public void getAvailableTimes_24Open() {
-    AvailabilityTimeResponseDto retDto = reservationService
-        .getAvailabilityTime(seatFacility.getId(), now.toLocalDate());
+    @DisplayName("예약가능한 시간을 조회한다.(0시~24시)")
+    @Test
+    public void getAvailabilityTime_24Open() {
+        AvailabilityTimeResponse retResponse = reservationService.getAvailabilityTime(facility2.getId(),
+            LocalDate.now());
 
-    // 00:00:00 ~ 23:59:59
-    Assertions.assertThat(retDto.getAvailableTimes()).hasSize(24);
-  }
+        // 0~23
+        Assertions.assertThat(retResponse.getTimeResponses().stream()
+                .filter(timeResponse -> timeResponse.getAvailable()))
+            .hasSize(24);
+    }
 
-  @DisplayName("특정 날짜의 예약가능시간을 조회할 수 있다.(12~15시 예약존재)")
-  @Test
-  public void getAvailableTimes_ifPresentReservation() {
-    LocalDateTime reservationStart = now.toLocalDate().atTime(LocalTime.of(12, 0, 0));
-    LocalDateTime reservationEnd = now.toLocalDate().atTime(LocalTime.of(14, 59, 59));
-    ReservationCreateDto dto = new ReservationCreateDto(reservationStart, reservationEnd);
+    @DisplayName("특정 날짜의 예약가능시간을 조회할 수 있다.(12~15시 예약존재)")
+    @Test
+    public void getAvailableTimes_ifPresentReservation() {
+        ReservationCreateRequest createRequest = new ReservationCreateRequest(3, now, 12, now, 15);
 
-    reservationService.createReservation(dto, roomFacility.getId(), visitorMember.getEmail());
+        reservationService.createReservation(createRequest, facility1.getId(),
+            visitorMember.getEmail());
 
-    AvailabilityTimeResponseDto retDto = reservationService
-        .getAvailabilityTime(roomFacility.getId(), now.toLocalDate());
+        AvailabilityTimeResponse retResponse = reservationService.getAvailabilityTime(facility1.getId(),
+            LocalDate.now());
 
-    // 09:00:00 ~ 11:59:59, 15:00:00 ~ 23:59:59
-    Assertions.assertThat(retDto.getAvailableTimes()).hasSize(15 - 3);
-  }
+        // 9시 ~ 12시, 15시 ~ 24시
+        Assertions.assertThat(retResponse.getTimeResponses().stream()
+                .filter(timeResponse -> timeResponse.getAvailable()))
+            .hasSize(15 - 3);
+    }
 
-  @DisplayName("로그인한 멤버가 비지터일 경우 예약을 생성할 수 있다.")
-  @Test
-  public void createReservation_IfVisitor() {
-    LocalDateTime reservationStart = now.toLocalDate().atTime(LocalTime.of(12, 0, 0));
-    LocalDateTime reservationEnd = now.toLocalDate().atTime(LocalTime.of(14, 59, 59));
-    ReservationCreateDto dto = new ReservationCreateDto(reservationStart, reservationEnd);
-    Long reservationId = reservationService.createReservation(dto, roomFacility.getId(),
-        visitorMember.getEmail());
+    @DisplayName("Visitor는 예약을 생성할 수 있다.")
+    @Test
+    public void createReservation_IfVisitor() {
+        ReservationCreateRequest createRequest = new ReservationCreateRequest(3, now, 18, now, 21);
 
-    ReservationReadDto readDto = reservationService.findReservation(reservationId,
-        visitorMember.getEmail());
+        Long reservationId = reservationService.createReservation(createRequest, facility1.getId(),
+            visitorMember.getEmail());
 
-    assertAll(
-        () -> assertThat(readDto.getId()).isEqualTo(reservationId),
-        () -> assertThat(readDto.getFacility().getId()).isEqualTo(roomFacility.getId()),
-        () -> assertThat(readDto.getMember().getId()).isEqualTo(visitorMember.getId()),
-        () -> assertThat(readDto.getStatus()).isEqualTo(ReservationStatus.WAITING)
-    );
-  }
+        ReservationResponse retResponse = reservationService.findReservation(reservationId,
+            visitorMember.getEmail());
+        assertAll(
+            () -> assertThat(retResponse.getId()).isEqualTo(reservationId),
+            () -> assertThat(retResponse.getFacility().getId()).isEqualTo(facility1.getId()),
+            () -> assertThat(retResponse.getMember().getId()).isEqualTo(visitorMember.getId()),
+            () -> assertThat(retResponse.getStatus()).isEqualTo(ReservationStatus.WAITING)
+        );
+    }
 
-  @DisplayName("기존 예약과 시간이 겹친다면 Room은 예약할 수 없다.")
-  @Test
-  public void createReservationRoom_throwException_ifOverlappingReservation() {
-    LocalDateTime reservationStart = now.toLocalDate().atTime(LocalTime.of(12, 0, 0));
-    LocalDateTime reservationEnd = now.toLocalDate().atTime(LocalTime.of(14, 59, 59));
-    ReservationCreateDto dto = new ReservationCreateDto(reservationStart, reservationEnd);
-    reservationService.createReservation(dto, roomFacility.getId(), visitorMember.getEmail());
+    @DisplayName("기존 예약과 시간이 겹친다면 Room은 예약할 수 없다.")
+    @Test
+    public void createReservationRoom_throwException_ifOverlappingReservation() {
+        ReservationCreateRequest createRequest = new ReservationCreateRequest(3, now, 12, now, 15);
+        reservationService.createReservation(createRequest, facility1.getId(),
+            visitorMember.getEmail());
 
-    reservationStart = now.toLocalDate().atTime(LocalTime.of(13, 0, 0));
-    reservationEnd = now.toLocalDate().atTime(LocalTime.of(15, 59, 59));
-    ReservationCreateDto dto2 = new ReservationCreateDto(reservationStart, reservationEnd);
-    assertThatThrownBy(() -> reservationService
-        .createReservation(dto2, roomFacility.getId(), visitorMember.getEmail()))
-        .isInstanceOf(ConflictingReservationException.class);
-  }
+        ReservationCreateRequest createRequest2 = new ReservationCreateRequest(3, now, 13, now, 15);
+        assertThatThrownBy(() -> reservationService
+            .createReservation(createRequest2, facility1.getId(), visitorMember.getEmail()))
+            .isInstanceOf(ConflictingReservationException.class);
+    }
 
-  @DisplayName("좌석을 예약할 경우 예약상태는 완료가 된다.")
-  @Test
-  public void reservationStatus_IfSeat() {
-    LocalDateTime reservationStart = now;
-    LocalDateTime reservationEnd = now.plusHours(3);
-    ReservationCreateDto dto = new ReservationCreateDto(reservationStart, reservationEnd);
-    Long reservationId = reservationService.createReservation(dto, seatFacility.getId(),
-        visitorMember.getEmail());
+    @DisplayName("방문자가 본인의 예약을 취소할 수 있다.")
+    @Test
+    public void cancelReservation() {
+        ReservationCreateRequest createRequest = new ReservationCreateRequest(3, now, 12, now, 15);
+        Long reservationId = reservationService
+            .createReservation(createRequest, facility1.getId(), visitorMember.getEmail());
 
-    ReservationReadDto readDto = reservationService.findReservation(reservationId,
-        visitorMember.getEmail());
-    assertAll(
-        () -> assertThat(readDto.getId()).isEqualTo(reservationId),
-        () -> assertThat(readDto.getFacility().getId()).isEqualTo(seatFacility.getId()),
-        () -> assertThat(readDto.getMember().getId()).isEqualTo(visitorMember.getId()),
-        () -> assertThat(readDto.getStatus()).isEqualTo(ReservationStatus.COMPLETED)
-    );
-  }
+        reservationService.cancelReservation(reservationId, visitorMember.getEmail());
 
-  @DisplayName("다른 누군가가 사용중이라면 Seat은 예약할 수 없다.")
-  @Test
-  public void createReservationSeat_throwException_ifOverlappingReservation() {
-    LocalDateTime reservationStart = now;
-    LocalDateTime reservationEnd = now.plusHours(3);
-    ReservationCreateDto dto = new ReservationCreateDto(reservationStart, reservationEnd);
-    reservationService.createReservation(dto, seatFacility.getId(), visitorMember.getEmail());
+        ReservationResponse retResponse = reservationService
+            .findReservation(reservationId, visitorMember.getEmail());
+        assertAll(
+            () -> assertThat(retResponse.getId()).isEqualTo(reservationId),
+            () -> assertThat(retResponse.getMember().getEmail()).isEqualTo(visitorMember.getEmail()),
+            () -> assertThat(retResponse.getStatus()).isEqualTo(ReservationStatus.CANCELED)
+        );
+    }
 
-    reservationStart = now.plusHours(1);
-    reservationEnd = now.plusHours(3);
-    ReservationCreateDto dto2 = new ReservationCreateDto(reservationStart, reservationEnd);
-    assertThatThrownBy(() -> reservationService
-        .createReservation(dto2, seatFacility.getId(), visitorMember.getEmail()))
-        .isInstanceOf(ConflictingReservationException.class);
-  }
+    @DisplayName("예약을 생성한 사용자가 아닌 다른 사용자가 해당 예약을 취소하려고 한다면 예외가 발생한다")
+    @Test
+    public void cancelReservation_throwException_IfNotMyReservation() {
+        ReservationCreateRequest createRequest = new ReservationCreateRequest(3, now, 12, now, 15);
+        Long reservationId = reservationService
+            .createReservation(createRequest, facility1.getId(), visitorMember.getEmail());
 
-  @DisplayName("방문자가 본인의 예약을 취소할 수 있다.")
-  @Test
-  public void cancelReservation() {
-    LocalDateTime reservationStart = now.toLocalDate().atTime(LocalTime.of(12, 0, 0));
-    LocalDateTime reservationEnd = now.toLocalDate().atTime(LocalTime.of(14, 59, 59));
-    ReservationCreateDto dto = new ReservationCreateDto(reservationStart, reservationEnd);
-    Long reservationId = reservationService
-        .createReservation(dto, roomFacility.getId(), visitorMember.getEmail());
-
-    reservationService.cancelReservation(reservationId, visitorMember.getEmail());
-
-    ReservationReadDto readDto = reservationService
-        .findReservation(reservationId, visitorMember.getEmail());
-    assertAll(
-        () -> assertThat(readDto.getId()).isEqualTo(reservationId),
-        () -> assertThat(readDto.getMember().getEmail()).isEqualTo(visitorMember.getEmail()),
-        () -> assertThat(readDto.getStatus()).isEqualTo(ReservationStatus.CANCELED)
-    );
-  }
-
-  @DisplayName("예약을 생성한 사용자가 아닌 다른 사용자가 해당 예약을 취소하려고 한다면 예외가 발생한다")
-  @Test
-  public void cancelReservation_throwException_IfNotMyReservation() {
-    LocalDateTime reservationStart = now.toLocalDate().atTime(LocalTime.of(12, 0, 0));
-    LocalDateTime reservationEnd = now.toLocalDate().atTime(LocalTime.of(14, 59, 59));
-    ReservationCreateDto dto = new ReservationCreateDto(reservationStart, reservationEnd);
-    Long reservationId = reservationService
-        .createReservation(dto, roomFacility.getId(), visitorMember.getEmail());
-
-    assertAll(
-        () -> assertThatThrownBy(
-            () -> reservationService.cancelReservation(reservationId, hostMember.getEmail()))
-            .isInstanceOf(PermissionDeniedException.class)
-    );
-  }
+        assertAll(
+            () -> assertThatThrownBy(
+                () -> reservationService.cancelReservation(reservationId, hostMember.getEmail()))
+                .isInstanceOf(PermissionDeniedException.class)
+        );
+    }
 }

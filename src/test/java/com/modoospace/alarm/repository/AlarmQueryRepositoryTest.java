@@ -4,7 +4,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 import com.modoospace.TestConfig;
 import com.modoospace.alarm.controller.dto.AlarmEvent;
-import com.modoospace.alarm.controller.dto.AlarmReadDto;
+import com.modoospace.alarm.controller.dto.AlarmResponse;
 import com.modoospace.alarm.domain.AlarmRepository;
 import com.modoospace.alarm.domain.AlarmType;
 import com.modoospace.member.domain.Member;
@@ -62,13 +62,13 @@ class AlarmQueryRepositoryTest {
   @Test
   public void searchAlarms(){
     PageRequest pageRequest = PageRequest.of(0, 10);
-    Page<AlarmReadDto> alarmReadDtos = alarmQueryRepository.searchByMember(hostMember, pageRequest);
+    Page<AlarmResponse> alarms = alarmQueryRepository.searchByMember(hostMember, pageRequest);
 
-    List<AlarmReadDto> retContent = alarmReadDtos.getContent();
+    List<AlarmResponse> retContent = alarms.getContent();
 
     assertThat(retContent).hasSize(10);
-    for (AlarmReadDto alarmReadDto : retContent) {
-      System.out.println("alarmReadDto = " + alarmReadDto.getMessage());
+    for (AlarmResponse alarm : retContent) {
+      System.out.println("alarm = " + alarm.getMessage());
     }
   }
 }

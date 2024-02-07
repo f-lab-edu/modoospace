@@ -1,7 +1,7 @@
 package com.modoospace.space.controller;
 
 import com.modoospace.config.auth.LoginEmail;
-import com.modoospace.space.controller.dto.space.SpaceCreateUpdateDto;
+import com.modoospace.space.controller.dto.space.SpaceCreateUpdateRequest;
 import com.modoospace.space.sevice.SpaceService;
 import javax.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -22,9 +22,9 @@ public class AdminSpaceController {
 
   @PutMapping("/{spaceId}")
   public ResponseEntity<Void> update(@PathVariable Long spaceId,
-      @RequestBody @Valid SpaceCreateUpdateDto updateDto,
+      @RequestBody @Valid SpaceCreateUpdateRequest updateRequest,
       @LoginEmail String loginEmail) {
-    spaceService.updateSpace(spaceId, updateDto, loginEmail);
+    spaceService.updateSpace(spaceId, updateRequest, loginEmail);
     return ResponseEntity.noContent().build();
   }
 

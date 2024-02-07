@@ -1,7 +1,7 @@
 package com.modoospace.member.service;
 
 import com.modoospace.common.exception.NotFoundEntityException;
-import com.modoospace.member.controller.dto.MemberUpdateDto;
+import com.modoospace.member.controller.dto.MemberUpdateRequest;
 import com.modoospace.member.domain.Member;
 import com.modoospace.member.domain.MemberRepository;
 import com.modoospace.member.repository.MemberCacheRepository;
@@ -17,11 +17,11 @@ public class MemberService {
   private final MemberCacheRepository memberCacheRepository;
 
   @Transactional
-  public void updateMemberRole(Long memberId, MemberUpdateDto updateDto, String loginEmail) {
+  public void updateMemberRole(Long memberId, MemberUpdateRequest updateRequest, String loginEmail) {
     Member loginMember = findMemberByEmail(loginEmail);
     Member member = findMemberById(memberId);
 
-    member.updateRoleOnlyAdmin(updateDto.getRole(), loginMember);
+    member.updateRoleOnlyAdmin(updateRequest.getRole(), loginMember);
     memberCacheRepository.save(member);
   }
 

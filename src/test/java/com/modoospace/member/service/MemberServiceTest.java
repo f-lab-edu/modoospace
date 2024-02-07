@@ -4,7 +4,7 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.junit.jupiter.api.Assertions.assertAll;
 
 import com.modoospace.common.exception.PermissionDeniedException;
-import com.modoospace.member.controller.dto.MemberUpdateDto;
+import com.modoospace.member.controller.dto.MemberUpdateRequest;
 import com.modoospace.member.domain.Member;
 import com.modoospace.member.domain.MemberRepository;
 import com.modoospace.member.domain.Role;
@@ -69,11 +69,11 @@ class MemberServiceTest {
   @DisplayName("Visitor 사용자를 Host로 변경한디.")
   @Test
   public void updateMemberRole() {
-    MemberUpdateDto updateDto = MemberUpdateDto.builder()
+    MemberUpdateRequest updateRequest = MemberUpdateRequest.builder()
         .role(Role.HOST)
         .build();
 
-    memberService.updateMemberRole(visitorMember.getId(), updateDto, "admin@email");
+    memberService.updateMemberRole(visitorMember.getId(), updateRequest, "admin@email");
 
     Member updateMember = memberRepository.findByEmail("visitor@email").get();
     updateMember.verifyRolePermission(Role.HOST);
@@ -82,16 +82,16 @@ class MemberServiceTest {
   @DisplayName("관리자가 아닐 경우, 사용자의 권한을 변경할 수 없다. (본인도 포함이다.)")
   @Test
   public void updateMemberRole_throwException_ifNotAdmin() {
-    MemberUpdateDto updateDto = MemberUpdateDto.builder()
+    MemberUpdateRequest updateRequest = MemberUpdateRequest.builder()
         .role(Role.HOST)
         .build();
 
     assertAll(
         () -> assertThatThrownBy(
-            () -> memberService.updateMemberRole(visitorMember.getId(), updateDto, "visitor@email"))
+            () -> memberService.updateMemberRole(visitorMember.getId(), updateRequest, "visitor@email"))
             .isInstanceOf(PermissionDeniedException.class),
         () -> assertThatThrownBy(
-            () -> memberService.updateMemberRole(hostMember.getId(), updateDto, "host@email"))
+            () -> memberService.updateMemberRole(hostMember.getId(), updateRequest, "host@email"))
             .isInstanceOf(PermissionDeniedException.class)
     );
   }

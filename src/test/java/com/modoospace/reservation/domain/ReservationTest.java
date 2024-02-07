@@ -4,153 +4,299 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.junit.jupiter.api.Assertions.assertAll;
 
+import com.modoospace.common.exception.LimitNumOfUserException;
+import com.modoospace.common.exception.NotOpenedFacilityException;
 import com.modoospace.common.exception.PermissionDeniedException;
 import com.modoospace.member.domain.Member;
 import com.modoospace.member.domain.Role;
 import com.modoospace.space.domain.Facility;
-import com.modoospace.space.domain.FacilityType;
 import com.modoospace.space.domain.Space;
+import com.modoospace.space.domain.TimeRange;
 import com.modoospace.space.domain.TimeSetting;
 import com.modoospace.space.domain.TimeSettings;
 import com.modoospace.space.domain.WeekdaySetting;
 import com.modoospace.space.domain.WeekdaySettings;
 import java.time.DayOfWeek;
 import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.time.LocalTime;
 import java.util.Arrays;
 import java.util.List;
+import java.util.stream.Collectors;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
 public class ReservationTest {
 
-  private Member adminMember;
-  private Member hostMember;
-  private Member visitorMember;
+    private Member adminMember;
+    private Member hostMember;
+    private Member visitorMember;
 
-  private Space space;
+    private Member notVisitorMember;
 
-  private Facility facilityRoom;
+    private Space space;
+    private Facility enableFacility;
 
-  @BeforeEach
-  public void setUp() {
+    private Facility notEnableFacility;
 
-    adminMember = Member.builder()
-        .id(1L)
-        .email("admin@email")
-        .name("admin")
-        .role(Role.ADMIN)
-        .build();
+    @BeforeEach
+    public void setUp() {
+        adminMember = Member.builder()
+            .id(1L)
+            .email("admin@email")
+            .name("admin")
+            .role(Role.ADMIN)
+            .build();
 
-    hostMember = Member.builder()
-        .id(2L)
-        .email("host@email")
-        .name("host")
-        .role(Role.HOST)
-        .build();
+        hostMember = Member.builder()
+            .id(2L)
+            .email("host@email")
+            .name("host")
+            .role(Role.HOST)
+            .build();
 
-    visitorMember = Member.builder()
-        .id(3L)
-        .email("visitor@email")
-        .name("visitor")
-        .role(Role.VISITOR)
-        .build();
+        visitorMember = Member.builder()
+            .id(3L)
+            .email("visitor@email")
+            .name("visitor")
+            .role(Role.VISITOR)
+            .build();
 
-    space = Space.builder()
-        .name("test")
-        .host(hostMember)
-        .build();
+        notVisitorMember = Member.builder()
+            .id(4L)
+            .email("notVisitor@email")
+            .name("notVisitor")
+            .role(Role.VISITOR)
+            .build();
 
-    List<TimeSetting> timeSettings = Arrays.asList(TimeSetting.builder()
-        .startTime(LocalTime.of(0, 0))
-        .endTime(LocalTime.of(23, 59, 59))
-        .build());
+        space = Space.builder()
+            .name("test")
+            .host(hostMember)
+            .build();
 
-    List<WeekdaySetting> weekdaySettings = Arrays.asList(
-        WeekdaySetting.builder()
-            .weekday(DayOfWeek.MONDAY)
-            .build(),
-        WeekdaySetting.builder()
-            .weekday(DayOfWeek.TUESDAY)
-            .build(),
-        WeekdaySetting.builder()
-            .weekday(DayOfWeek.WEDNESDAY)
-            .build(),
-        WeekdaySetting.builder()
-            .weekday(DayOfWeek.THURSDAY)
-            .build(),
-        WeekdaySetting.builder()
-            .weekday(DayOfWeek.FRIDAY)
-            .build());
+        TimeSettings timeSettings = createTimeSettings(new TimeRange(0, 24));
+        WeekdaySettings weekDaySettings = createWeekDaySettings(DayOfWeek.MONDAY, DayOfWeek.TUESDAY,
+            DayOfWeek.WEDNESDAY, DayOfWeek.THURSDAY, DayOfWeek.FRIDAY);
+        enableFacility = Facility.builder()
+            .name("스터디룸 1~3인실")
+            .reservationEnable(true)
+            .minUser(1)
+            .maxUser(3)
+            .description("1~3인실 입니다.")
+            .timeSettings(timeSettings)
+            .weekdaySettings(weekDaySettings)
+            .space(space)
+            .build();
 
-    facilityRoom = Facility.builder()
-        .name("룸")
-        .facilityType(FacilityType.ROOM)
-        .reservationEnable(true)
-        .description("설명")
-        .timeSettings(new TimeSettings(timeSettings))
-        .weekdaySettings(new WeekdaySettings(weekdaySettings))
-        .space(space)
-        .build();
-  }
+        notEnableFacility = Facility.builder()
+            .name("스터디룸 4~6인실")
+            .reservationEnable(false)
+            .minUser(4)
+            .maxUser(6)
+            .description("4~6인실 입니다.")
+            .timeSettings(timeSettings)
+            .weekdaySettings(weekDaySettings)
+            .space(space)
+            .build();
+    }
 
-  @DisplayName("방문자는 룸을 예약할 수 있다.")
-  @Test
-  public void reservationForRoom() {
-    Reservation reservation = Reservation.builder()
-        .reservationStart(LocalDateTime.now())
-        .reservationEnd(LocalDateTime.now().plusHours(3))
-        .visitor(visitorMember)
-        .facility(facilityRoom)
-        .build();
+    private TimeSettings createTimeSettings(TimeRange... timeRanges) {
+        List<TimeSetting> timeSettings = Arrays.stream(timeRanges)
+            .map(TimeSetting::new)
+            .collect(Collectors.toList());
+        return new TimeSettings(timeSettings);
+    }
 
-    assertThat(reservation.getVisitor()).isEqualTo(visitorMember);
-  }
+    private WeekdaySettings createWeekDaySettings(DayOfWeek... dayOfWeeks) {
+        List<WeekdaySetting> weekdaySettings = Arrays.stream(dayOfWeeks)
+            .map(WeekdaySetting::new)
+            .collect(Collectors.toList());
+        return new WeekdaySettings(weekdaySettings);
+    }
 
-  @DisplayName("호스트 및 관리자는 예약을 변경할 수 있다.")
-  @Test
-  public void updateAsHost() {
-    Reservation reservation = Reservation.builder()
-        .reservationStart(LocalDateTime.now())
-        .reservationEnd(LocalDateTime.now().plusHours(3))
-        .visitor(visitorMember)
-        .facility(facilityRoom)
-        .build();
+    @DisplayName("최소인원 미만이면 예약을 생성할 수 없다.")
+    @Test
+    public void createReservation_throwException_ifSmallMinUser() {
+        DateTimeRange dateTimeRange = new DateTimeRange(
+            LocalDate.now(), 14, LocalDate.now(), 17);
+        assertThatThrownBy(() -> Reservation.builder()
+            .numOfUser(0)
+            .dateTimeRange(dateTimeRange)
+            .visitor(visitorMember)
+            .facility(enableFacility)
+            .build()).isInstanceOf(LimitNumOfUserException.class);
+    }
 
-    assertAll(
-        () -> reservation.updateAsHost(reservation, hostMember),
-        () -> reservation.updateAsHost(reservation, adminMember)
-    );
-  }
+    @DisplayName("최대인원 초과이면 예약을 생성할 수 없다.")
+    @Test
+    public void createReservation_throwException_ifBigMaxUser() {
+        DateTimeRange dateTimeRange = new DateTimeRange(
+            LocalDate.now(), 14, LocalDate.now(), 17);
+        assertThatThrownBy(() -> Reservation.builder()
+            .numOfUser(4)
+            .dateTimeRange(dateTimeRange)
+            .visitor(visitorMember)
+            .facility(enableFacility)
+            .build()).isInstanceOf(LimitNumOfUserException.class);
+    }
 
-  @DisplayName("예약 요청자와 방문자가 다를 경우 예외가 발생한다.")
-  @Test
-  public void verifySameVisitor() {
-    Reservation reservation = Reservation.builder()
-        .reservationStart(LocalDateTime.now())
-        .reservationEnd(LocalDateTime.now().plusHours(3))
-        .visitor(hostMember)
-        .facility(facilityRoom)
-        .build();
+    @DisplayName("시설이 열리지 않았으면 예약을 생성할 수 없다.")
+    @Test
+    public void createReservation_throwException_ifNotOpenFacility() {
+        DateTimeRange dateTimeRange = new DateTimeRange(
+            LocalDate.now(), 14, LocalDate.now(), 17);
+        assertThatThrownBy(() -> Reservation.builder()
+            .numOfUser(4)
+            .dateTimeRange(dateTimeRange)
+            .visitor(visitorMember)
+            .facility(notEnableFacility)
+            .build())
+            .isInstanceOf(NotOpenedFacilityException.class);
+    }
 
-    assertThatThrownBy(() -> reservation.verifySameVisitor(visitorMember))
-        .isInstanceOf(PermissionDeniedException.class);
-  }
+    @DisplayName("호스트는 예약을 승인할 수 있다.")
+    @Test
+    public void approve_ifHost() {
+        DateTimeRange dateTimeRange = new DateTimeRange(
+            LocalDate.now(), 14, LocalDate.now(), 17);
+        Reservation reservation = Reservation.builder()
+            .numOfUser(2)
+            .dateTimeRange(dateTimeRange)
+            .visitor(visitorMember)
+            .facility(enableFacility)
+            .build();
 
-  @DisplayName("예약이 해당 시간 사이에 있는지 체크한다.")
-  @Test
-  public void isReservationBetween() {
-    LocalDateTime start = LocalDateTime.of(LocalDate.now(), LocalTime.of(9, 0, 0));
-    Reservation reservation = Reservation.builder()
-        .reservationStart(start)
-        .reservationEnd(start.plusHours(3))
-        .visitor(hostMember)
-        .facility(facilityRoom)
-        .build();
+        reservation.approveAsHost(hostMember);
 
-    assertThat(reservation.isReservationBetween(start.toLocalTime())).isTrue();
-    assertThat(reservation.isReservationBetween(start.toLocalTime().minusHours(2))).isFalse();
-  }
+        assertThat(reservation.getStatus()).isEqualTo(ReservationStatus.COMPLETED);
+    }
+
+    @DisplayName("관리자는 예약을 승인할 수 있다.")
+    @Test
+    public void approve_ifAdmin() {
+        DateTimeRange dateTimeRange = new DateTimeRange(
+            LocalDate.now(), 14, LocalDate.now(), 17);
+        Reservation reservation = Reservation.builder()
+            .numOfUser(2)
+            .dateTimeRange(dateTimeRange)
+            .visitor(visitorMember)
+            .facility(enableFacility)
+            .build();
+
+        reservation.approveAsHost(adminMember);
+
+        assertThat(reservation.getStatus()).isEqualTo(ReservationStatus.COMPLETED);
+    }
+
+    @DisplayName("호스트는 예약을 수정할 수 있다.")
+    @Test
+    public void update_ifHost() {
+        DateTimeRange dateTimeRange = new DateTimeRange(
+            LocalDate.now(), 14, LocalDate.now(), 17);
+        Reservation reservation = Reservation.builder()
+            .numOfUser(2)
+            .dateTimeRange(dateTimeRange)
+            .visitor(visitorMember)
+            .facility(enableFacility)
+            .build();
+
+        DateTimeRange updateDateTimeRange = new DateTimeRange(
+            LocalDate.now(), 17, LocalDate.now(), 22);
+        Reservation updateReservation = Reservation.builder()
+            .numOfUser(3)
+            .dateTimeRange(updateDateTimeRange)
+            .status(ReservationStatus.CANCELED)
+            .visitor(reservation.getVisitor())
+            .facility(reservation.getFacility())
+            .build();
+
+        reservation.updateAsHost(updateReservation, hostMember);
+
+        assertAll(
+            () -> assertThat(reservation.getNumOfUser()).isEqualTo(3),
+            () -> assertThat(reservation.isBetween(LocalDate.now(), 18)),
+            () -> assertThat(reservation.getStatus()).isEqualTo(ReservationStatus.CANCELED)
+        );
+    }
+
+    @DisplayName("방문자는 예약을 취소할 수 있다.")
+    @Test
+    public void cancel_ifVisitor() {
+        DateTimeRange dateTimeRange = new DateTimeRange(
+            LocalDate.now(), 14, LocalDate.now(), 17);
+        Reservation reservation = Reservation.builder()
+            .numOfUser(2)
+            .dateTimeRange(dateTimeRange)
+            .visitor(visitorMember)
+            .facility(enableFacility)
+            .build();
+
+        reservation.cancelAsVisitor(visitorMember);
+
+        assertThat(reservation.getStatus()).isEqualTo(ReservationStatus.CANCELED);
+    }
+
+    @DisplayName("방문자가 아닌자는 예약을 취소할 수 있다.")
+    @Test
+    public void cancel_throwException_ifVisitor() {
+        DateTimeRange dateTimeRange = new DateTimeRange(
+            LocalDate.now(), 14, LocalDate.now(), 17);
+        Reservation reservation = Reservation.builder()
+            .numOfUser(2)
+            .dateTimeRange(dateTimeRange)
+            .visitor(visitorMember)
+            .facility(enableFacility)
+            .build();
+
+        assertThatThrownBy(() -> reservation.cancelAsVisitor(notVisitorMember))
+            .isInstanceOf(PermissionDeniedException.class);
+    }
+
+    @DisplayName("예약에 접근이 가능한자인지 검증한다.")
+    @Test
+    public void verifyReservationAccess_ifAdminHostVisitor() {
+        DateTimeRange dateTimeRange = new DateTimeRange(
+            LocalDate.now(), 14, LocalDate.now(), 17);
+        Reservation reservation = Reservation.builder()
+            .numOfUser(2)
+            .dateTimeRange(dateTimeRange)
+            .visitor(visitorMember)
+            .facility(enableFacility)
+            .build();
+
+        reservation.verifyReservationAccess(adminMember);
+        reservation.verifyReservationAccess(hostMember);
+        reservation.verifyReservationAccess(visitorMember);
+    }
+
+    @DisplayName("예약에 접근이 불가능한자면 예외를 던진다.")
+    @Test
+    public void verifyReservationAccess_throwException_ifNotVisitor() {
+        DateTimeRange dateTimeRange = new DateTimeRange(
+            LocalDate.now(), 14, LocalDate.now(), 17);
+        Reservation reservation = Reservation.builder()
+            .numOfUser(2)
+            .dateTimeRange(dateTimeRange)
+            .visitor(visitorMember)
+            .facility(enableFacility)
+            .build();
+
+        assertThatThrownBy(() -> reservation.verifyReservationAccess(notVisitorMember))
+            .isInstanceOf(PermissionDeniedException.class);
+    }
+
+    @DisplayName("예약이 해당 시간 사이에 있는지 체크한다.")
+    @Test
+    public void isBetween_true() {
+        DateTimeRange dateTimeRange = new DateTimeRange(
+            LocalDate.now(), 17, LocalDate.now(), 22);
+        Reservation reservation = Reservation.builder()
+            .numOfUser(2)
+            .dateTimeRange(dateTimeRange)
+            .visitor(visitorMember)
+            .facility(enableFacility)
+            .build();
+
+        assertThat(reservation.isBetween(LocalDate.now(), 15)).isFalse();
+        assertThat(reservation.isBetween(LocalDate.now(), 17)).isTrue();
+    }
 }

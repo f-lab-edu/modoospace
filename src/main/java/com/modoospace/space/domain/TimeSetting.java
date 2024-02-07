@@ -1,11 +1,10 @@
 package com.modoospace.space.domain;
 
 import com.modoospace.common.exception.ConflictingTimeException;
-import com.modoospace.common.exception.InvalidTimeRangeException;
+import com.sun.istack.NotNull;
 import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.time.LocalTime;
 import javax.persistence.Column;
+import javax.persistence.Embedded;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
@@ -13,7 +12,6 @@ import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import lombok.AccessLevel;
-import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
@@ -22,66 +20,61 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class TimeSetting {
 
-  @Id
-  @GeneratedValue
-  @Column(name = "time_setting_id")
-  private Long id;
+    @Id
+    @GeneratedValue
+    @Column(name = "time_setting_id")
+    private Long id;
 
-  @Column(nullable = false)
-  private LocalTime startTime;
+    @NotNull
+    @Embedded
+    private TimeRange timeRange;
 
-  @Column(nullable = false)
-  private LocalTime endTime;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "facility_id")
+    private Facility facility;
 
-  @ManyToOne(fetch = FetchType.LAZY)
-  @JoinColumn(name = "facility_id")
-  private Facility facility;
-
-  @Builder
-  public TimeSetting(Long id, LocalTime startTime, LocalTime endTime,
-      Facility facility) {
-    this.id = id;
-
-    validateTimeRange(startTime, endTime);
-    this.startTime = startTime;
-    this.endTime = endTime;
-
-    this.facility = facility;
-  }
-
-  private void validateTimeRange(LocalTime startTime, LocalTime endTime) {
-    if (startTime.isAfter(endTime)) {
-      throw new InvalidTimeRangeException(startTime, endTime);
+    public TimeSetting(TimeRange timeRange) {
+        this(null, timeRange, null);
     }
-  }
 
-  public void setFacility(Facility facility) {
-    this.facility = facility;
-  }
-
-  public void verifyConflicting(TimeSetting compareTimeSetting) {
-    if (!endTime.isBefore(compareTimeSetting.getStartTime()) &&
-        !compareTimeSetting.getEndTime().isBefore(startTime)) {
-      throw new ConflictingTimeException(this, compareTimeSetting);
+    public TimeSetting(Long id, TimeRange timeRange, Facility facility) {
+        this.id = id;
+        this.timeRange = timeRange;
+        this.facility = facility;
     }
-  }
 
-  public FacilitySchedule createFacilitySchedule(LocalDate scheduleDate) {
-    LocalDateTime startDateTime = LocalDateTime.of(scheduleDate, this.startTime);
-    LocalDateTime endDateTime = LocalDateTime.of(scheduleDate, this.endTime);
+    public void verifyConflicting(TimeSetting targetTimeSetting) {
+        if (isConflicting(targetTimeSetting)) {
+            throw new ConflictingTimeException(this, targetTimeSetting);
+        }
+    }
 
-    return FacilitySchedule.builder()
-        .startDateTime(startDateTime)
-        .endDateTime(endDateTime)
-        .facility(this.facility)
-        .build();
-  }
+    private boolean isConflicting(TimeSetting targetTimeSetting) {
+        return this.timeRange.isConflicting(targetTimeSetting.getTimeRange());
+    }
 
-  @Override
-  public String toString() {
-    return "TimeSetting{" +
-        "startTime=" + startTime.toString() +
-        ", endTime=" + endTime.toString() +
-        '}';
-  }
+    public boolean isContinuous(TimeSetting targetTimeSetting) {
+        return this.timeRange.isContinuous(targetTimeSetting.getTimeRange());
+    }
+
+    public void merge(TimeSetting targetTimeSetting) {
+        this.timeRange.mergeTimeRange(targetTimeSetting.getTimeRange());
+    }
+
+    public void setFacility(Facility facility) {
+        this.facility = facility;
+    }
+
+    public Schedule createSchedule(LocalDate date) {
+        return Schedule.builder().date(date).timeRange(this.timeRange).facility(this.facility)
+            .build();
+    }
+
+    public Integer getStartHour() {
+        return timeRange.getStartHour();
+    }
+
+    public Integer getEndHour() {
+        return timeRange.getEndHour();
+    }
 }

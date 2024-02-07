@@ -3,6 +3,7 @@ package com.modoospace.space.domain;
 import static javax.persistence.FetchType.LAZY;
 
 import com.modoospace.common.BaseTimeEntity;
+import com.modoospace.common.exception.DeleteSpaceWithFacilitiesException;
 import com.modoospace.member.domain.Member;
 import com.modoospace.member.domain.Role;
 import com.sun.istack.NotNull;
@@ -28,57 +29,68 @@ import lombok.NoArgsConstructor;
 @Builder
 public class Space extends BaseTimeEntity {
 
-  @Id
-  @GeneratedValue
-  @Column(name = "space_id")
-  private Long id;
+    @Id
+    @GeneratedValue
+    @Column(name = "space_id")
+    private Long id;
 
-  @Column(nullable = false)
-  private String name;
+    @Column(nullable = false)
+    private String name;
 
-  private String description;
+    private String description;
 
-  @NotNull
-  @Embedded
-  private Address address;
+    @NotNull
+    @Embedded
+    private Address address;
 
-  @ManyToOne(fetch = LAZY)
-  @JoinColumn(name = "category_id")
-  private Category category;
+    @ManyToOne(fetch = LAZY)
+    @JoinColumn(name = "category_id")
+    private Category category;
 
-  @ManyToOne(fetch = LAZY)
-  @JoinColumn(name = "host_id")
-  private Member host;
+    @ManyToOne(fetch = LAZY)
+    @JoinColumn(name = "host_id")
+    private Member host;
 
-  @Builder.Default
-  @OneToMany(mappedBy = "space", cascade = CascadeType.ALL)
-  private List<Facility> facilities = new ArrayList<>();
+    @Builder.Default
+    @OneToMany(mappedBy = "space", cascade = CascadeType.ALL)
+    private List<Facility> facilities = new ArrayList<>();
 
-  public Space(Long id, String name, String description, Address address,
-      Category category, Member host, List<Facility> facilities) {
-    this.id = id;
-    this.name = name;
-    this.description = description;
-    this.address = address;
-    this.category = category;
+    public Space(Long id, String name, String description, Address address,
+        Category category, Member host, List<Facility> facilities) {
+        this.id = id;
+        this.name = name;
+        this.description = description;
+        this.address = address;
+        this.category = category;
 
-    host.verifyRolePermission(Role.HOST);
-    this.host = host;
+        host.verifyRolePermission(Role.HOST);
+        this.host = host;
 
-    this.facilities = facilities;
-  }
-
-  public void update(final Space updateSpace, Member loginMember) {
-    verifyManagementPermission(loginMember);
-    this.name = updateSpace.getName();
-    this.description = updateSpace.getDescription();
-    this.address = updateSpace.getAddress();
-  }
-
-  public void verifyManagementPermission(Member loginMember) {
-    if (host.getId().equals(loginMember.getId())) {
-      return;
+        this.facilities = facilities;
     }
-    loginMember.verifyRolePermission(Role.ADMIN);
-  }
+
+    public void update(final Space updateSpace, Member loginMember) {
+        verifyManagementPermission(loginMember);
+        this.name = updateSpace.getName();
+        this.description = updateSpace.getDescription();
+        this.address = updateSpace.getAddress();
+    }
+
+    public void verifyManagementPermission(Member loginMember) {
+        if (host.getId().equals(loginMember.getId())) {
+            return;
+        }
+        loginMember.verifyRolePermission(Role.ADMIN);
+    }
+
+    public void verifyDeletePermission(Member loginMember) {
+        if (hasFacilities()) {
+            throw new DeleteSpaceWithFacilitiesException();
+        }
+        verifyManagementPermission(loginMember);
+    }
+
+     private boolean hasFacilities() {
+        return !facilities.isEmpty();
+    }
 }

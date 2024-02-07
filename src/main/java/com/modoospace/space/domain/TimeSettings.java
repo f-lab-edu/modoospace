@@ -20,43 +20,56 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class TimeSettings {
 
-  @OneToMany(mappedBy = "facility", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
-  private List<TimeSetting> timeSettings = new ArrayList<>();
+    @OneToMany(mappedBy = "facility", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
+    private List<TimeSetting> timeSettings = new ArrayList<>();
 
-  public TimeSettings(List<TimeSetting> timeSettings) {
-    validateTimeSettings(timeSettings);
-    this.timeSettings = timeSettings;
-  }
-
-  private void validateTimeSettings(List<TimeSetting> timeSettings) {
-    Collections.sort(timeSettings, Comparator.comparing(TimeSetting::getStartTime));
-
-    for (int i = 0; i < timeSettings.size() - 1; i++) {
-      TimeSetting timeSetting = timeSettings.get(i);
-      TimeSetting compareTimeSetting = timeSettings.get(i + 1);
-      timeSetting.verifyConflicting(compareTimeSetting);
+    public TimeSettings(List<TimeSetting> timeSettings) {
+        this.timeSettings = validateAndMerge(timeSettings);
     }
-  }
 
-  public void setFacility(Facility facility) {
-    for (TimeSetting timeSetting : timeSettings) {
-      timeSetting.setFacility(facility);
+    private List<TimeSetting> validateAndMerge(List<TimeSetting> timeSettings) {
+        Collections.sort(timeSettings, Comparator.comparing(TimeSetting::getStartHour));
+
+        while (validateAndMergeContinuousTime(timeSettings)) {
+        }
+
+        return timeSettings;
     }
-  }
 
-  public List<FacilitySchedule> createFacilitySchedules(LocalDate scheduleDate) {
-    return timeSettings.stream()
-        .map(timeSetting -> timeSetting.createFacilitySchedule(scheduleDate))
-        .collect(Collectors.toList());
-  }
+    private boolean validateAndMergeContinuousTime(List<TimeSetting> timeSettings) {
+        for (int i = 0; i < timeSettings.size() - 1; i++) {
+            TimeSetting timeSetting1 = timeSettings.get(i);
+            TimeSetting timeSetting2 = timeSettings.get(i + 1);
 
-  public boolean isEmpty() {
-    return timeSettings.isEmpty();
-  }
+            timeSetting1.verifyConflicting(timeSetting2);
+            if (timeSetting1.isContinuous(timeSetting2)) {
+                timeSetting1.merge(timeSetting2);
+                timeSettings.remove(timeSetting2);
+                return true;
+            }
+        }
+        return false;
+    }
 
-  public void update(TimeSettings timeSettings, Facility facility) {
-    this.timeSettings.clear();
-    this.timeSettings.addAll(timeSettings.getTimeSettings());
-    timeSettings.setFacility(facility);
-  }
+    public void setFacility(Facility facility) {
+        for (TimeSetting timeSetting : timeSettings) {
+            timeSetting.setFacility(facility);
+        }
+    }
+
+    public List<Schedule> createSchedules(LocalDate date) {
+        return timeSettings.stream()
+            .map(timeSetting -> timeSetting.createSchedule(date))
+            .collect(Collectors.toList());
+    }
+
+    public boolean isEmpty() {
+        return timeSettings.isEmpty();
+    }
+
+    public void update(TimeSettings timeSettings, Facility facility) {
+        this.timeSettings.clear();
+        this.timeSettings.addAll(timeSettings.getTimeSettings());
+        timeSettings.setFacility(facility);
+    }
 }

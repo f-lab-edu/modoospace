@@ -1,6 +1,6 @@
 package com.modoospace.alarm.controller;
 
-import com.modoospace.alarm.controller.dto.AlarmReadDto;
+import com.modoospace.alarm.controller.dto.AlarmResponse;
 import com.modoospace.alarm.service.AlarmService;
 import com.modoospace.config.auth.LoginEmail;
 import lombok.RequiredArgsConstructor;
@@ -22,9 +22,9 @@ public class AlarmController {
   private final AlarmService alarmService;
 
   @GetMapping()
-  public ResponseEntity<Page<AlarmReadDto>> search(@LoginEmail String loginEmail,
+  public ResponseEntity<Page<AlarmResponse>> search(@LoginEmail String loginEmail,
       Pageable pageable) {
-    Page<AlarmReadDto> alarms = alarmService.searchAlarms(loginEmail, pageable);
+    Page<AlarmResponse> alarms = alarmService.searchAlarms(loginEmail, pageable);
     return ResponseEntity.ok().body(alarms);
   }
 
