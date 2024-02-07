@@ -3,7 +3,6 @@ package com.modoospace.space.domain;
 import com.modoospace.common.exception.ConflictingTimeException;
 import com.sun.istack.NotNull;
 import java.time.LocalDate;
-import java.time.LocalTime;
 import javax.persistence.Column;
 import javax.persistence.Embedded;
 import javax.persistence.Entity;
@@ -13,7 +12,6 @@ import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import lombok.AccessLevel;
-import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
@@ -68,23 +66,12 @@ public class TimeSetting {
     }
 
     public Schedule createSchedule(LocalDate date) {
-        return Schedule.builder()
-            .date(date)
-            .timeRange(this.timeRange)
-            .facility(this.facility)
+        return Schedule.builder().date(date).timeRange(this.timeRange).facility(this.facility)
             .build();
-    }
-
-    public LocalTime getStartTime() {
-        return timeRange.getStartTime();
     }
 
     public Integer getStartHour() {
         return timeRange.getStartHour();
-    }
-
-    public LocalTime getEndTime() {
-        return timeRange.getEndTime();
     }
 
     public Integer getEndHour() {

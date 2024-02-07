@@ -38,7 +38,6 @@ public class ScheduleService {
         facility.addSchedule(createRequest.toEntity(facility), loginMember);
     }
 
-
     public ScheduleResponse findSchedule(Long facilityScheduleId) {
         Schedule schedule = findScheduleById(facilityScheduleId);
 
@@ -72,7 +71,7 @@ public class ScheduleService {
             .find1DaySchedules(facility, findDate);
 
         return schedules.stream()
-            .map(facilitySchedule -> ScheduleResponse.of(facilitySchedule))
+            .map(ScheduleResponse::of)
             .collect(Collectors.toList());
     }
 
@@ -99,7 +98,7 @@ public class ScheduleService {
             .find1MonthSchedules(facility, findYearMonth);
 
         return schedules.stream()
-            .map(facilitySchedule -> ScheduleResponse.of(facilitySchedule))
+            .map(ScheduleResponse::of)
             .collect(Collectors.toList());
     }
 
@@ -120,14 +119,12 @@ public class ScheduleService {
     }
 
     private Facility findFacilityById(Long facilityId) {
-        Facility facility = facilityRepository.findById(facilityId)
+        return facilityRepository.findById(facilityId)
             .orElseThrow(() -> new NotFoundEntityException("시설", facilityId));
-        return facility;
     }
 
     private Schedule findScheduleById(Long scheduleId) {
-        Schedule schedule = scheduleRepository.findById(scheduleId)
+        return scheduleRepository.findById(scheduleId)
             .orElseThrow(() -> new NotFoundEntityException("시설스케줄", scheduleId));
-        return schedule;
     }
 }

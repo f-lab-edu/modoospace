@@ -51,7 +51,6 @@ public class Reservation extends BaseTimeEntity {
     @JoinColumn(name = "visitor_id")
     private Member visitor;
 
-
     @Builder
     public Reservation(Long id, Integer numOfUser, DateTimeRange dateTimeRange,
         ReservationStatus status, Facility facility, Member visitor) {
@@ -109,7 +108,7 @@ public class Reservation extends BaseTimeEntity {
         return isConflictingRange(new DateTimeRange(date, hour, date, hour + 1));
     }
 
-    public boolean isConflictingRange(DateTimeRange dateTimeRange) {
+    private boolean isConflictingRange(DateTimeRange dateTimeRange) {
         return this.dateTimeRange.isConflicting(dateTimeRange);
     }
 

@@ -1,8 +1,10 @@
 package com.modoospace.space.domain;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.junit.jupiter.api.Assertions.assertAll;
 
+import com.modoospace.common.exception.ConflictingTimeException;
 import java.time.LocalDate;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -17,31 +19,19 @@ class ScheduleTest {
         nowDate = LocalDate.now();
     }
 
-    @DisplayName("같은 날짜의 스케줄 데이터면 true를 반환한다.")
+    @DisplayName("스케줄 데이터끼리 시간이 겹치면 Exception을 던진다.")
     @Test
-    public void isDateEqual_returnTrue() {
-        Schedule schedule = new Schedule(nowDate, new TimeRange(9, 15));
-        Schedule targetSchedule1 = new Schedule(nowDate, new TimeRange(10, 20));
-        Schedule targetSchedule2 = new Schedule(nowDate.plusDays(1), new TimeRange(10, 20));
-
-        assertAll(
-            () -> assertThat(schedule.isDateEqual(targetSchedule1)).isTrue(),
-            () -> assertThat(schedule.isDateEqual(targetSchedule2)).isFalse()
-        );
-    }
-
-    @DisplayName("스케줄 데이터끼리 시간이 겹치면 true를 반환한다.")
-    @Test
-    public void isConflicting_returnTrue() {
+    public void verifyConflicting_throwException() {
         Schedule schedule = new Schedule(nowDate, new TimeRange(9, 15));
         Schedule targetSchedule1 = new Schedule(nowDate, new TimeRange(10, 20));
         Schedule targetSchedule2 = new Schedule(nowDate, new TimeRange(16, 20));
         Schedule targetSchedule3 = new Schedule(nowDate.plusDays(1), new TimeRange(10, 20));
 
         assertAll(
-            () -> assertThat(schedule.isConflicting(targetSchedule1)).isTrue(),
-            () -> assertThat(schedule.isConflicting(targetSchedule2)).isFalse(),
-            () -> assertThat(schedule.isConflicting(targetSchedule3)).isFalse()
+            () -> assertThatThrownBy(() -> schedule.verifyConflicting(targetSchedule1))
+                .isInstanceOf(ConflictingTimeException.class),
+            () -> schedule.verifyConflicting(targetSchedule2),
+            () -> schedule.verifyConflicting(targetSchedule3)
         );
     }
 
@@ -69,18 +59,6 @@ class ScheduleTest {
         assertAll(
             () -> assertThat(schedule.getStartHour()).isEqualTo(9),
             () -> assertThat(schedule.getEndHour()).isEqualTo(20)
-        );
-    }
-
-    @DisplayName("스케줄 데이터가 24시간 범위인지 체크한다.")
-    @Test
-    public void is24TimeRange_returnTrue() {
-        Schedule schedule24 = new Schedule(nowDate, new TimeRange(0, 24));
-        Schedule schedule20 = new Schedule(nowDate, new TimeRange(0, 20));
-
-        assertAll(
-            () -> assertThat(schedule24.is24TimeRange()).isTrue(),
-            () -> assertThat(schedule20.is24TimeRange()).isFalse()
         );
     }
 

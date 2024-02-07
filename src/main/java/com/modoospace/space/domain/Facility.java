@@ -84,7 +84,7 @@ public class Facility extends BaseTimeEntity {
         }
     }
 
-    public void validateUserNum(Integer minUser, Integer maxUser) {
+    private void validateUserNum(Integer minUser, Integer maxUser) {
         if (!isValidUserNum(minUser)) {
             throw new InvalidNumOfUserException(minUser);
         }

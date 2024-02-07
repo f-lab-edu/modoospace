@@ -55,7 +55,7 @@ public class Schedule {
         }
     }
 
-    public boolean isConflicting(Schedule targetSchedule) {
+    private boolean isConflicting(Schedule targetSchedule) {
         if (!isDateEqual(targetSchedule)) {
             return false;
         }
@@ -77,12 +77,8 @@ public class Schedule {
         this.facility = facility;
     }
 
-    public boolean isDateEqual(Schedule targetSchedule) {
+    private boolean isDateEqual(Schedule targetSchedule) {
         return this.date.isEqual(targetSchedule.getDate());
-    }
-
-    public boolean is24TimeRange() {
-        return getStartHour() == 0 && getEndHour() == 24;
     }
 
     public void update(Schedule schedule) {
