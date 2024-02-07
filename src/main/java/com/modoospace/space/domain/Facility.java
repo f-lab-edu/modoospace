@@ -170,4 +170,8 @@ public class Facility extends BaseTimeEntity {
             throw new LimitNumOfUserException();
         }
     }
+
+    public String getName() {
+        return space.getName() + "(" + name + ")";
+    }
 }
