@@ -102,7 +102,7 @@ class FacilityTest {
 
     @DisplayName("공간이름 + 시설이름을 반환한다.")
     @Test
-    public void getName() {
+    public void getFacilityName() {
         Facility facility = Facility.builder()
             .name("4인실")
             .minUser(2)
@@ -113,6 +113,6 @@ class FacilityTest {
             .space(space)
             .build();
 
-        assertThat(facility.getName()).isEqualTo("슈가맨워크(4인실)");
+        assertThat(facility.getFacilityName()).isEqualTo("슈가맨워크(4인실)");
     }
 }

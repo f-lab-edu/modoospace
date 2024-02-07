@@ -36,7 +36,7 @@ public class AlarmEvent {
         return AlarmEvent.builder()
             .email(reservation.getHost().getEmail())
             .reservationId(reservation.getId())
-            .facilityName(reservation.getFacility().getName())
+            .facilityName(reservation.getFacility().getFacilityName())
             .alarmType(AlarmType.NEW_RESERVATION)
             .build();
     }
@@ -45,7 +45,7 @@ public class AlarmEvent {
         return AlarmEvent.builder()
             .email(reservation.getVisitor().getEmail())
             .reservationId(reservation.getId())
-            .facilityName(reservation.getFacility().getName())
+            .facilityName(reservation.getFacility().getFacilityName())
             .alarmType(AlarmType.APPROVED_RESERVATION)
             .build();
     }
@@ -54,7 +54,7 @@ public class AlarmEvent {
         return AlarmEvent.builder()
             .email(reservation.getHost().getEmail())
             .reservationId(reservation.getId())
-            .facilityName(reservation.getFacility().getName())
+            .facilityName(reservation.getFacility().getFacilityName())
             .alarmType(AlarmType.CANCELED_RESERVATION)
             .build();
     }

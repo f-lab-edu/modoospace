@@ -171,7 +171,7 @@ public class Facility extends BaseTimeEntity {
         }
     }
 
-    public String getName() {
+    public String getFacilityName() {
         return space.getName() + "(" + name + ")";
     }
 }
