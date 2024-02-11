@@ -107,7 +107,7 @@ public class ScheduleQueryRepository {
             .execute();
     }
 
-    public void deleteSchedules(Facility facility) {
+    public void deleteFacilitySchedules(Facility facility) {
         jpaQueryFactory
             .delete(schedule)
             .where(facilityEq(facility))

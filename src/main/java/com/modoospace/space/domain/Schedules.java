@@ -1,14 +1,10 @@
 package com.modoospace.space.domain;
 
-import com.modoospace.common.exception.ConflictingTimeException;
 import java.time.LocalDate;
 import java.time.YearMonth;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
-import java.util.Optional;
-import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 import javax.persistence.CascadeType;
 import javax.persistence.Embeddable;
@@ -31,7 +27,7 @@ public class Schedules {
     }
 
     private List<Schedule> validateAndMerge(List<Schedule> schedules) {
-        Collections.sort(schedules, Comparator
+        schedules.sort(Comparator
             .comparing(Schedule::getDate)
             .thenComparing(Schedule::getStartHour));
 
@@ -56,61 +52,65 @@ public class Schedules {
         return false;
     }
 
-    public static Schedules create3MonthFacilitySchedules(TimeSettings timeSettings,
+    public static Schedules create3MonthSchedules(TimeSettings timeSettings,
         WeekdaySettings weekdaySettings, YearMonth createYearMonth) {
         LocalDate startDate = createYearMonth.atDay(1);
         int daysBetween = startDate.lengthOfMonth()
             + startDate.plusMonths(1).lengthOfMonth()
             + startDate.plusMonths(2).lengthOfMonth();
 
-        return createFacilitySchedules(timeSettings, weekdaySettings, startDate, daysBetween);
+        return createSchedules(timeSettings, weekdaySettings, startDate, daysBetween);
     }
 
-    public static Schedules create1MonthFacilitySchedules(TimeSettings timeSettings,
+    public static Schedules create1MonthSchedules(TimeSettings timeSettings,
         WeekdaySettings weekdaySettings, YearMonth createYearMonth) {
         LocalDate startDate = createYearMonth.atDay(1);
         int daysBetween = startDate.lengthOfMonth();
 
-        return createFacilitySchedules(timeSettings, weekdaySettings, startDate, daysBetween);
+        return createSchedules(timeSettings, weekdaySettings, startDate, daysBetween);
     }
 
-    private static Schedules createFacilitySchedules(TimeSettings timeSettings,
+    private static Schedules createSchedules(TimeSettings timeSettings,
         WeekdaySettings weekdaySettings, LocalDate startDate, int daysBetween) {
         List<Schedule> schedules = new ArrayList<>();
         IntStream.range(0, daysBetween)
             .mapToObj(startDate::plusDays)
-            .filter(scheduleDate -> weekdaySettings.isContainWeekday(scheduleDate.getDayOfWeek()))
-            .flatMap(scheduleDate -> timeSettings.createSchedules(scheduleDate).stream())
+            .filter(date -> weekdaySettings.isContainWeekday(date.getDayOfWeek()))
+            .flatMap(date -> timeSettings.createSchedules(date).stream())
             .forEach(schedules::add);
 
         return new Schedules(schedules);
     }
 
-    public void addSchedule(Schedule createSchedule) {
+    public void setFacility(Facility facility) {
+        for (Schedule schedule : schedules) {
+            schedule.setFacility(facility);
+        }
+    }
+
+    public void add(Schedule createSchedule) {
         schedules.add(createSchedule);
         validateAndMerge(schedules);
     }
 
-    public void updateSchedule(Schedule updateSchedule, Schedule schedule) {
+    public void update(Schedule updateSchedule, Schedule schedule) {
         schedule.update(updateSchedule);
         validateAndMerge(schedules);
     }
 
-    public void update(Schedules schedules, Facility facility) {
+    public void update3Month(TimeSettings timeSettings, WeekdaySettings weekdaySettings) {
         this.schedules.clear();
-        this.schedules.addAll(schedules.getSchedules());
-        schedules.setFacility(facility);
+        Schedules createSchedules = Schedules.create3MonthSchedules(
+            timeSettings, weekdaySettings, YearMonth.now()
+        );
+        this.schedules.addAll(createSchedules.getSchedules());
     }
 
-    public void addAll(Schedules schedules, Facility facility) {
-        this.schedules.addAll(schedules.getSchedules());
-        schedules.setFacility(facility);
-    }
-
-    private void setFacility(Facility facility) {
-        for (Schedule schedule : schedules) {
-            schedule.setFacility(facility);
-        }
+    public void add1Month(TimeSettings timeSettings, WeekdaySettings weekdaySettings,
+        YearMonth yearMonth) {
+        Schedules createSchedules = Schedules.create1MonthSchedules(
+            timeSettings, weekdaySettings, yearMonth);
+        this.schedules.addAll(createSchedules.getSchedules());
     }
 
     @Override

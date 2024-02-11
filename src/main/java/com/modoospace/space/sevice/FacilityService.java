@@ -7,6 +7,7 @@ import com.modoospace.space.controller.dto.facility.FacilityCreateRequest;
 import com.modoospace.space.controller.dto.facility.FacilityDetailResponse;
 import com.modoospace.space.controller.dto.facility.FacilityResponse;
 import com.modoospace.space.controller.dto.facility.FacilitySearchRequest;
+import com.modoospace.space.controller.dto.facility.FacilitySettingUpdateRequest;
 import com.modoospace.space.controller.dto.facility.FacilityUpdateRequest;
 import com.modoospace.space.domain.Facility;
 import com.modoospace.space.domain.FacilityRepository;
@@ -62,10 +63,18 @@ public class FacilityService {
         facility.verifyManagementPermission(loginMember);
 
         Facility updatedFacility = updateRequest.toEntity();
-        if (updatedFacility.shouldCreateSchedules()) { // TODO : 성능 비교 필요.
-            scheduleQueryRepository.deleteSchedules(facility);
-        }
         facility.update(updatedFacility);
+    }
+
+    @Transactional
+    public void updateFacilitySetting(Long facilityId, FacilitySettingUpdateRequest updateRequest,
+        String loginEmail) {
+        Member loginMember = memberService.findMemberByEmail(loginEmail);
+        Facility facility = findFacilityById(facilityId);
+        facility.verifyManagementPermission(loginMember);
+
+        scheduleQueryRepository.deleteFacilitySchedules(facility);
+        facility.updateSetting(updateRequest.toTimeSettings(), updateRequest.toWeekdaySettings());
     }
 
     @Transactional
@@ -74,6 +83,7 @@ public class FacilityService {
         Facility facility = findFacilityById(facilityId);
         facility.verifyManagementPermission(loginMember);
 
+        scheduleQueryRepository.deleteFacilitySchedules(facility);
         facilityRepository.delete(facility);
     }
 
