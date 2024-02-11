@@ -148,7 +148,7 @@ class FacilityServiceTest {
     }
 
     private List<TimeSettingCreateRequest> createTimeSetting(Integer start, Integer end) {
-        return Arrays.asList(new TimeSettingCreateRequest(start, end));
+        return List.of(new TimeSettingCreateRequest(start, end));
     }
 
     private List<WeekdaySettingCreateRequest> createWeekDaySetting(DayOfWeek... dayOfWeeks) {
@@ -206,7 +206,7 @@ class FacilityServiceTest {
     @DisplayName("시설시간 및 요일 세팅을 업데이트한다.")
     @Test
     public void updateFacilitySetting() {
-        // 1. 시설 생성 Transaction(Commit)
+        // 1. 데이터 생성 Transaction(Commit)
         Long facilityId = facilityService
             .createFacility(space.getId(), createFacility(true), hostMember.getEmail());
         TestTransaction.flagForCommit();
