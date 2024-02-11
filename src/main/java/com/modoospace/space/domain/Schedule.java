@@ -3,6 +3,7 @@ package com.modoospace.space.domain;
 import com.modoospace.common.exception.ConflictingTimeException;
 import com.sun.istack.NotNull;
 import java.time.LocalDate;
+import java.time.YearMonth;
 import javax.persistence.Column;
 import javax.persistence.Embedded;
 import javax.persistence.Entity;
@@ -75,6 +76,10 @@ public class Schedule {
 
     public void setFacility(Facility facility) {
         this.facility = facility;
+    }
+
+    public boolean isYearMonthEqual(YearMonth yearMonth) {
+        return YearMonth.of(date.getYear(), date.getMonth()).equals(yearMonth);
     }
 
     private boolean isDateEqual(Schedule targetSchedule) {

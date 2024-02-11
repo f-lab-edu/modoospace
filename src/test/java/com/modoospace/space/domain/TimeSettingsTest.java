@@ -5,7 +5,6 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 import com.modoospace.common.exception.ConflictingTimeException;
 import java.time.LocalDate;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -45,14 +44,6 @@ class TimeSettingsTest {
         List<Schedule> facilitySchedules = retTimeSettings.createSchedules(LocalDate.now());
 
         assertThat(facilitySchedules).hasSize(2);
-    }
-
-    @DisplayName("시설 세팅값이 비었다면 true를 던진다.")
-    @Test
-    public void isEmpty_returnTrue() {
-        TimeSettings timeSettings = new TimeSettings(new ArrayList<>());
-
-        assertThat(timeSettings.isEmpty()).isTrue();
     }
 
     private List<TimeSetting> createTimeSettings(TimeRange... timeRanges) {

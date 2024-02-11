@@ -69,8 +69,7 @@ public class Space extends BaseTimeEntity {
         this.facilities = facilities;
     }
 
-    public void update(final Space updateSpace, Member loginMember) {
-        verifyManagementPermission(loginMember);
+    public void update(final Space updateSpace) {
         this.name = updateSpace.getName();
         this.description = updateSpace.getDescription();
         this.address = updateSpace.getAddress();

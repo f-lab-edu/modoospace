@@ -21,7 +21,6 @@ import com.modoospace.space.domain.Space;
 import com.modoospace.space.domain.SpaceRepository;
 import java.time.LocalDate;
 import java.time.YearMonth;
-import java.util.Arrays;
 import java.util.List;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -29,6 +28,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
+import org.springframework.test.context.transaction.TestTransaction;
 import org.springframework.transaction.annotation.Transactional;
 
 @SpringBootTest
@@ -87,7 +87,7 @@ public class ScheduleServiceTest {
             .minUser(1)
             .maxUser(4)
             .description("1~4인실 입니다.")
-            .timeSettings(Arrays.asList(new TimeSettingCreateRequest(9, 18)))
+            .timeSettings(List.of(new TimeSettingCreateRequest(9, 18)))
             .build();
         facility = facilityRepository.save(createRequest.toEntity(space));
 
@@ -253,11 +253,26 @@ public class ScheduleServiceTest {
     @DisplayName("이미 생성되어있는 1달 치 스케줄을 지우고 새로 생성한다.")
     @Test
     public void create1MonthDefaultFacilitySchedules_plus2Month() {
-        YearMonth createYearMonth = nowYearMonth.plusMonths(2);
+        // 1. 데이터 생성 Transaction(Commit)
+        TestTransaction.flagForCommit();
+        TestTransaction.end();
 
+        // 2. 스케줄 생성 및 검증 Transaction(Rollback)
+        TestTransaction.start();
+        YearMonth createYearMonth = nowYearMonth.plusMonths(2);
         scheduleService.create1MonthDefaultSchedules(
             facility.getId(), createYearMonth, hostMember.getEmail());
+        assertAllSchedules(createYearMonth);
+        TestTransaction.end();
 
+        // 3. 생성된 데이터 삭제 Transaction(Commit)
+        TestTransaction.start();
+        deleteAll();
+        TestTransaction.flagForCommit();
+        TestTransaction.end();
+    }
+
+    private void assertAllSchedules(YearMonth createYearMonth) {
         List<ScheduleResponse> retResponses = scheduleService.find1MonthSchedules(
             facility.getId(), createYearMonth);
         assertAll(
@@ -268,6 +283,13 @@ public class ScheduleServiceTest {
                 retResponses.get(retResponses.size() - 1).getDate())
                 .isEqualTo(createYearMonth.atEndOfMonth())
         );
+    }
+
+    private void deleteAll() {
+        facilityRepository.deleteAll();
+        spaceRepository.deleteAll();
+        categoryRepository.deleteAll();
+        memberRepository.deleteAll();
     }
 
     @DisplayName("1달 치 스케줄을 삭제한다.")

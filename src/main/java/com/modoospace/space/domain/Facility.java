@@ -60,8 +60,7 @@ public class Facility extends BaseTimeEntity {
     @Builder
     public Facility(Long id, String name, Boolean reservationEnable,
         Integer minUser, Integer maxUser, String description,
-        Space space, TimeSettings timeSettings, WeekdaySettings weekdaySettings,
-        Schedules schedules) {
+        Space space, TimeSettings timeSettings, WeekdaySettings weekdaySettings) {
         this.id = id;
         this.name = name;
         this.reservationEnable = reservationEnable;
@@ -72,15 +71,14 @@ public class Facility extends BaseTimeEntity {
 
         this.description = description;
         this.space = space;
-        this.timeSettings = timeSettings;
-        timeSettings.setFacility(this);
-        this.weekdaySettings = weekdaySettings;
-        weekdaySettings.setFacility(this);
 
-        this.schedules = schedules;
-        if (schedules == null) {
-            this.schedules = Schedules
-                .create3MonthFacilitySchedules(timeSettings, weekdaySettings, YearMonth.now());
+        this.timeSettings = timeSettings;
+        this.weekdaySettings = weekdaySettings;
+        if (shouldCreateSchedules()) {
+            timeSettings.setFacility(this);
+            weekdaySettings.setFacility(this);
+            this.schedules = Schedules.create3MonthSchedules(
+                this.timeSettings, this.weekdaySettings, YearMonth.now());
         }
     }
 
@@ -106,48 +104,35 @@ public class Facility extends BaseTimeEntity {
         return minUser <= maxUser;
     }
 
-    public void update(Facility facility, Member loginMember) {
-        verifyManagementPermission(loginMember);
+    private boolean shouldCreateSchedules() {
+        return this.timeSettings != null && this.weekdaySettings != null;
+    }
 
+    public void update(Facility facility) {
         this.name = facility.getName();
         this.reservationEnable = facility.getReservationEnable();
         this.minUser = facility.getMinUser();
         this.maxUser = facility.getMaxUser();
         this.description = facility.getDescription();
-
-        if (!facility.getTimeSettings().isEmpty()) {
-            this.timeSettings.update(facility.getTimeSettings(), this);
-        }
-
-        if (!facility.getWeekdaySettings().isEmpty()) {
-            this.weekdaySettings.update(facility.getWeekdaySettings(), this);
-        }
-
-        if (!facility.getTimeSettings().isEmpty() || !facility.getWeekdaySettings().isEmpty()) {
-            Schedules schedules = Schedules
-                .create3MonthFacilitySchedules(this.timeSettings, this.weekdaySettings,
-                    YearMonth.now());
-            this.schedules.update(schedules, this);
-        }
     }
 
-    public void create1MonthDefaultSchedules(YearMonth createYearMonth,
-        Member loginMember) {
-        verifyManagementPermission(loginMember);
-
-        Schedules schedules = Schedules.create1MonthFacilitySchedules(
-            this.timeSettings, this.weekdaySettings, createYearMonth);
-        this.schedules.addAll(schedules, this);
+    public void updateSetting(TimeSettings timeSettings, WeekdaySettings weekdaySettings) {
+        this.timeSettings.update(timeSettings, this);
+        this.weekdaySettings.update(weekdaySettings, this);
+        schedules.update3Month(this.timeSettings, this.weekdaySettings);
     }
 
-    public void addSchedule(Schedule createSchedule, Member loginMember) {
-        verifyManagementPermission(loginMember);
-        schedules.addSchedule(createSchedule);
+    public void add1MonthDefaultSchedules(YearMonth yearMonth) {
+        schedules.delete1Month(yearMonth);
+        schedules.add1Month(timeSettings, weekdaySettings, yearMonth);
     }
 
-    public void updateSchedule(Schedule updateSchedule, Schedule schedule, Member loginMember) {
-        verifyManagementPermission(loginMember);
-        schedules.updateSchedule(updateSchedule, schedule);
+    public void addSchedule(Schedule createSchedule) {
+        schedules.add(createSchedule);
+    }
+
+    public void updateSchedule(Schedule updateSchedule, Schedule schedule) {
+        schedules.update(updateSchedule, schedule);
     }
 
     public void verifyManagementPermission(Member loginMember) {
@@ -155,7 +140,7 @@ public class Facility extends BaseTimeEntity {
     }
 
     public void verifyReservationEnable() {
-        if (!this.reservationEnable) {
+        if (!reservationEnable) {
             throw new NotOpenedFacilityException();
         }
     }
@@ -164,5 +149,9 @@ public class Facility extends BaseTimeEntity {
         if (numOfUser < minUser || numOfUser > maxUser) {
             throw new LimitNumOfUserException();
         }
+    }
+
+    public String getFacilityName() {
+        return space.getName() + "(" + name + ")";
     }
 }

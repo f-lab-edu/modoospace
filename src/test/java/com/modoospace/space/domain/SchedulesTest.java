@@ -22,7 +22,7 @@ class SchedulesTest {
         WeekdaySettings weekDaySetting = createWeekDaySetting(DayOfWeek.MONDAY, DayOfWeek.TUESDAY,
             DayOfWeek.WEDNESDAY, DayOfWeek.THURSDAY, DayOfWeek.FRIDAY);
         Schedules schedules = Schedules
-            .create3MonthFacilitySchedules(timeSettings, weekDaySetting, YearMonth.now());
+            .create3MonthSchedules(timeSettings, weekDaySetting, YearMonth.now());
 
         System.out.println(schedules);
     }
@@ -47,7 +47,7 @@ class SchedulesTest {
         Schedules schedules = createSchedules(createNowDateSchedule(9, 12));
         Schedule addSchedule = createNowDateSchedule(13, 14);
 
-        schedules.addSchedule(addSchedule);
+        schedules.add(addSchedule);
 
         Schedule retSchedule = schedules.getSchedules().get(1);
         assertAll(
@@ -62,7 +62,7 @@ class SchedulesTest {
         Schedules schedules = createSchedules(createNowDateSchedule(9, 12));
         Schedule addSchedule = createNowDateSchedule(12, 14);
 
-        schedules.addSchedule(addSchedule);
+        schedules.add(addSchedule);
 
         Schedule retSchedule = schedules.getSchedules().get(0);
         assertAll(
@@ -78,7 +78,7 @@ class SchedulesTest {
             createNowDateSchedule(13, 18));
         Schedule addSchedule = createNowDateSchedule(12, 13);
 
-        schedules.addSchedule(addSchedule);
+        schedules.add(addSchedule);
 
         Schedule retSchedule = schedules.getSchedules().get(0);
         assertAll(
@@ -93,7 +93,7 @@ class SchedulesTest {
         Schedules schedules = createSchedules(createNowDateSchedule(9, 12));
         Schedule addSchedule = createNowDateSchedule(11, 13);
 
-        assertThatThrownBy(() -> schedules.addSchedule(addSchedule))
+        assertThatThrownBy(() -> schedules.add(addSchedule))
             .isInstanceOf(ConflictingTimeException.class);
     }
 
@@ -105,7 +105,7 @@ class SchedulesTest {
         Schedules schedules = createSchedules(schedule1, schedule2);
         Schedule updateSchedule = createNowDateSchedule(13, 18);
 
-        schedules.updateSchedule(updateSchedule, schedule2);
+        schedules.update(updateSchedule, schedule2);
 
         Schedule retSchedule = schedules.getSchedules().get(0);
         assertAll(
@@ -122,7 +122,7 @@ class SchedulesTest {
         Schedules schedules = createSchedules(schedule1, schedule2);
         Schedule updateSchedule = createNowDateSchedule(12, 18);
 
-        schedules.updateSchedule(updateSchedule, schedule2);
+        schedules.update(updateSchedule, schedule2);
 
         Schedule retSchedule = schedules.getSchedules().get(0);
         assertAll(
@@ -139,7 +139,7 @@ class SchedulesTest {
         Schedules schedules = createSchedules(schedule1, schedule2);
         Schedule updateSchedule = createNowDateSchedule(11, 18);
 
-        assertThatThrownBy(() -> schedules.updateSchedule(updateSchedule, schedule2))
+        assertThatThrownBy(() -> schedules.update(updateSchedule, schedule2))
             .isInstanceOf(ConflictingTimeException.class);
     }
 

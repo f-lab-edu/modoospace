@@ -5,6 +5,7 @@ import com.modoospace.space.controller.dto.facility.FacilityCreateRequest;
 import com.modoospace.space.controller.dto.facility.FacilityDetailResponse;
 import com.modoospace.space.controller.dto.facility.FacilityResponse;
 import com.modoospace.space.controller.dto.facility.FacilitySearchRequest;
+import com.modoospace.space.controller.dto.facility.FacilitySettingUpdateRequest;
 import com.modoospace.space.controller.dto.facility.FacilityUpdateRequest;
 import com.modoospace.space.sevice.FacilityService;
 import java.net.URI;
@@ -27,43 +28,51 @@ import org.springframework.web.bind.annotation.RestController;
 @RequestMapping("/api/v1/spaces/{spaceId}/facilities")
 public class FacilityController {
 
-  private final FacilityService facilityService;
+    private final FacilityService facilityService;
 
-  @PostMapping()
-  public ResponseEntity<Void> create(@PathVariable Long spaceId,
-      @RequestBody @Valid FacilityCreateRequest createRequest,
-      @LoginEmail String loginEmail) {
-    Long facilityId = facilityService.createFacility(spaceId, createRequest, loginEmail);
-    return ResponseEntity
-        .created(URI.create("/api/v1/spaces/" + spaceId + "/facilities/" + facilityId)).build();
-  }
+    @PostMapping()
+    public ResponseEntity<Void> create(@PathVariable Long spaceId,
+        @RequestBody @Valid FacilityCreateRequest createRequest,
+        @LoginEmail String loginEmail) {
+        Long facilityId = facilityService.createFacility(spaceId, createRequest, loginEmail);
+        return ResponseEntity
+            .created(URI.create("/api/v1/spaces/" + spaceId + "/facilities/" + facilityId)).build();
+    }
 
-  @GetMapping()
-  public ResponseEntity<Page<FacilityResponse>> search(@PathVariable Long spaceId,
-      FacilitySearchRequest searchDto, Pageable pageable) {
-    Page<FacilityResponse> facilityReadDtos = facilityService
-        .searchFacility(spaceId, searchDto, pageable);
-    return ResponseEntity.ok().body(facilityReadDtos);
-  }
+    @GetMapping()
+    public ResponseEntity<Page<FacilityResponse>> search(@PathVariable Long spaceId,
+        FacilitySearchRequest searchDto, Pageable pageable) {
+        Page<FacilityResponse> facilityReadDtos = facilityService
+            .searchFacility(spaceId, searchDto, pageable);
+        return ResponseEntity.ok().body(facilityReadDtos);
+    }
 
-  @GetMapping("/{facilityId}")
-  public ResponseEntity<FacilityDetailResponse> find(@PathVariable Long facilityId) {
-    FacilityDetailResponse facilityReadDto = facilityService.findFacility(facilityId);
-    return ResponseEntity.ok().body(facilityReadDto);
-  }
+    @GetMapping("/{facilityId}")
+    public ResponseEntity<FacilityDetailResponse> find(@PathVariable Long facilityId) {
+        FacilityDetailResponse facilityReadDto = facilityService.findFacility(facilityId);
+        return ResponseEntity.ok().body(facilityReadDto);
+    }
 
-  @PutMapping("/{facilityId}")
-  public ResponseEntity<Void> update(@PathVariable Long facilityId,
-      @RequestBody @Valid FacilityUpdateRequest updateRequest,
-      @LoginEmail String loginEmail) {
-    facilityService.updateFacility(facilityId, updateRequest, loginEmail);
-    return ResponseEntity.noContent().build();
-  }
+    @PutMapping("/{facilityId}")
+    public ResponseEntity<Void> update(@PathVariable Long facilityId,
+        @RequestBody @Valid FacilityUpdateRequest updateRequest,
+        @LoginEmail String loginEmail) {
+        facilityService.updateFacility(facilityId, updateRequest, loginEmail);
+        return ResponseEntity.noContent().build();
+    }
 
-  @DeleteMapping("/{facilityId}")
-  public ResponseEntity<Void> delete(@PathVariable Long facilityId,
-      @LoginEmail String loginEmail) {
-    facilityService.deleteFacility(facilityId, loginEmail);
-    return ResponseEntity.noContent().build();
-  }
+    @PutMapping("/{facilityId}/setting")
+    public ResponseEntity<Void> updateSetting(@PathVariable Long facilityId,
+        @RequestBody @Valid FacilitySettingUpdateRequest updateRequest,
+        @LoginEmail String loginEmail) {
+        facilityService.updateFacilitySetting(facilityId, updateRequest, loginEmail);
+        return ResponseEntity.noContent().build();
+    }
+
+    @DeleteMapping("/{facilityId}")
+    public ResponseEntity<Void> delete(@PathVariable Long facilityId,
+        @LoginEmail String loginEmail) {
+        facilityService.deleteFacility(facilityId, loginEmail);
+        return ResponseEntity.noContent().build();
+    }
 }

@@ -38,7 +38,7 @@ public class FacilityCreateRequest {
     private String description;
 
     @Builder.Default
-    private List<TimeSettingCreateRequest> timeSettings = Arrays.asList(new TimeSettingCreateRequest());
+    private List<TimeSettingCreateRequest> timeSettings = List.of(new TimeSettingCreateRequest());
 
     @Builder.Default
     private List<WeekdaySettingCreateRequest> weekdaySettings = Arrays.asList(
@@ -80,13 +80,13 @@ public class FacilityCreateRequest {
 
     private List<TimeSetting> toTimeSettings(List<TimeSettingCreateRequest> timeSettings) {
         return timeSettings.stream()
-            .map(settingcreateRequest -> settingcreateRequest.toEntity())
+            .map(TimeSettingCreateRequest::toEntity)
             .collect(Collectors.toList());
     }
 
     private List<WeekdaySetting> toWeekdaySettings(List<WeekdaySettingCreateRequest> weekdaySettings) {
         return weekdaySettings.stream()
-            .map(settingcreateRequest -> settingcreateRequest.toEntity())
+            .map(WeekdaySettingCreateRequest::toEntity)
             .collect(Collectors.toList());
     }
 }

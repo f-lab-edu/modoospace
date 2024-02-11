@@ -58,8 +58,8 @@ public class CustomOAuth2UserService implements OAuth2UserService<OAuth2UserRequ
         .map(entity -> entity.updateNameFromProvider(attributes.getName()))
         .orElse(attributes.toEntity());
 
-    memberCacheRepository.save(member);
     memberRepository.save(member);
+    memberCacheRepository.save(member);
     return member;
   }
 }

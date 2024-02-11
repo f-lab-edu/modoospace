@@ -2,7 +2,6 @@ package com.modoospace.space.domain;
 
 import java.time.LocalDate;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -28,7 +27,7 @@ public class TimeSettings {
     }
 
     private List<TimeSetting> validateAndMerge(List<TimeSetting> timeSettings) {
-        Collections.sort(timeSettings, Comparator.comparing(TimeSetting::getStartHour));
+        timeSettings.sort(Comparator.comparing(TimeSetting::getStartHour));
 
         while (validateAndMergeContinuousTime(timeSettings)) {
         }
@@ -63,13 +62,9 @@ public class TimeSettings {
             .collect(Collectors.toList());
     }
 
-    public boolean isEmpty() {
-        return timeSettings.isEmpty();
-    }
-
     public void update(TimeSettings timeSettings, Facility facility) {
         this.timeSettings.clear();
-        this.timeSettings.addAll(timeSettings.getTimeSettings());
         timeSettings.setFacility(facility);
+        this.timeSettings.addAll(timeSettings.getTimeSettings());
     }
 }
