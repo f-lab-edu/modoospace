@@ -286,10 +286,10 @@ public class ScheduleServiceTest {
     }
 
     private void deleteAll() {
-        facilityRepository.deleteAllInBatch();
-        spaceRepository.deleteAllInBatch();
-        categoryRepository.deleteAllInBatch();
-        memberRepository.deleteAllInBatch();
+        facilityRepository.deleteAll();
+        spaceRepository.deleteAll();
+        categoryRepository.deleteAll();
+        memberRepository.deleteAll();
     }
 
     @DisplayName("1달 치 스케줄을 삭제한다.")
