@@ -14,7 +14,6 @@ import java.time.LocalDate;
 import java.time.YearMonth;
 import java.util.List;
 import java.util.stream.Collectors;
-import javax.persistence.EntityManager;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -27,7 +26,6 @@ public class ScheduleService {
     private final FacilityRepository facilityRepository;
     private final ScheduleRepository scheduleRepository;
     private final ScheduleQueryRepository scheduleQueryRepository;
-    private final EntityManager em;
 
     @Transactional
     public void createSchedule(Long facilityId, ScheduleCreateUpdateRequest createRequest,
@@ -84,15 +82,9 @@ public class ScheduleService {
         Facility facility = findFacilityById(facilityId);
         facility.verifyManagementPermission(loginMember);
 
-        // 문제 : 쿼리를 직접날려 삭제를 실행했기때문에, 영속성컨테이너의 facility의 스케줄데이터는 그대로.
         scheduleQueryRepository.delete1MonthSchedules(facility, createYearMonth);
-        // 해결 : 영속성 컨텍스트를 비운 후 엔티티를 다시 조회하여 데이터 일관성을 보장.
-        // 다른방식 : 엔티티의 데이터를 코드로 직접 삭제해줘도 된다.
-        em.clear();
-        facility = findFacilityById(facilityId);
-        facility.create1MonthDefaultSchedules(createYearMonth);
+        facility.add1MonthDefaultSchedules(createYearMonth);
     }
-
 
     public List<ScheduleResponse> find1MonthSchedules(Long facilityId,
         YearMonth findYearMonth) {

@@ -5,6 +5,7 @@ import java.time.YearMonth;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
+import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 import javax.persistence.CascadeType;
 import javax.persistence.Embeddable;
@@ -111,6 +112,13 @@ public class Schedules {
         Schedules createSchedules = Schedules.create1MonthSchedules(
             timeSettings, weekdaySettings, yearMonth);
         this.schedules.addAll(createSchedules.getSchedules());
+    }
+
+    public void delete1Month(YearMonth yearMonth) {
+        List<Schedule> deleteSchedules = this.schedules.stream()
+            .filter(schedule -> schedule.isYearMonthEqual(yearMonth))
+            .collect(Collectors.toList());
+        this.schedules.removeAll(deleteSchedules);
     }
 
     @Override

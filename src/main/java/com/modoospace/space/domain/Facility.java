@@ -123,6 +123,7 @@ public class Facility extends BaseTimeEntity {
     }
 
     public void add1MonthDefaultSchedules(YearMonth yearMonth) {
+        schedules.delete1Month(yearMonth);
         schedules.add1Month(timeSettings, weekdaySettings, yearMonth);
     }
 
