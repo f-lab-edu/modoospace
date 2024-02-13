@@ -9,10 +9,10 @@ import com.modoospace.common.exception.PermissionDeniedException;
 import com.modoospace.member.domain.Member;
 import com.modoospace.member.domain.MemberRepository;
 import com.modoospace.member.domain.Role;
+import com.modoospace.space.controller.dto.address.AddressCreateUpdateRequest;
 import com.modoospace.space.controller.dto.space.SpaceCreateUpdateRequest;
 import com.modoospace.space.controller.dto.space.SpaceResponse;
 import com.modoospace.space.controller.dto.space.SpaceSearchRequest;
-import com.modoospace.space.domain.Address;
 import com.modoospace.space.domain.Category;
 import com.modoospace.space.domain.CategoryRepository;
 import com.modoospace.space.domain.SpaceRepository;
@@ -48,7 +48,7 @@ class SpaceServiceTest {
     private Member hostMember;
     private Member visitorMember;
     private Member adminMember;
-    private Address address;
+    private AddressCreateUpdateRequest createAddress;
     private Category category;
 
     @BeforeEach
@@ -75,7 +75,7 @@ class SpaceServiceTest {
         memberRepository.save(visitorMember);
         memberRepository.save(adminMember);
 
-        address = Address.builder()
+        createAddress = AddressCreateUpdateRequest.builder()
             .depthFirst("depthFirst")
             .depthSecond("depthSecond")
             .depthThird("depthThird")
@@ -90,7 +90,7 @@ class SpaceServiceTest {
     @Test
     public void createSpace_IfHost() {
         SpaceCreateUpdateRequest createRequest = new SpaceCreateUpdateRequest(
-            "공간이름", "설명", address);
+            "공간이름", "설명", createAddress);
         Long spaceId = spaceService.createSpace(category.getId(), createRequest,
             hostMember.getEmail());
 
@@ -99,7 +99,12 @@ class SpaceServiceTest {
             () -> assertThat(retSpaceResponse.getId()).isEqualTo(spaceId),
             () -> assertThat(retSpaceResponse.getName()).isEqualTo("공간이름"),
             () -> assertThat(retSpaceResponse.getDescription()).isEqualTo("설명"),
-            () -> assertThat(retSpaceResponse.getAddress()).isEqualTo(address)
+            () -> assertThat(retSpaceResponse.getAddress().getDepthFirst())
+                .isEqualTo(createAddress.getDepthFirst()),
+            () -> assertThat(retSpaceResponse.getAddress().getDepthSecond())
+                .isEqualTo(createAddress.getDepthSecond()),
+            () -> assertThat(retSpaceResponse.getAddress().getDepthThird())
+                .isEqualTo(createAddress.getDepthThird())
         );
     }
 
@@ -108,7 +113,7 @@ class SpaceServiceTest {
     @ValueSource(strings = {"admin@email", "visitor@email"})
     public void createSpace_throwException_IfNotHost(String email) {
         SpaceCreateUpdateRequest createRequest = new SpaceCreateUpdateRequest(
-            "공간이름", "설명", address);
+            "공간이름", "설명", createAddress);
         assertThatThrownBy(() -> spaceService.createSpace(category.getId(), createRequest, email))
             .isInstanceOf(PermissionDeniedException.class);
     }
@@ -118,10 +123,10 @@ class SpaceServiceTest {
     @ValueSource(strings = {"host@email", "admin@email"})
     public void updateSpace(String email) {
         SpaceCreateUpdateRequest createRequest = new SpaceCreateUpdateRequest(
-            "공간이름", "설명", address);
+            "공간이름", "설명", createAddress);
         Long spaceId = spaceService.createSpace(category.getId(), createRequest,
             hostMember.getEmail());
-        Address updateAddress = Address.builder()
+        AddressCreateUpdateRequest updateAddress = AddressCreateUpdateRequest.builder()
             .depthFirst("시도")
             .depthSecond("구")
             .depthThird("동")
@@ -136,7 +141,12 @@ class SpaceServiceTest {
         assertAll(
             () -> assertThat(retSpaceResponse.getName()).isEqualTo("업데이트공간"),
             () -> assertThat(retSpaceResponse.getDescription()).isEqualTo("업데이트설명"),
-            () -> assertThat(retSpaceResponse.getAddress()).isEqualTo(updateAddress)
+            () -> assertThat(retSpaceResponse.getAddress().getDepthFirst())
+                .isEqualTo(updateAddress.getDepthFirst()),
+            () -> assertThat(retSpaceResponse.getAddress().getDepthSecond())
+                .isEqualTo(updateAddress.getDepthSecond()),
+            () -> assertThat(retSpaceResponse.getAddress().getDepthThird())
+                .isEqualTo(updateAddress.getDepthThird())
         );
     }
 
@@ -144,11 +154,11 @@ class SpaceServiceTest {
     @Test
     public void updateSpace_throwException_IfAdminMemberOrOwnSpace() {
         SpaceCreateUpdateRequest createRequest = new SpaceCreateUpdateRequest(
-            "공간이름", "설명", address);
+            "공간이름", "설명", createAddress);
         Long spaceId = spaceService.createSpace(category.getId(), createRequest,
             hostMember.getEmail());
         SpaceCreateUpdateRequest updateRequest = new SpaceCreateUpdateRequest(
-            "업데이트공간", "업데이트설명", address);
+            "업데이트공간", "업데이트설명", createAddress);
 
         assertAll(
             () -> assertThatThrownBy(
@@ -165,7 +175,7 @@ class SpaceServiceTest {
     @ValueSource(strings = {"host@email", "admin@email"})
     public void deleteSpace(String email) {
         SpaceCreateUpdateRequest createRequest = new SpaceCreateUpdateRequest(
-            "공간이름", "설명", address);
+            "공간이름", "설명", createAddress);
         Long spaceId = spaceService.createSpace(category.getId(), createRequest,
             hostMember.getEmail());
 
@@ -178,7 +188,7 @@ class SpaceServiceTest {
     @Test
     public void deleteSpace_throwException_IfAdminMemberOrOwnSpace() {
         SpaceCreateUpdateRequest createRequest = new SpaceCreateUpdateRequest(
-            "공간이름", "설명", address);
+            "공간이름", "설명", createAddress);
         Long spaceId = spaceService.createSpace(category.getId(), createRequest,
             hostMember.getEmail());
 
@@ -195,10 +205,10 @@ class SpaceServiceTest {
     @Test
     public void searchSpaceByHostId() {
         SpaceCreateUpdateRequest createRequest1 = new SpaceCreateUpdateRequest(
-            "공간이름", "설명", address);
+            "공간이름", "설명", createAddress);
         spaceService.createSpace(category.getId(), createRequest1, hostMember.getEmail());
         SpaceCreateUpdateRequest createRequest2 = new SpaceCreateUpdateRequest(
-            "공간이름2", "설명", address);
+            "공간이름2", "설명", createAddress);
         spaceService.createSpace(category.getId(), createRequest2, hostMember.getEmail());
 
         PageRequest pageRequest = PageRequest.of(0, 10);

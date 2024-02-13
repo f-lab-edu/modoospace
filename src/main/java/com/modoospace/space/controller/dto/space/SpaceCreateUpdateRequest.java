@@ -1,7 +1,7 @@
 package com.modoospace.space.controller.dto.space;
 
 import com.modoospace.member.domain.Member;
-import com.modoospace.space.domain.Address;
+import com.modoospace.space.controller.dto.address.AddressCreateUpdateRequest;
 import com.modoospace.space.domain.Category;
 import com.modoospace.space.domain.Space;
 import javax.validation.constraints.NotEmpty;
@@ -19,9 +19,10 @@ public class SpaceCreateUpdateRequest {
     private String description;
 
     @NotNull
-    private Address address;
+    private AddressCreateUpdateRequest address;
 
-    public SpaceCreateUpdateRequest(String name, String description, Address address) {
+    public SpaceCreateUpdateRequest(String name, String description,
+        AddressCreateUpdateRequest address) {
         this.name = name;
         this.description = description;
         this.address = address;
@@ -31,7 +32,7 @@ public class SpaceCreateUpdateRequest {
         return Space.builder()
             .name(name)
             .description(description)
-            .address(address)
+            .address(address.toEntity())
             .category(category)
             .host(host)
             .build();
