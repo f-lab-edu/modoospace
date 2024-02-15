@@ -43,7 +43,10 @@ dependencies {
     implementation 'org.springframework.session:spring-session-data-redis'
     implementation 'it.ozimov:embedded-redis:0.7.2'
 
-    //queryDsl
+    // Elastic Search
+    implementation 'org.springframework.data:spring-data-elasticsearch'
+
+    // QueryDsl
     implementation "com.querydsl:querydsl-jpa:${queryDslVersion}"
     implementation "com.querydsl:querydsl-apt:${queryDslVersion}"
     implementation 'org.jetbrains:annotations:24.0.0'
