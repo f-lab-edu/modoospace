@@ -32,7 +32,7 @@ public class AddressResponse {
             .depthSecond(address.getDepthSecond())
             .depthThird(address.getDepthThird())
             .noAddress(getNoAddress(address))
-            .noAddress(getRoadAddress(address))
+            .roadAddress(getRoadAddress(address))
             .build();
     }
 
