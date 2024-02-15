@@ -9,6 +9,8 @@ import com.modoospace.space.controller.dto.space.SpaceSearchRequest;
 import com.modoospace.space.domain.Category;
 import com.modoospace.space.domain.CategoryRepository;
 import com.modoospace.space.domain.Space;
+import com.modoospace.space.domain.SpaceIndex;
+import com.modoospace.space.domain.SpaceIndexRepository;
 import com.modoospace.space.domain.SpaceRepository;
 import com.modoospace.space.repository.SpaceQueryRepository;
 import lombok.RequiredArgsConstructor;
@@ -25,6 +27,7 @@ public class SpaceService {
     private final SpaceRepository spaceRepository;
     private final CategoryRepository categoryRepository;
     private final SpaceQueryRepository spaceQueryRepository;
+    private final SpaceIndexRepository spaceIndexRepository;
 
     @Transactional
     public Long createSpace(Long categoryId, SpaceCreateUpdateRequest createRequest,
@@ -34,12 +37,13 @@ public class SpaceService {
 
         Space space = createRequest.toEntity(category, host);
         spaceRepository.save(space);
+        spaceIndexRepository.save(SpaceIndex.of(space));
 
         return space.getId();
     }
 
-    public Page<SpaceResponse> searchSpace(SpaceSearchRequest searchDto, Pageable pageable) {
-        Page<Space> spaces = spaceQueryRepository.searchSpace(searchDto, pageable);
+    public Page<SpaceResponse> searchSpace(SpaceSearchRequest searchRequest, Pageable pageable) {
+        Page<Space> spaces = spaceQueryRepository.searchSpace(searchRequest, pageable);
 
         return spaces.map(SpaceResponse::of);
     }
@@ -59,6 +63,7 @@ public class SpaceService {
 
         Space updatedSpace = updateRequest.toEntity(space.getCategory(), space.getHost());
         space.update(updatedSpace);
+        spaceIndexRepository.save(SpaceIndex.of(space));
     }
 
     @Transactional
@@ -68,6 +73,7 @@ public class SpaceService {
         space.verifyDeletePermission(loginMember);
 
         spaceRepository.delete(space);
+        spaceIndexRepository.delete(SpaceIndex.of(space));
     }
 
     private Space findSpaceById(Long spaceId) {

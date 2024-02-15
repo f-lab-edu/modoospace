@@ -20,59 +20,37 @@ import org.springframework.stereotype.Repository;
 @Repository
 public class SpaceQueryRepository {
 
-  private final JPAQueryFactory jpaQueryFactory;
+    private final JPAQueryFactory jpaQueryFactory;
 
-  public Page<Space> searchSpace(SpaceSearchRequest searchRequest, Pageable pageable) {
+    private final SpaceIndexQueryRepository spaceIndexQueryRepository;
 
-    List<Space> content = jpaQueryFactory
-        .selectFrom(space)
-        .join(space.host, member).fetchJoin()
-        .join(space.category, category).fetchJoin()
-        .where(nameContains(searchRequest.getName())
-            , depthFirstEq(searchRequest.getDepthFirst())
-            , depthSecondEq(searchRequest.getDepthSecond())
-            , depthThirdEq(searchRequest.getDepthThird())
-            , hostIdEq(searchRequest.getHostId())
-            , categoryIdEq(searchRequest.getCategoryId())
-        )
-        .offset(pageable.getOffset())
-        .limit(pageable.getPageSize())
-        .fetch();
+    public Page<Space> searchSpace(SpaceSearchRequest searchRequest, Pageable pageable) {
 
-    JPAQuery<Space> countQuery = jpaQueryFactory
-        .selectFrom(space)
-        .where(nameContains(searchRequest.getName())
-            , depthFirstEq(searchRequest.getDepthFirst())
-            , depthSecondEq(searchRequest.getDepthSecond())
-            , depthThirdEq(searchRequest.getDepthThird())
-            , hostIdEq(searchRequest.getHostId())
-            , categoryIdEq(searchRequest.getCategoryId())
-        );
+        List<Space> content = jpaQueryFactory
+            .selectFrom(space)
+            .join(space.host, member).fetchJoin()
+            .join(space.category, category).fetchJoin()
+            .where(
+                idInSpaceIndex(searchRequest.getQuery())
+            )
+            .offset(pageable.getOffset())
+            .limit(pageable.getPageSize())
+            .fetch();
 
-    return PageableExecutionUtils.getPage(content, pageable, countQuery::fetchCount);
-  }
+        JPAQuery<Space> countQuery = jpaQueryFactory
+            .selectFrom(space)
+            .where(
+                idInSpaceIndex(searchRequest.getQuery())
+            );
 
-  private BooleanExpression nameContains(String name) {
-    return name != null ? space.name.contains(name) : null;
-  }
+        return PageableExecutionUtils.getPage(content, pageable, countQuery::fetchCount);
+    }
 
-  private BooleanExpression depthFirstEq(String depthFirst) {
-    return depthFirst != null ? space.address.depthFirst.eq(depthFirst) : null;
-  }
+    private BooleanExpression idInSpaceIndex(String query) {
+        return query != null ? space.id.in(findByQueryString(query)) : null;
+    }
 
-  private BooleanExpression depthSecondEq(String depthSecond) {
-    return depthSecond != null ? space.address.depthSecond.eq(depthSecond) : null;
-  }
-
-  private BooleanExpression depthThirdEq(String depthThird) {
-    return depthThird != null ? space.address.depthThird.eq(depthThird) : null;
-  }
-
-  private BooleanExpression hostIdEq(Long hostId) {
-    return hostId != null ? space.host.id.eq(hostId) : null;
-  }
-
-  private BooleanExpression categoryIdEq(Long categoryId) {
-    return categoryId != null ? space.category.id.eq(categoryId) : null;
-  }
+    private List<Long> findByQueryString(String query) {
+        return spaceIndexQueryRepository.findByQueryString(query);
+    }
 }
