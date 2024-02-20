@@ -86,12 +86,13 @@ public class SpaceQueryRepository {
 
         BooleanBuilder builder = new BooleanBuilder();
         for (String term : terms) {
-            builder.and(space.name.like(term)
-                .or(space.description.like(term))
-                .or(space.category.name.like(term))
-                .or(space.address.depthFirst.like(term))
-                .or(space.address.depthSecond.like(term))
-                .or(space.address.depthThird.like(term)));
+            String searchPattern = "%"+term+"%";
+            builder.and(space.name.like(searchPattern)
+                .or(space.description.like(searchPattern))
+                .or(space.category.name.like(searchPattern))
+                .or(space.address.depthFirst.like(searchPattern))
+                .or(space.address.depthSecond.like(searchPattern))
+                .or(space.address.depthThird.like(searchPattern)));
         }
         return builder;
     }
