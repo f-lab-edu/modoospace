@@ -38,6 +38,7 @@ public class SpaceController {
     @GetMapping()
     public ResponseEntity<Page<SpaceResponse>> search(SpaceSearchRequest searchRequest,
         Pageable pageable) {
+        searchRequest.updateTimeRange();
         Page<SpaceResponse> spaces = spaceService.searchSpace(searchRequest, pageable);
         return ResponseEntity.ok().body(spaces);
     }
