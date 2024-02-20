@@ -31,6 +31,8 @@ public class SpaceSearchRequest {
         this.query = query;
         this.maxUser = maxUser;
         this.useDate = useDate;
-        this.timeRange = new TimeRange(startHour, endHour);
+        if(startHour != null && endHour != null){
+            this.timeRange = new TimeRange(startHour, endHour);
+        }
     }
 }

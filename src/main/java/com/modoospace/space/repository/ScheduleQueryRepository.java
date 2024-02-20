@@ -68,7 +68,7 @@ public class ScheduleQueryRepository {
                 , dateEq(date)
                 , includingTimeRange(startTime, endTime)
             )
-            .fetchOne();
+            .fetchFirst();
     }
 
     public List<Schedule> find1DaySchedules(Facility facility, LocalDate findDate) {

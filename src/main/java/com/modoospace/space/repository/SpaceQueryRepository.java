@@ -1,14 +1,22 @@
 package com.modoospace.space.repository;
 
 import static com.modoospace.member.domain.QMember.member;
+import static com.modoospace.reservation.domain.QReservation.reservation;
 import static com.modoospace.space.domain.QCategory.category;
+import static com.modoospace.space.domain.QFacility.facility;
+import static com.modoospace.space.domain.QSchedule.schedule;
 import static com.modoospace.space.domain.QSpace.space;
 
+import com.modoospace.reservation.domain.ReservationStatus;
 import com.modoospace.space.controller.dto.space.SpaceSearchRequest;
 import com.modoospace.space.domain.Space;
+import com.modoospace.space.domain.TimeRange;
+import com.querydsl.core.BooleanBuilder;
 import com.querydsl.core.types.dsl.BooleanExpression;
 import com.querydsl.jpa.impl.JPAQuery;
 import com.querydsl.jpa.impl.JPAQueryFactory;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -25,13 +33,15 @@ public class SpaceQueryRepository {
     private final SpaceIndexQueryRepository spaceIndexQueryRepository;
 
     public Page<Space> searchSpace(SpaceSearchRequest searchRequest, Pageable pageable) {
-
         List<Space> content = jpaQueryFactory
             .selectFrom(space)
             .join(space.host, member).fetchJoin()
             .join(space.category, category).fetchJoin()
             .where(
-                idInSpaceIndex(searchRequest.getQuery())
+                findSpaceByQuery(searchRequest.getQuery())
+                , facilitySubQuery(searchRequest.getMaxUser()
+                    , searchRequest.getUseDate()
+                    , searchRequest.getTimeRange())
             )
             .offset(pageable.getOffset())
             .limit(pageable.getPageSize())
@@ -40,17 +50,118 @@ public class SpaceQueryRepository {
         JPAQuery<Space> countQuery = jpaQueryFactory
             .selectFrom(space)
             .where(
-                idInSpaceIndex(searchRequest.getQuery())
+                findSpaceByQuery(searchRequest.getQuery())
+                , facilitySubQuery(searchRequest.getMaxUser()
+                    , searchRequest.getUseDate()
+                    , searchRequest.getTimeRange())
             );
 
         return PageableExecutionUtils.getPage(content, pageable, countQuery::fetchCount);
     }
 
-    private BooleanExpression idInSpaceIndex(String query) {
-        return query != null ? space.id.in(findByQueryString(query)) : null;
+    /**
+     * 엘라스틱 서치를 사용한 검색
+     */
+    private BooleanExpression idInQueryResult(String query) {
+        return query != null ? space.id.in(findIdByQueryString(query)) : null;
     }
 
-    private List<Long> findByQueryString(String query) {
-        return spaceIndexQueryRepository.findByQueryString(query);
+    private List<Long> findIdByQueryString(String query) {
+        return spaceIndexQueryRepository.findIdByQueryString(query);
+    }
+
+    /**
+     * 쿼리를 사용한 검색
+     */
+    private BooleanBuilder findSpaceByQuery(String query) {
+        if (query == null) {
+            return null;
+        }
+
+        return likeQuery(query);
+    }
+
+    private BooleanBuilder likeQuery(String query) {
+        String[] terms = query.split("\\s+");
+
+        BooleanBuilder builder = new BooleanBuilder();
+        for (String term : terms) {
+            builder.and(space.name.like(term)
+                .or(space.description.like(term))
+                .or(space.category.name.like(term))
+                .or(space.address.depthFirst.like(term))
+                .or(space.address.depthSecond.like(term))
+                .or(space.address.depthThird.like(term)));
+        }
+        return builder;
+    }
+
+    private BooleanExpression facilitySubQuery(Integer maxUser, LocalDate useDate,
+        TimeRange timeRange) {
+        return jpaQueryFactory
+            .selectFrom(facility)
+            .where(
+                facility.space.eq(space)
+                , facility.reservationEnable.eq(true)
+                , biggerThanMaxUser(maxUser)
+                , scheduleSubQuery(useDate, timeRange)
+                , reservationSubQuery(useDate, timeRange)
+            )
+            .exists();
+    }
+
+    private BooleanExpression biggerThanMaxUser(Integer maxUser) {
+        if (maxUser == null) {
+            return null;
+        }
+
+        return facility.maxUser.goe(maxUser);
+    }
+
+    /**
+     * 가능한 스케줄을 포함하고있는지 확인한다.
+     */
+    private BooleanExpression scheduleSubQuery(LocalDate useDate, TimeRange timeRange) {
+        if (useDate == null) {
+            return null;
+        }
+
+        return jpaQueryFactory
+            .selectFrom(schedule)
+            .where(
+                schedule.facility.eq(facility)
+                , schedule.date.eq(useDate)
+                , includingTimeRange(timeRange)
+            )
+            .exists();
+    }
+
+    private BooleanExpression includingTimeRange(TimeRange timeRange) {
+        if (timeRange == null) {
+            return null;
+        }
+
+        return (schedule.timeRange.startTime.loe(timeRange.getStartTime()))
+            .and((schedule.timeRange.endTime.goe(timeRange.getEndTime())));
+    }
+
+    /**
+     * 겹치는 예약이 있는지 확인한다.
+     */
+    private BooleanExpression reservationSubQuery(LocalDate useDate, TimeRange timeRange) {
+        if (useDate == null || timeRange == null) {
+            return null;
+        }
+
+        LocalDateTime startDateTime = LocalDateTime.of(useDate, timeRange.getStartTime());
+        LocalDateTime endDateTime = LocalDateTime.of(useDate, timeRange.getEndTime());
+        return jpaQueryFactory
+            .selectFrom(reservation)
+            .where(reservation.facility.eq(facility)
+                , reservation.status.ne(ReservationStatus.CANCELED)
+                , reservation.dateTimeRange.startDateTime.before(endDateTime)
+                , reservation.dateTimeRange.endDateTime.after(startDateTime)
+            )
+            .notExists();
     }
 }
