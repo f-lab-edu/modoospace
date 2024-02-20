@@ -9,6 +9,7 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import org.springframework.format.annotation.DateTimeFormat;
 
 @Getter
 @Setter
@@ -20,7 +21,7 @@ public class SpaceSearchRequest {
     @Positive
     private Integer maxUser; // 최대인원
 
-    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = DateFormatManager.DATE_FORMAT)
+    @DateTimeFormat(pattern = DateFormatManager.DATE_FORMAT)
     private LocalDate useDate; // 사용일자
 
     private TimeRange timeRange; // 사용시간
