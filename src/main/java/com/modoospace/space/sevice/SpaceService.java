@@ -4,6 +4,7 @@ import com.modoospace.common.exception.NotFoundEntityException;
 import com.modoospace.member.domain.Member;
 import com.modoospace.member.service.MemberService;
 import com.modoospace.space.controller.dto.space.SpaceCreateUpdateRequest;
+import com.modoospace.space.controller.dto.space.SpaceDetailResponse;
 import com.modoospace.space.controller.dto.space.SpaceResponse;
 import com.modoospace.space.controller.dto.space.SpaceSearchRequest;
 import com.modoospace.space.domain.Category;
@@ -48,10 +49,10 @@ public class SpaceService {
         return spaces.map(SpaceResponse::of);
     }
 
-    public SpaceResponse findSpace(Long spaceId) {
+    public SpaceDetailResponse findSpace(Long spaceId) {
         Space space = findSpaceById(spaceId);
 
-        return SpaceResponse.of(space);
+        return SpaceDetailResponse.of(space);
     }
 
     @Transactional

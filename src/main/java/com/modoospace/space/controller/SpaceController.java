@@ -2,6 +2,7 @@ package com.modoospace.space.controller;
 
 import com.modoospace.config.auth.LoginEmail;
 import com.modoospace.space.controller.dto.space.SpaceCreateUpdateRequest;
+import com.modoospace.space.controller.dto.space.SpaceDetailResponse;
 import com.modoospace.space.controller.dto.space.SpaceResponse;
 import com.modoospace.space.controller.dto.space.SpaceSearchRequest;
 import com.modoospace.space.sevice.SpaceService;
@@ -44,8 +45,8 @@ public class SpaceController {
     }
 
     @GetMapping("/{spaceId}")
-    public ResponseEntity<SpaceResponse> find(@PathVariable Long spaceId) {
-        SpaceResponse space = spaceService.findSpace(spaceId);
+    public ResponseEntity<SpaceDetailResponse> find(@PathVariable Long spaceId) {
+        SpaceDetailResponse space = spaceService.findSpace(spaceId);
         return ResponseEntity.ok().body(space);
     }
 
