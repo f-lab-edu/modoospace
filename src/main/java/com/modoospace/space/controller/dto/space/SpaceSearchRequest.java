@@ -16,6 +16,12 @@ public class SpaceSearchRequest {
 
     private String query;
 
+    private String depthFirst; // 시도
+
+    private String depthSecond; // 구
+
+    private String depthThird; // 동
+
     @Positive
     private Integer maxUser; // 최대인원
 

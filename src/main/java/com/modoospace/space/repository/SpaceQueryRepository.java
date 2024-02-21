@@ -39,6 +39,9 @@ public class SpaceQueryRepository {
             .join(space.category, category).fetchJoin()
             .where(
                 findSpaceByQuery(searchRequest.getQuery())
+                , eqDepthFirst(searchRequest.getDepthFirst())
+                , eqDepthSecond(searchRequest.getDepthSecond())
+                , eqDepthThird(searchRequest.getDepthThird())
                 , facilitySubQuery(searchRequest.getMaxUser()
                     , searchRequest.getUseDate()
                     , searchRequest.getTimeRange())
@@ -86,7 +89,7 @@ public class SpaceQueryRepository {
 
         BooleanBuilder builder = new BooleanBuilder();
         for (String term : terms) {
-            String searchPattern = "%"+term+"%";
+            String searchPattern = "%" + term + "%";
             builder.and(space.name.like(searchPattern)
                 .or(space.description.like(searchPattern))
                 .or(space.category.name.like(searchPattern))
@@ -95,6 +98,18 @@ public class SpaceQueryRepository {
                 .or(space.address.depthThird.like(searchPattern)));
         }
         return builder;
+    }
+
+    private BooleanExpression eqDepthFirst(String depthFirst) {
+        return depthFirst != null ? space.address.depthFirst.eq(depthFirst) : null;
+    }
+
+    private BooleanExpression eqDepthSecond(String depthSecond) {
+        return depthSecond != null ? space.address.depthSecond.eq(depthSecond) : null;
+    }
+
+    private BooleanExpression eqDepthThird(String depthThird) {
+        return depthThird != null ? space.address.depthThird.eq(depthThird) : null;
     }
 
     private BooleanExpression facilitySubQuery(Integer maxUser, LocalDate useDate,
