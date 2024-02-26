@@ -49,6 +49,12 @@ public class SpaceService {
         return spaces.map(SpaceResponse::of);
     }
 
+    public Page<SpaceResponse> searchSpaceQuery(SpaceSearchRequest searchRequest, Pageable pageable) {
+        Page<Space> spaces = spaceQueryRepository.searchSpaceQuery(searchRequest, pageable);
+
+        return spaces.map(SpaceResponse::of);
+    }
+
     public SpaceDetailResponse findSpace(Long spaceId) {
         Space space = findSpaceById(spaceId);
 

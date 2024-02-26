@@ -17,19 +17,8 @@ public class SpaceIndexQueryRepository {
 
     private final ElasticsearchOperations elasticsearchOperations;
 
-    /**
-     * {"query": {"query_string": {"fields": ["name", "description", "categoryName", "address"]
-     * ,"query": "*사당* AND *스터디룸*"} }}
-     **/
-    public List<Long> findIdByQueryString(String queryString) {
-        String[] terms = queryString.split("\\s+");
-        BoolQueryBuilder queryBuilder = QueryBuilders.boolQuery();
-        for (String term : terms) {
-            queryBuilder = queryBuilder.must(
-                QueryBuilders.queryStringQuery("*" + term + "*")
-                    .field("name").field("description").field("categoryName").field("address")
-            );
-        }
+    public List<Long> findIdByQuery(String queryString) {
+        BoolQueryBuilder queryBuilder = makeQuery(queryString);
 
         NativeSearchQuery searchQuery = new NativeSearchQueryBuilder()
             .withQuery(queryBuilder)
@@ -39,6 +28,22 @@ public class SpaceIndexQueryRepository {
             .stream()
             .map(searchHit -> searchHit.getContent().getId())
             .collect(Collectors.toList());
+    }
+
+    /**
+     * {"query": {"query_string": {"fields": ["name", "description", "categoryName", "address",]
+     * ,"query": "*사당* AND *스터디룸*"}}}
+     **/
+    private BoolQueryBuilder makeQuery(String queryString) {
+        String[] terms = queryString.split("\\s+");
+        BoolQueryBuilder queryBuilder = QueryBuilders.boolQuery();
+        for (String term : terms) {
+            queryBuilder = queryBuilder.must(
+                QueryBuilders.queryStringQuery("*" + term + "*")
+                    .field("name").field("description").field("categoryName").field("address")
+            );
+        }
+        return queryBuilder;
     }
 }
 

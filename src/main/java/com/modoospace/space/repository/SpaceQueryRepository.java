@@ -38,6 +38,36 @@ public class SpaceQueryRepository {
             .join(space.host, member).fetchJoin()
             .join(space.category, category).fetchJoin()
             .where(
+                spaceIdInQueryResult(searchRequest.getQuery())
+                , eqDepthFirst(searchRequest.getDepthFirst())
+                , eqDepthSecond(searchRequest.getDepthSecond())
+                , eqDepthThird(searchRequest.getDepthThird())
+                , facilitySubQuery(searchRequest.getMaxUser()
+                    , searchRequest.getUseDate()
+                    , searchRequest.getTimeRange())
+            )
+            .offset(pageable.getOffset())
+            .limit(pageable.getPageSize())
+            .fetch();
+
+        JPAQuery<Space> countQuery = jpaQueryFactory
+            .selectFrom(space)
+            .where(
+                spaceIdInQueryResult(searchRequest.getQuery())
+                , facilitySubQuery(searchRequest.getMaxUser()
+                    , searchRequest.getUseDate()
+                    , searchRequest.getTimeRange())
+            );
+
+        return PageableExecutionUtils.getPage(content, pageable, countQuery::fetchCount);
+    }
+
+    public Page<Space> searchSpaceQuery(SpaceSearchRequest searchRequest, Pageable pageable) {
+        List<Space> content = jpaQueryFactory
+            .selectFrom(space)
+            .join(space.host, member).fetchJoin()
+            .join(space.category, category).fetchJoin()
+            .where(
                 findSpaceByQuery(searchRequest.getQuery())
                 , eqDepthFirst(searchRequest.getDepthFirst())
                 , eqDepthSecond(searchRequest.getDepthSecond())
@@ -65,23 +95,15 @@ public class SpaceQueryRepository {
     /**
      * 엘라스틱 서치를 사용한 검색
      */
-    private BooleanExpression idInQueryResult(String query) {
-        return query != null ? space.id.in(findIdByQueryString(query)) : null;
-    }
-
-    private List<Long> findIdByQueryString(String query) {
-        return spaceIndexQueryRepository.findIdByQueryString(query);
+    private BooleanExpression spaceIdInQueryResult(String query) {
+        return query != null ? space.id.in(spaceIndexQueryRepository.findIdByQuery(query)) : null;
     }
 
     /**
      * 쿼리를 사용한 검색
      */
     private BooleanBuilder findSpaceByQuery(String query) {
-        if (query == null) {
-            return null;
-        }
-
-        return likeQuery(query);
+        return query != null ? likeQuery(query) : null;
     }
 
     private BooleanBuilder likeQuery(String query) {
@@ -127,11 +149,7 @@ public class SpaceQueryRepository {
     }
 
     private BooleanExpression biggerThanMaxUser(Integer maxUser) {
-        if (maxUser == null) {
-            return null;
-        }
-
-        return facility.maxUser.goe(maxUser);
+        return maxUser != null ? facility.maxUser.goe(maxUser) : null;
     }
 
     /**

@@ -44,6 +44,14 @@ public class SpaceController {
         return ResponseEntity.ok().body(spaces);
     }
 
+    @GetMapping("/query")
+    public ResponseEntity<Page<SpaceResponse>> searchQuery(SpaceSearchRequest searchRequest,
+        Pageable pageable) {
+        searchRequest.updateTimeRange();
+        Page<SpaceResponse> spaces = spaceService.searchSpaceQuery(searchRequest, pageable);
+        return ResponseEntity.ok().body(spaces);
+    }
+
     @GetMapping("/{spaceId}")
     public ResponseEntity<SpaceDetailResponse> find(@PathVariable Long spaceId) {
         SpaceDetailResponse space = spaceService.findSpace(spaceId);

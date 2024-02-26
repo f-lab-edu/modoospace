@@ -34,9 +34,9 @@ public class SpaceIndex {
             .name(space.getName())
             .description(space.getDescription())
             .categoryName(space.getCategory().getName())
-            .address(space.getAddress().getDepthFirst() + " "
-                + space.getAddress().getDepthSecond() + " "
-                + space.getAddress().getDepthThird())
+            .address(space.getAddress().getDepthFirst()
+                + " " + space.getAddress().getDepthSecond()
+                + " " + space.getAddress().getDepthThird())
             .build();
     }
 }
