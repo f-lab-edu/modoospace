@@ -14,11 +14,16 @@ public class RestClientConfig extends AbstractElasticsearchConfiguration {
     private String host;
     @Value("${spring.elasticsearch.port}")
     private int port;
+    @Value("${spring.elasticsearch.username}")
+    private String username;
+    @Value("${spring.elasticsearch.password}")
+    private String password;
 
     @Override
     public RestHighLevelClient elasticsearchClient() {
         final ClientConfiguration clientConfiguration = ClientConfiguration.builder()
             .connectedTo(host + ":" + port)
+            .withBasicAuth(username, password)
             .build();
 
         return RestClients.create(clientConfiguration).rest();
