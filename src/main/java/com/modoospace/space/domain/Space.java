@@ -37,6 +37,7 @@ public class Space extends BaseTimeEntity {
     @Column(nullable = false)
     private String name;
 
+    @Column(length = 2000)
     private String description;
 
     @NotNull

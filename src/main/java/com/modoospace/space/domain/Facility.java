@@ -42,6 +42,7 @@ public class Facility extends BaseTimeEntity {
     @Column(nullable = false)
     private Integer maxUser;
 
+    @Column(length = 2000)
     private String description;
 
     @ManyToOne(fetch = LAZY)
