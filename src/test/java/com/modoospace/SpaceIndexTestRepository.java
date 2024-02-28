@@ -11,8 +11,8 @@ import org.elasticsearch.xcontent.XContentType;
 
 public class SpaceIndexTestRepository {
 
-    private RestHighLevelClient restHighLevelClient;
-    private ObjectMapper objectMapper = new ObjectMapper();
+    private final RestHighLevelClient restHighLevelClient;
+    private final ObjectMapper objectMapper = new ObjectMapper();
 
     public SpaceIndexTestRepository(RestHighLevelClient restHighLevelClient) {
         this.restHighLevelClient = restHighLevelClient;

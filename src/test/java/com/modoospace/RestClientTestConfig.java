@@ -18,20 +18,22 @@ public class RestClientTestConfig {
 
     @Bean
     public RestHighLevelClient elasticsearchClient() {
-        ElasticsearchContainer container
-            = new ElasticsearchContainer("docker.elastic.co/elasticsearch/elasticsearch:7.17.9");
-        container.start();
+        RestClientBuilder builder;
+        try (ElasticsearchContainer container = new ElasticsearchContainer(
+            "docker.elastic.co/elasticsearch/elasticsearch:7.17.9")) {
+            container.start();
 
-        BasicCredentialsProvider credentialProvider = new BasicCredentialsProvider();
-        credentialProvider.setCredentials(AuthScope.ANY,
-            new UsernamePasswordCredentials("elasticsearch", "elasticsearch"));
+            BasicCredentialsProvider credentialProvider = new BasicCredentialsProvider();
+            credentialProvider.setCredentials(AuthScope.ANY,
+                new UsernamePasswordCredentials("elasticsearch", "elasticsearch"));
 
-        RestClientBuilder builder = RestClient.builder(
-                HttpHost.create(container.getHttpHostAddress()))
-            .setHttpClientConfigCallback(
-                httpClientBuilder -> httpClientBuilder.setDefaultCredentialsProvider(
-                    credentialProvider)
-            );
+            builder = RestClient.builder(
+                    HttpHost.create(container.getHttpHostAddress()))
+                .setHttpClientConfigCallback(
+                    httpClientBuilder -> httpClientBuilder.setDefaultCredentialsProvider(
+                        credentialProvider)
+                );
+        }
 
         return new RestHighLevelClient(builder);
     }
