@@ -2,7 +2,7 @@ package com.modoospace.reservation.repository;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-import com.modoospace.TestConfig;
+import com.modoospace.JpaTestConfig;
 import com.modoospace.member.domain.Member;
 import com.modoospace.member.domain.MemberRepository;
 import com.modoospace.member.domain.Role;
@@ -10,7 +10,6 @@ import com.modoospace.reservation.domain.DateTimeRange;
 import com.modoospace.reservation.domain.Reservation;
 import com.modoospace.reservation.domain.ReservationRepository;
 import com.modoospace.space.controller.dto.facility.FacilityCreateRequest;
-import com.modoospace.space.controller.dto.space.SpaceCreateUpdateRequest;
 import com.modoospace.space.domain.Category;
 import com.modoospace.space.domain.CategoryRepository;
 import com.modoospace.space.domain.Facility;
@@ -28,7 +27,7 @@ import org.springframework.context.annotation.Import;
 import org.springframework.test.context.ActiveProfiles;
 
 @DataJpaTest
-@Import(TestConfig.class)
+@Import(JpaTestConfig.class)
 @ActiveProfiles("test")
 public class ReservationQueryRepositoryTest {
 

@@ -2,7 +2,7 @@ package com.modoospace.space.repository;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-import com.modoospace.TestConfig;
+import com.modoospace.JpaTestConfig;
 import com.modoospace.member.domain.Member;
 import com.modoospace.member.domain.MemberRepository;
 import com.modoospace.member.domain.Role;
@@ -29,7 +29,7 @@ import org.springframework.context.annotation.Import;
 import org.springframework.test.context.ActiveProfiles;
 
 @DataJpaTest
-@Import(TestConfig.class)
+@Import(JpaTestConfig.class)
 @ActiveProfiles("test")
 public class ScheduleQueryRepositoryTest {
 
