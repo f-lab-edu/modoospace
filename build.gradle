@@ -45,6 +45,8 @@ dependencies {
 
     // Elastic Search
     implementation 'org.springframework.data:spring-data-elasticsearch'
+    implementation 'org.elasticsearch:elasticsearch:7.17.9'
+    implementation "org.testcontainers:elasticsearch:1.19.6"
 
     // QueryDsl
     implementation "com.querydsl:querydsl-jpa:${queryDslVersion}"
