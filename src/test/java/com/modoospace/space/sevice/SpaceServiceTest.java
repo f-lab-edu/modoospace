@@ -11,8 +11,7 @@ import com.modoospace.member.domain.MemberRepository;
 import com.modoospace.member.domain.Role;
 import com.modoospace.space.controller.dto.address.AddressCreateUpdateRequest;
 import com.modoospace.space.controller.dto.space.SpaceCreateUpdateRequest;
-import com.modoospace.space.controller.dto.space.SpaceResponse;
-import com.modoospace.space.controller.dto.space.SpaceSearchRequest;
+import com.modoospace.space.controller.dto.space.SpaceDetailResponse;
 import com.modoospace.space.domain.Category;
 import com.modoospace.space.domain.CategoryRepository;
 import com.modoospace.space.domain.SpaceRepository;
@@ -23,8 +22,6 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -94,7 +91,7 @@ class SpaceServiceTest {
         Long spaceId = spaceService.createSpace(category.getId(), createRequest,
             hostMember.getEmail());
 
-        SpaceResponse retSpaceResponse = spaceService.findSpace(spaceId);
+        SpaceDetailResponse retSpaceResponse = spaceService.findSpace(spaceId);
         assertAll(
             () -> assertThat(retSpaceResponse.getId()).isEqualTo(spaceId),
             () -> assertThat(retSpaceResponse.getName()).isEqualTo("공간이름"),
@@ -137,7 +134,7 @@ class SpaceServiceTest {
 
         spaceService.updateSpace(spaceId, updateRequest, email);
 
-        SpaceResponse retSpaceResponse = spaceService.findSpace(spaceId);
+        SpaceDetailResponse retSpaceResponse = spaceService.findSpace(spaceId);
         assertAll(
             () -> assertThat(retSpaceResponse.getName()).isEqualTo("업데이트공간"),
             () -> assertThat(retSpaceResponse.getDescription()).isEqualTo("업데이트설명"),
@@ -199,25 +196,5 @@ class SpaceServiceTest {
                 () -> spaceService.deleteSpace(spaceId, visitorMember.getEmail()))
                 .isInstanceOf(PermissionDeniedException.class)
         );
-    }
-
-    @DisplayName("호스트ID로 호스트가 소유하고있는 공간을 조회할 수 있다.")
-    @Test
-    public void searchSpaceByHostId() {
-        SpaceCreateUpdateRequest createRequest1 = new SpaceCreateUpdateRequest(
-            "공간이름", "설명", createAddress);
-        spaceService.createSpace(category.getId(), createRequest1, hostMember.getEmail());
-        SpaceCreateUpdateRequest createRequest2 = new SpaceCreateUpdateRequest(
-            "공간이름2", "설명", createAddress);
-        spaceService.createSpace(category.getId(), createRequest2, hostMember.getEmail());
-
-        PageRequest pageRequest = PageRequest.of(0, 10);
-        SpaceSearchRequest searchRequest = new SpaceSearchRequest();
-        searchRequest.setHostId(hostMember.getId());
-        Page<SpaceResponse> retPage = spaceService
-            .searchSpace(searchRequest, pageRequest);
-
-        assertThat(retPage.isFirst()).isTrue();
-        assertThat(retPage.getTotalElements()).isEqualTo(2);
     }
 }
