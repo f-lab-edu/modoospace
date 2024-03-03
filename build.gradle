@@ -113,7 +113,7 @@ jacocoTestCoverageVerification {
             limit {
                 counter = 'BRANCH'
                 value = 'COVEREDRATIO'
-                minimum = 0.5 // 테스트 커버리지 최소 50%
+                minimum = 0.8 // 테스트 커버리지 최소 80%
             }
 
             // 커버리지 체크를 제외할 클래스들
