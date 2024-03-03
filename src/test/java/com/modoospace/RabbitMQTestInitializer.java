@@ -14,7 +14,7 @@ public class RabbitMQTestInitializer {
 
     static void initializeRabbitMQ(RabbitMQContainer container) {
         ConnectionFactory factory = new ConnectionFactory();
-        factory.setHost(container.getContainerIpAddress());
+        factory.setHost(container.getHost());
         factory.setPort(container.getAmqpPort());
         factory.setUsername("guest");
         factory.setPassword("guest");

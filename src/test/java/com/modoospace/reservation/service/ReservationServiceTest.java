@@ -11,6 +11,7 @@ import com.modoospace.member.service.MemberService;
 import com.modoospace.reservation.controller.dto.AvailabilityTimeResponse;
 import com.modoospace.reservation.controller.dto.ReservationCreateRequest;
 import com.modoospace.reservation.controller.dto.ReservationResponse;
+import com.modoospace.reservation.controller.dto.TimeResponse;
 import com.modoospace.reservation.domain.ReservationRepository;
 import com.modoospace.reservation.domain.ReservationStatus;
 import com.modoospace.reservation.repository.ReservationQueryRepository;
@@ -27,7 +28,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
-import java.util.Arrays;
+import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
@@ -116,7 +117,7 @@ public class ReservationServiceTest extends AbstractIntegrationContainerBaseTest
                 .maxUser(4)
                 .description("1~4인실 입니다.")
                 .timeSettings(
-                        Arrays.asList(new TimeSettingCreateRequest(9, 24))
+                        List.of(new TimeSettingCreateRequest(9, 24))
                 )
                 .build();
         facility1 = facilityRepository.save(createRequest1.toEntity(space));
@@ -141,7 +142,7 @@ public class ReservationServiceTest extends AbstractIntegrationContainerBaseTest
 
         // 9~23
         Assertions.assertThat(retResponse.getTimeResponses().stream()
-                        .filter(timeResponse -> timeResponse.getAvailable()))
+                        .filter(TimeResponse::getAvailable))
                 .hasSize(15);
     }
 
@@ -153,7 +154,7 @@ public class ReservationServiceTest extends AbstractIntegrationContainerBaseTest
 
         // 0~23
         Assertions.assertThat(retResponse.getTimeResponses().stream()
-                        .filter(timeResponse -> timeResponse.getAvailable()))
+                        .filter(TimeResponse::getAvailable))
                 .hasSize(24);
     }
 
@@ -170,7 +171,7 @@ public class ReservationServiceTest extends AbstractIntegrationContainerBaseTest
 
         // 9시 ~ 12시, 15시 ~ 24시
         Assertions.assertThat(retResponse.getTimeResponses().stream()
-                        .filter(timeResponse -> timeResponse.getAvailable()))
+                        .filter(TimeResponse::getAvailable))
                 .hasSize(15 - 3);
     }
 

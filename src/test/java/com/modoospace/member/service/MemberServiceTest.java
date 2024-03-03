@@ -29,13 +29,12 @@ class MemberServiceTest extends AbstractIntegrationContainerBaseTest {
     @Autowired
     private StringRedisTemplate redisTemplate;
 
-    private Member adminMember;
     private Member hostMember;
     private Member visitorMember;
 
     @BeforeEach
     public void setUp() {
-        adminMember = Member.builder()
+        Member adminMember = Member.builder()
                 .email("admin@email")
                 .name("admin")
                 .role(Role.ADMIN)

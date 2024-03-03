@@ -41,7 +41,6 @@ class SpaceServiceTest extends AbstractIntegrationContainerBaseTest {
 
     private Member hostMember;
     private Member visitorMember;
-    private Member adminMember;
     private AddressCreateUpdateRequest createAddress;
     private Category category;
 
@@ -59,7 +58,7 @@ class SpaceServiceTest extends AbstractIntegrationContainerBaseTest {
                 .role(Role.VISITOR)
                 .build();
 
-        adminMember = Member.builder()
+        Member adminMember = Member.builder()
                 .email("admin@email")
                 .name("admin")
                 .role(Role.ADMIN)

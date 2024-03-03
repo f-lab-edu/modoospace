@@ -1,9 +1,5 @@
 package com.modoospace.space.sevice;
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatThrownBy;
-import static org.junit.jupiter.api.Assertions.assertAll;
-
 import com.modoospace.AbstractIntegrationContainerBaseTest;
 import com.modoospace.common.exception.ConflictingTimeException;
 import com.modoospace.common.exception.NotFoundEntityException;
@@ -14,23 +10,21 @@ import com.modoospace.space.controller.dto.facility.FacilityCreateRequest;
 import com.modoospace.space.controller.dto.schedule.ScheduleCreateUpdateRequest;
 import com.modoospace.space.controller.dto.schedule.ScheduleResponse;
 import com.modoospace.space.controller.dto.timeSetting.TimeSettingCreateRequest;
-import com.modoospace.space.domain.Category;
-import com.modoospace.space.domain.CategoryRepository;
-import com.modoospace.space.domain.Facility;
-import com.modoospace.space.domain.FacilityRepository;
-import com.modoospace.space.domain.Space;
-import com.modoospace.space.domain.SpaceRepository;
-import java.time.LocalDate;
-import java.time.YearMonth;
-import java.util.List;
+import com.modoospace.space.domain.*;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.transaction.TestTransaction;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.time.LocalDate;
+import java.time.YearMonth;
+import java.util.List;
+
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.junit.jupiter.api.Assertions.assertAll;
 
 @Transactional
 public class ScheduleServiceTest extends AbstractIntegrationContainerBaseTest {
@@ -61,10 +55,10 @@ public class ScheduleServiceTest extends AbstractIntegrationContainerBaseTest {
     @BeforeEach
     public void setUp() {
         hostMember = Member.builder()
-            .email("host@email")
-            .name("host")
-            .role(Role.HOST)
-            .build();
+                .email("host@email")
+                .name("host")
+                .role(Role.HOST)
+                .build();
         memberRepository.save(hostMember);
         memberRepository.flush();
 
@@ -72,22 +66,22 @@ public class ScheduleServiceTest extends AbstractIntegrationContainerBaseTest {
         categoryRepository.save(category);
 
         Space space = Space.builder()
-            .name("공간이름")
-            .description("설명")
-            .category(category)
-            .host(hostMember)
-            .build();
+                .name("공간이름")
+                .description("설명")
+                .category(category)
+                .host(hostMember)
+                .build();
         spaceRepository.save(space);
 
         // TimeSetting, WeekSetting 기본값이 필요하여 Request 사용.
         FacilityCreateRequest createRequest = FacilityCreateRequest.builder()
-            .name("스터디룸1")
-            .reservationEnable(true)
-            .minUser(1)
-            .maxUser(4)
-            .description("1~4인실 입니다.")
-            .timeSettings(List.of(new TimeSettingCreateRequest(9, 18)))
-            .build();
+                .name("스터디룸1")
+                .reservationEnable(true)
+                .minUser(1)
+                .maxUser(4)
+                .description("1~4인실 입니다.")
+                .timeSettings(List.of(new TimeSettingCreateRequest(9, 18)))
+                .build();
         facility = facilityRepository.save(createRequest.toEntity(space));
 
         nowDate = LocalDate.now();
@@ -98,16 +92,16 @@ public class ScheduleServiceTest extends AbstractIntegrationContainerBaseTest {
     @Test
     public void createFacilitySchedule() {
         ScheduleCreateUpdateRequest createRequest = new ScheduleCreateUpdateRequest(nowDate, 19,
-            24);
+                24);
 
         scheduleService.createSchedule(
-            facility.getId(), createRequest, hostMember.getEmail());
+                facility.getId(), createRequest, hostMember.getEmail());
 
         ScheduleResponse retSchedule = scheduleService.find1DaySchedules(
-            facility.getId(), nowDate).get(1);
+                facility.getId(), nowDate).get(1);
         assertAll(
-            () -> assertThat(retSchedule.getStartHour()).isEqualTo(19),
-            () -> assertThat(retSchedule.getEndHour()).isEqualTo(24)
+                () -> assertThat(retSchedule.getStartHour()).isEqualTo(19),
+                () -> assertThat(retSchedule.getEndHour()).isEqualTo(24)
         );
     }
 
@@ -115,16 +109,16 @@ public class ScheduleServiceTest extends AbstractIntegrationContainerBaseTest {
     @Test
     public void createFacilitySchedule_merge() {
         ScheduleCreateUpdateRequest createRequest = new ScheduleCreateUpdateRequest(nowDate, 18,
-            24);
+                24);
 
         scheduleService.createSchedule(
-            facility.getId(), createRequest, hostMember.getEmail());
+                facility.getId(), createRequest, hostMember.getEmail());
 
         ScheduleResponse retSchedule = scheduleService.find1DaySchedules(
-            facility.getId(), nowDate).get(0);
+                facility.getId(), nowDate).get(0);
         assertAll(
-            () -> assertThat(retSchedule.getStartHour()).isEqualTo(9),
-            () -> assertThat(retSchedule.getEndHour()).isEqualTo(24)
+                () -> assertThat(retSchedule.getStartHour()).isEqualTo(9),
+                () -> assertThat(retSchedule.getEndHour()).isEqualTo(24)
         );
     }
 
@@ -132,29 +126,29 @@ public class ScheduleServiceTest extends AbstractIntegrationContainerBaseTest {
     @Test
     public void createFacilitySchedule_throwException_ifConflict() {
         ScheduleCreateUpdateRequest createRequest = new ScheduleCreateUpdateRequest(
-            nowDate, 16, 24);
+                nowDate, 16, 24);
 
         assertThatThrownBy(() -> scheduleService
-            .createSchedule(facility.getId(), createRequest, hostMember.getEmail()))
-            .isInstanceOf(ConflictingTimeException.class);
+                .createSchedule(facility.getId(), createRequest, hostMember.getEmail()))
+                .isInstanceOf(ConflictingTimeException.class);
     }
 
     @DisplayName("시설 스케줄을 업데이트 한다.")
     @Test
     public void updateFacilitySchedule() {
         ScheduleCreateUpdateRequest updateRequest = new ScheduleCreateUpdateRequest(
-            nowDate, 0, 24);
+                nowDate, 0, 24);
         ScheduleResponse targetSchedule = scheduleService.find1DaySchedules(
-            facility.getId(), nowDate).get(0);
+                facility.getId(), nowDate).get(0);
 
         scheduleService
-            .updateSchedule(targetSchedule.getId(), updateRequest, hostMember.getEmail());
+                .updateSchedule(targetSchedule.getId(), updateRequest, hostMember.getEmail());
 
         ScheduleResponse retSchedule = scheduleService.find1DaySchedules(
-            facility.getId(), nowDate).get(0);
+                facility.getId(), nowDate).get(0);
         assertAll(
-            () -> assertThat(retSchedule.getStartHour()).isEqualTo(0),
-            () -> assertThat(retSchedule.getEndHour()).isEqualTo(24)
+                () -> assertThat(retSchedule.getStartHour()).isEqualTo(0),
+                () -> assertThat(retSchedule.getEndHour()).isEqualTo(24)
         );
     }
 
@@ -162,22 +156,22 @@ public class ScheduleServiceTest extends AbstractIntegrationContainerBaseTest {
     @Test
     public void updateFacilitySchedule_merge() {
         ScheduleCreateUpdateRequest createRequest = new ScheduleCreateUpdateRequest(
-            nowDate, 20, 24);
+                nowDate, 20, 24);
         scheduleService.createSchedule(
-            facility.getId(), createRequest, hostMember.getEmail());
+                facility.getId(), createRequest, hostMember.getEmail());
         ScheduleResponse createSchedule = scheduleService.find1DaySchedules(
-            facility.getId(), nowDate).get(1);
+                facility.getId(), nowDate).get(1);
         ScheduleCreateUpdateRequest updateRequest = new ScheduleCreateUpdateRequest(
-            nowDate, 18, 24);
+                nowDate, 18, 24);
 
         scheduleService.updateSchedule(
-            createSchedule.getId(), updateRequest, hostMember.getEmail());
+                createSchedule.getId(), updateRequest, hostMember.getEmail());
 
         ScheduleResponse retSchedule = scheduleService.find1DaySchedules(
-            facility.getId(), nowDate).get(0);
+                facility.getId(), nowDate).get(0);
         assertAll(
-            () -> assertThat(retSchedule.getStartHour()).isEqualTo(9),
-            () -> assertThat(retSchedule.getEndHour()).isEqualTo(24)
+                () -> assertThat(retSchedule.getStartHour()).isEqualTo(9),
+                () -> assertThat(retSchedule.getEndHour()).isEqualTo(24)
         );
     }
 
@@ -185,38 +179,38 @@ public class ScheduleServiceTest extends AbstractIntegrationContainerBaseTest {
     @Test
     public void updateFacilitySchedule_throwException_ifConflict() {
         ScheduleCreateUpdateRequest createRequest = new ScheduleCreateUpdateRequest(
-            nowDate, 20, 24);
+                nowDate, 20, 24);
         scheduleService.createSchedule(
-            facility.getId(), createRequest, hostMember.getEmail());
+                facility.getId(), createRequest, hostMember.getEmail());
         ScheduleCreateUpdateRequest updateRequest = new ScheduleCreateUpdateRequest(
-            nowDate, 16, 24);
+                nowDate, 16, 24);
         ScheduleResponse createSchedule = scheduleService.find1DaySchedules(
-            facility.getId(), nowDate).get(1);
+                facility.getId(), nowDate).get(1);
 
         assertThatThrownBy(() -> scheduleService.updateSchedule(
-            createSchedule.getId(), updateRequest, hostMember.getEmail()))
-            .isInstanceOf(ConflictingTimeException.class);
+                createSchedule.getId(), updateRequest, hostMember.getEmail()))
+                .isInstanceOf(ConflictingTimeException.class);
     }
 
     @DisplayName("시설 스케줄을 삭제한다.")
     @Test
     public void deleteFacilitySchedule() {
         ScheduleResponse targetSchedule = scheduleService
-            .find1DaySchedules(facility.getId(), nowDate).get(0);
+                .find1DaySchedules(facility.getId(), nowDate).get(0);
 
         scheduleService.deleteSchedule(
-            targetSchedule.getId(), hostMember.getEmail());
+                targetSchedule.getId(), hostMember.getEmail());
 
         assertThatThrownBy(
-            () -> scheduleService.findSchedule(targetSchedule.getId()))
-            .isInstanceOf(NotFoundEntityException.class);
+                () -> scheduleService.findSchedule(targetSchedule.getId()))
+                .isInstanceOf(NotFoundEntityException.class);
     }
 
     @DisplayName("하루 치 스케줄데이터를 조회한다.")
     @Test
     public void find1DayFacilitySchedules() {
         List<ScheduleResponse> facilitySchedules = scheduleService.find1DaySchedules(
-            facility.getId(), nowDate);
+                facility.getId(), nowDate);
 
         assertThat(facilitySchedules).hasSize(1);
     }
@@ -227,16 +221,16 @@ public class ScheduleServiceTest extends AbstractIntegrationContainerBaseTest {
         YearMonth createYearMonth = nowYearMonth.plusMonths(3);
 
         scheduleService.create1MonthDefaultSchedules(
-            facility.getId(), createYearMonth, hostMember.getEmail());
+                facility.getId(), createYearMonth, hostMember.getEmail());
 
         List<ScheduleResponse> retReponses = scheduleService.find1MonthSchedules(
-            facility.getId(), createYearMonth);
+                facility.getId(), createYearMonth);
         assertAll(
-            () -> assertThat(retReponses.size()).isEqualTo(createYearMonth.lengthOfMonth()),
-            () -> assertThat(retReponses.get(0).getDate())
-                .isEqualTo(createYearMonth.atDay(1)),
-            () -> assertThat(retReponses.get(retReponses.size() - 1).getDate())
-                .isEqualTo(createYearMonth.atEndOfMonth())
+                () -> assertThat(retReponses.size()).isEqualTo(createYearMonth.lengthOfMonth()),
+                () -> assertThat(retReponses.get(0).getDate())
+                        .isEqualTo(createYearMonth.atDay(1)),
+                () -> assertThat(retReponses.get(retReponses.size() - 1).getDate())
+                        .isEqualTo(createYearMonth.atEndOfMonth())
         );
     }
 
@@ -244,7 +238,7 @@ public class ScheduleServiceTest extends AbstractIntegrationContainerBaseTest {
     @Test
     public void find1MonthFacilitySchedules() {
         List<ScheduleResponse> facilitySchedules = scheduleService.find1MonthSchedules(
-            facility.getId(), nowYearMonth);
+                facility.getId(), nowYearMonth);
 
         assertThat(facilitySchedules).hasSize(nowYearMonth.lengthOfMonth());
     }
@@ -260,7 +254,7 @@ public class ScheduleServiceTest extends AbstractIntegrationContainerBaseTest {
         TestTransaction.start();
         YearMonth createYearMonth = nowYearMonth.plusMonths(2);
         scheduleService.create1MonthDefaultSchedules(
-            facility.getId(), createYearMonth, hostMember.getEmail());
+                facility.getId(), createYearMonth, hostMember.getEmail());
         assertAllSchedules(createYearMonth);
         TestTransaction.end();
 
@@ -273,14 +267,14 @@ public class ScheduleServiceTest extends AbstractIntegrationContainerBaseTest {
 
     private void assertAllSchedules(YearMonth createYearMonth) {
         List<ScheduleResponse> retResponses = scheduleService.find1MonthSchedules(
-            facility.getId(), createYearMonth);
+                facility.getId(), createYearMonth);
         assertAll(
-            () -> assertThat(retResponses.size()).isEqualTo(createYearMonth.lengthOfMonth()),
-            () -> assertThat(retResponses.get(0).getDate())
-                .isEqualTo(createYearMonth.atDay(1)),
-            () -> assertThat(
-                retResponses.get(retResponses.size() - 1).getDate())
-                .isEqualTo(createYearMonth.atEndOfMonth())
+                () -> assertThat(retResponses.size()).isEqualTo(createYearMonth.lengthOfMonth()),
+                () -> assertThat(retResponses.get(0).getDate())
+                        .isEqualTo(createYearMonth.atDay(1)),
+                () -> assertThat(
+                        retResponses.get(retResponses.size() - 1).getDate())
+                        .isEqualTo(createYearMonth.atEndOfMonth())
         );
     }
 
@@ -297,10 +291,10 @@ public class ScheduleServiceTest extends AbstractIntegrationContainerBaseTest {
         YearMonth deleteYearMonth = nowYearMonth.plusMonths(2);
 
         scheduleService.delete1MonthSchedules(
-            facility.getId(), deleteYearMonth, hostMember.getEmail());
+                facility.getId(), deleteYearMonth, hostMember.getEmail());
 
         List<ScheduleResponse> retResponses = scheduleService
-            .find1MonthSchedules(facility.getId(), deleteYearMonth);
+                .find1MonthSchedules(facility.getId(), deleteYearMonth);
         assertThat(retResponses).isEmpty();
     }
 }
