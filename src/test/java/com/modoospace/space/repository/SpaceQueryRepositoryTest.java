@@ -130,7 +130,7 @@ public class SpaceQueryRepositoryTest extends AbstractIntegrationContainerBaseTe
         now = LocalDate.now();
     }
 
-    @DisplayName("쿼리(사당)에 맞는 공간을 반환한다.")
+    @DisplayName("쿼리(사당)에 맞는 공간을 반환한다.(ElasticSearch 활용)")
     @Test
     public void searchSpace_byQuery_사당() {
         SpaceSearchRequest searchRequest = new SpaceSearchRequest();
@@ -143,7 +143,20 @@ public class SpaceQueryRepositoryTest extends AbstractIntegrationContainerBaseTe
             .containsExactly("사당 스터디룸");
     }
 
-    @DisplayName("쿼리(스터디룸)에 맞는 공간을 반환한다.")
+    @DisplayName("쿼리(사당)에 맞는 공간을 반환한다.(쿼리 활용)")
+    @Test
+    public void searchSpaceQuery_byQuery_사당() {
+        SpaceSearchRequest searchRequest = new SpaceSearchRequest();
+        searchRequest.setQuery("사당");
+
+        Page<Space> resultPage = spaceQueryRepository
+                .searchSpaceQuery(searchRequest, PageRequest.of(0, 10));
+
+        assertThat(resultPage.getContent()).extracting("name")
+                .containsExactly("사당 스터디룸");
+    }
+
+    @DisplayName("쿼리(스터디룸)에 맞는 공간을 반환한다.(ElasticSearch 활용)")
     @Test
     public void searchSpace_byQuery_스터디룸() {
         SpaceSearchRequest searchRequest = new SpaceSearchRequest();
@@ -154,6 +167,19 @@ public class SpaceQueryRepositoryTest extends AbstractIntegrationContainerBaseTe
 
         assertThat(resultPage.getContent()).extracting("name")
             .containsExactly("사당 스터디룸", "강남 스터디룸");
+    }
+
+    @DisplayName("쿼리(스터디룸)에 맞는 공간을 반환한다.(쿼리 활용)")
+    @Test
+    public void searchSpaceQuery_byQuery_스터디룸() {
+        SpaceSearchRequest searchRequest = new SpaceSearchRequest();
+        searchRequest.setQuery("스터디룸");
+
+        Page<Space> resultPage = spaceQueryRepository
+                .searchSpaceQuery(searchRequest, PageRequest.of(0, 10));
+
+        assertThat(resultPage.getContent()).extracting("name")
+                .containsExactly("사당 스터디룸", "강남 스터디룸");
     }
 
     @DisplayName("지역에 맞는 공간을 반환한다.")
