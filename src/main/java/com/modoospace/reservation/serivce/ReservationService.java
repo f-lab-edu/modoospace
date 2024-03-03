@@ -58,6 +58,7 @@ public class ReservationService {
     }
 
     private void verifyAvailability(Facility facility, Reservation reservation) {
+        facility.verifyReservationEnable();
         verifyFacilitySchedulesOpen(facility, reservation);
         verifyReservationAvailability(facility, reservation);
     }
