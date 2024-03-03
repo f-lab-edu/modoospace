@@ -41,12 +41,9 @@ dependencies {
     // Redis
     implementation 'org.springframework.boot:spring-boot-starter-data-redis'
     implementation 'org.springframework.session:spring-session-data-redis'
-    implementation 'it.ozimov:embedded-redis:0.7.2'
 
     // Elastic Search
     implementation 'org.springframework.data:spring-data-elasticsearch'
-    implementation 'org.elasticsearch:elasticsearch:7.17.9'
-    implementation "org.testcontainers:elasticsearch:1.19.6"
 
     // QueryDsl
     implementation "com.querydsl:querydsl-jpa:${queryDslVersion}"
@@ -55,6 +52,8 @@ dependencies {
 
     // Test
     testImplementation 'org.springframework.boot:spring-boot-starter-test'
+    testImplementation "org.testcontainers:elasticsearch:1.19.6"
+    testImplementation "org.testcontainers:rabbitmq:1.19.6"
 
     // Database
     runtimeOnly 'com.h2database:h2'
