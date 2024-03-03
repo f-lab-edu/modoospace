@@ -3,12 +3,7 @@ package com.modoospace.space.sevice;
 import com.modoospace.common.exception.NotFoundEntityException;
 import com.modoospace.member.domain.Member;
 import com.modoospace.member.service.MemberService;
-import com.modoospace.space.controller.dto.facility.FacilityCreateRequest;
-import com.modoospace.space.controller.dto.facility.FacilityDetailResponse;
-import com.modoospace.space.controller.dto.facility.FacilityResponse;
-import com.modoospace.space.controller.dto.facility.FacilitySearchRequest;
-import com.modoospace.space.controller.dto.facility.FacilitySettingUpdateRequest;
-import com.modoospace.space.controller.dto.facility.FacilityUpdateRequest;
+import com.modoospace.space.controller.dto.facility.*;
 import com.modoospace.space.domain.Facility;
 import com.modoospace.space.domain.FacilityRepository;
 import com.modoospace.space.domain.Space;
@@ -33,7 +28,7 @@ public class FacilityService {
 
     @Transactional
     public Long createFacility(Long spaceId, FacilityCreateRequest createRequest,
-        String loginEmail) {
+                               String loginEmail) {
         Member loginMember = memberService.findMemberByEmail(loginEmail);
         Space space = findSpaceById(spaceId);
         space.verifyManagementPermission(loginMember);
@@ -45,8 +40,10 @@ public class FacilityService {
     }
 
     public Page<FacilityResponse> searchFacility(Long spaceId, FacilitySearchRequest searchRequest,
-        Pageable pageable) {
-        return facilityQueryRepository.searchFacility(spaceId, searchRequest, pageable);
+                                                 Pageable pageable) {
+        Page<Facility> facilities = facilityQueryRepository.searchFacility(spaceId, searchRequest, pageable);
+
+        return facilities.map(FacilityResponse::of);
     }
 
     public FacilityDetailResponse findFacility(Long facilityId) {
@@ -57,7 +54,7 @@ public class FacilityService {
 
     @Transactional
     public void updateFacility(Long facilityId, FacilityUpdateRequest updateRequest,
-        String loginEmail) {
+                               String loginEmail) {
         Member loginMember = memberService.findMemberByEmail(loginEmail);
         Facility facility = findFacilityById(facilityId);
         facility.verifyManagementPermission(loginMember);
@@ -68,7 +65,7 @@ public class FacilityService {
 
     @Transactional
     public void updateFacilitySetting(Long facilityId, FacilitySettingUpdateRequest updateRequest,
-        String loginEmail) {
+                                      String loginEmail) {
         Member loginMember = memberService.findMemberByEmail(loginEmail);
         Facility facility = findFacilityById(facilityId);
         facility.verifyManagementPermission(loginMember);
@@ -89,11 +86,11 @@ public class FacilityService {
 
     private Space findSpaceById(Long spaceId) {
         return spaceRepository.findById(spaceId)
-            .orElseThrow(() -> new NotFoundEntityException("공간", spaceId));
+                .orElseThrow(() -> new NotFoundEntityException("공간", spaceId));
     }
 
     private Facility findFacilityById(Long facilityId) {
         return facilityRepository.findById(facilityId)
-            .orElseThrow(() -> new NotFoundEntityException("시설", facilityId));
+                .orElseThrow(() -> new NotFoundEntityException("시설", facilityId));
     }
 }

@@ -10,7 +10,7 @@ import org.springframework.data.jpa.repository.config.EnableJpaAuditing;
 @SpringBootApplication
 public class ModoospaceApplication {
 
-  public static void main(String[] args) {
-    SpringApplication.run(ModoospaceApplication.class, args);
-  }
+    public static void main(String[] args) {
+        SpringApplication.run(ModoospaceApplication.class, args);
+    }
 }

@@ -2,8 +2,7 @@ package com.modoospace.space.repository;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-import com.modoospace.JpaTestConfig;
-import com.modoospace.SpaceIndexTestRepository;
+import com.modoospace.AbstractIntegrationContainerBaseTest;
 import com.modoospace.member.domain.Member;
 import com.modoospace.member.domain.MemberRepository;
 import com.modoospace.member.domain.Role;
@@ -13,34 +12,24 @@ import com.modoospace.reservation.domain.ReservationRepository;
 import com.modoospace.space.controller.dto.facility.FacilityCreateRequest;
 import com.modoospace.space.controller.dto.space.SpaceSearchRequest;
 import com.modoospace.space.controller.dto.timeSetting.TimeSettingCreateRequest;
-import com.modoospace.space.domain.Address;
-import com.modoospace.space.domain.Category;
-import com.modoospace.space.domain.CategoryRepository;
-import com.modoospace.space.domain.Facility;
-import com.modoospace.space.domain.FacilityRepository;
-import com.modoospace.space.domain.Space;
-import com.modoospace.space.domain.SpaceIndex;
-import com.modoospace.space.domain.SpaceRepository;
-import com.modoospace.space.domain.TimeRange;
+import com.modoospace.space.domain.*;
+
 import java.io.IOException;
 import java.time.LocalDate;
 import java.util.List;
-import org.elasticsearch.client.RestHighLevelClient;
+
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
-import org.springframework.context.annotation.Import;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
-import org.springframework.test.context.ActiveProfiles;
 
-@DataJpaTest
-@Import(JpaTestConfig.class)
-@ActiveProfiles("test")
-public class SpaceQueryRepositoryTest {
+import javax.transaction.Transactional;
+
+@Transactional
+public class SpaceQueryRepositoryTest extends AbstractIntegrationContainerBaseTest {
 
     @Autowired
     private SpaceQueryRepository spaceQueryRepository;
@@ -55,14 +44,13 @@ public class SpaceQueryRepositoryTest {
     private SpaceRepository spaceRepository;
 
     @Autowired
-    private RestHighLevelClient restHighLevelClient;
-    private SpaceIndexTestRepository spaceIndexTestRepository;
-
-    @Autowired
     private FacilityRepository facilityRepository;
 
     @Autowired
     private ReservationRepository reservationRepository;
+
+    @Autowired
+    private SpaceIndexRepository spaceIndexRepository;
 
     private Member visitorMember;
 
@@ -72,8 +60,6 @@ public class SpaceQueryRepositoryTest {
 
     @BeforeEach
     public void setup() throws IOException, InterruptedException {
-        spaceIndexTestRepository = new SpaceIndexTestRepository(restHighLevelClient);
-
         Member hostMember = Member.builder()
             .email("host@email")
             .name("host")
@@ -104,7 +90,7 @@ public class SpaceQueryRepositoryTest {
             .address(address)
             .build();
         spaceRepository.save(space);
-        spaceIndexTestRepository.save(SpaceIndex.of(space));
+        spaceIndexRepository.save(SpaceIndex.of(space));
 
         Address address2 = Address.builder()
             .depthFirst("서울")
@@ -119,7 +105,7 @@ public class SpaceQueryRepositoryTest {
             .address(address2)
             .build();
         spaceRepository.save(space2);
-        spaceIndexTestRepository.save(SpaceIndex.of(space2));
+        spaceIndexRepository.save(SpaceIndex.of(space2));
 
         // TimeSetting, WeekSetting 기본값이 필요하여 Request 사용.
         FacilityCreateRequest createRequest = FacilityCreateRequest.builder()
@@ -235,7 +221,7 @@ public class SpaceQueryRepositoryTest {
     }
 
     @AfterEach
-    public void clear() throws IOException {
-        spaceIndexTestRepository.deleteAll();
+    public void clear() {
+        spaceIndexRepository.deleteAll();
     }
 }

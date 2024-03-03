@@ -1,55 +1,45 @@
 package com.modoospace.space.repository;
 
-import static org.assertj.core.api.Assertions.assertThat;
-
-import com.modoospace.JpaTestConfig;
-import com.modoospace.SpaceIndexTestRepository;
+import com.modoospace.AbstractIntegrationContainerBaseTest;
 import com.modoospace.space.domain.SpaceIndex;
-import java.io.IOException;
-import java.util.List;
-import org.elasticsearch.client.RestHighLevelClient;
+import com.modoospace.space.domain.SpaceIndexRepository;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
-import org.springframework.context.annotation.Import;
-import org.springframework.test.context.ActiveProfiles;
 
-@DataJpaTest
-@Import(JpaTestConfig.class)
-@ActiveProfiles("test")
-class SpaceIndexQueryRepositoryTest {
+import java.io.IOException;
+import java.util.List;
+
+import static org.assertj.core.api.Assertions.assertThat;
+
+class SpaceIndexQueryRepositoryTest extends AbstractIntegrationContainerBaseTest {
 
     @Autowired
     private SpaceIndexQueryRepository spaceIndexQueryRepository;
 
     @Autowired
-    private RestHighLevelClient restHighLevelClient;
-
-    private SpaceIndexTestRepository spaceIndexTestRepository;
+    private SpaceIndexRepository spaceIndexRepository;
 
     @BeforeEach
     public void setUp() throws IOException, InterruptedException {
-        spaceIndexTestRepository = new SpaceIndexTestRepository(restHighLevelClient);
         SpaceIndex spaceIndex1 = SpaceIndex.builder()
-            .id(1L)
-            .name("사당 스터디룸")
-            .description("사당역 3번출구 5분거리에요.")
-            .categoryName("스터디룸")
-            .address("서울 관악구 남현동")
-            .build();
-        spaceIndexTestRepository.save(spaceIndex1);
+                .id(1L)
+                .name("사당 스터디룸")
+                .description("사당역 3번출구 5분거리에요.")
+                .categoryName("스터디룸")
+                .address("서울 관악구 남현동")
+                .build();
+        spaceIndexRepository.save(spaceIndex1);
 
         SpaceIndex spaceIndex2 = SpaceIndex.builder()
-            .id(2L)
-            .name("강남 스터디룸")
-            .description("강남역 1번출구 5분거리에요.")
-            .categoryName("스터디룸")
-            .address("서울 서초구 서초동")
-            .build();
-        spaceIndexTestRepository.save(spaceIndex2);
-
+                .id(2L)
+                .name("강남 스터디룸")
+                .description("강남역 1번출구 5분거리에요.")
+                .categoryName("스터디룸")
+                .address("서울 서초구 서초동")
+                .build();
+        spaceIndexRepository.save(spaceIndex2);
     }
 
     @Test
@@ -65,7 +55,7 @@ class SpaceIndexQueryRepositoryTest {
     }
 
     @AfterEach
-    public void clear() throws IOException {
-        spaceIndexTestRepository.deleteAll();
+    public void clear() {
+        spaceIndexRepository.deleteAll();
     }
 }

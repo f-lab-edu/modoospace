@@ -4,6 +4,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.junit.jupiter.api.Assertions.assertAll;
 
+import com.modoospace.AbstractIntegrationContainerBaseTest;
 import com.modoospace.common.exception.ConflictingTimeException;
 import com.modoospace.common.exception.NotFoundEntityException;
 import com.modoospace.member.domain.Member;
@@ -31,10 +32,8 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.transaction.TestTransaction;
 import org.springframework.transaction.annotation.Transactional;
 
-@SpringBootTest
-@ActiveProfiles("test")
 @Transactional
-public class ScheduleServiceTest {
+public class ScheduleServiceTest extends AbstractIntegrationContainerBaseTest {
 
     @Autowired
     private ScheduleService scheduleService;

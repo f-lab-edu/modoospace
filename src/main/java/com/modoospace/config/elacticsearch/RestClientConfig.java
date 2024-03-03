@@ -9,7 +9,6 @@ import org.springframework.data.elasticsearch.client.RestClients;
 import org.springframework.data.elasticsearch.config.AbstractElasticsearchConfiguration;
 
 @Configuration
-@Profile("!test")
 public class RestClientConfig extends AbstractElasticsearchConfiguration {
 
     @Value("${spring.elasticsearch.host}")

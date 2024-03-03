@@ -1,9 +1,6 @@
 package com.modoospace.space.sevice;
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatThrownBy;
-import static org.junit.jupiter.api.Assertions.assertAll;
-
+import com.modoospace.AbstractIntegrationContainerBaseTest;
 import com.modoospace.common.exception.NotFoundEntityException;
 import com.modoospace.common.exception.PermissionDeniedException;
 import com.modoospace.member.domain.Member;
@@ -21,14 +18,14 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.test.context.ActiveProfiles;
 import org.springframework.transaction.annotation.Transactional;
 
-@SpringBootTest
-@ActiveProfiles("test")
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.junit.jupiter.api.Assertions.assertAll;
+
 @Transactional
-class SpaceServiceTest {
+class SpaceServiceTest extends AbstractIntegrationContainerBaseTest {
 
     @Autowired
     private SpaceService spaceService;
@@ -51,33 +48,33 @@ class SpaceServiceTest {
     @BeforeEach
     public void setUp() {
         hostMember = Member.builder()
-            .email("host@email")
-            .name("host")
-            .role(Role.HOST)
-            .build();
+                .email("host@email")
+                .name("host")
+                .role(Role.HOST)
+                .build();
 
         visitorMember = Member.builder()
-            .email("visitor@email")
-            .name("visitor")
-            .role(Role.VISITOR)
-            .build();
+                .email("visitor@email")
+                .name("visitor")
+                .role(Role.VISITOR)
+                .build();
 
         adminMember = Member.builder()
-            .email("admin@email")
-            .name("admin")
-            .role(Role.ADMIN)
-            .build();
+                .email("admin@email")
+                .name("admin")
+                .role(Role.ADMIN)
+                .build();
 
         memberRepository.save(hostMember);
         memberRepository.save(visitorMember);
         memberRepository.save(adminMember);
 
         createAddress = AddressCreateUpdateRequest.builder()
-            .depthFirst("depthFirst")
-            .depthSecond("depthSecond")
-            .depthThird("depthThird")
-            .detailAddress("detailAddress")
-            .build();
+                .depthFirst("depthFirst")
+                .depthSecond("depthSecond")
+                .depthThird("depthThird")
+                .detailAddress("detailAddress")
+                .build();
 
         category = new Category("스터디 공간");
         categoryRepository.save(category);
@@ -87,21 +84,21 @@ class SpaceServiceTest {
     @Test
     public void createSpace_IfHost() {
         SpaceCreateUpdateRequest createRequest = new SpaceCreateUpdateRequest(
-            "공간이름", "설명", createAddress);
+                "공간이름", "설명", createAddress);
         Long spaceId = spaceService.createSpace(category.getId(), createRequest,
-            hostMember.getEmail());
+                hostMember.getEmail());
 
         SpaceDetailResponse retSpaceResponse = spaceService.findSpace(spaceId);
         assertAll(
-            () -> assertThat(retSpaceResponse.getId()).isEqualTo(spaceId),
-            () -> assertThat(retSpaceResponse.getName()).isEqualTo("공간이름"),
-            () -> assertThat(retSpaceResponse.getDescription()).isEqualTo("설명"),
-            () -> assertThat(retSpaceResponse.getAddress().getDepthFirst())
-                .isEqualTo(createAddress.getDepthFirst()),
-            () -> assertThat(retSpaceResponse.getAddress().getDepthSecond())
-                .isEqualTo(createAddress.getDepthSecond()),
-            () -> assertThat(retSpaceResponse.getAddress().getDepthThird())
-                .isEqualTo(createAddress.getDepthThird())
+                () -> assertThat(retSpaceResponse.getId()).isEqualTo(spaceId),
+                () -> assertThat(retSpaceResponse.getName()).isEqualTo("공간이름"),
+                () -> assertThat(retSpaceResponse.getDescription()).isEqualTo("설명"),
+                () -> assertThat(retSpaceResponse.getAddress().getDepthFirst())
+                        .isEqualTo(createAddress.getDepthFirst()),
+                () -> assertThat(retSpaceResponse.getAddress().getDepthSecond())
+                        .isEqualTo(createAddress.getDepthSecond()),
+                () -> assertThat(retSpaceResponse.getAddress().getDepthThird())
+                        .isEqualTo(createAddress.getDepthThird())
         );
     }
 
@@ -110,9 +107,9 @@ class SpaceServiceTest {
     @ValueSource(strings = {"admin@email", "visitor@email"})
     public void createSpace_throwException_IfNotHost(String email) {
         SpaceCreateUpdateRequest createRequest = new SpaceCreateUpdateRequest(
-            "공간이름", "설명", createAddress);
+                "공간이름", "설명", createAddress);
         assertThatThrownBy(() -> spaceService.createSpace(category.getId(), createRequest, email))
-            .isInstanceOf(PermissionDeniedException.class);
+                .isInstanceOf(PermissionDeniedException.class);
     }
 
     @DisplayName("공간의 주인/관리자만이 공간을 수정할 수 있다.")
@@ -120,30 +117,30 @@ class SpaceServiceTest {
     @ValueSource(strings = {"host@email", "admin@email"})
     public void updateSpace(String email) {
         SpaceCreateUpdateRequest createRequest = new SpaceCreateUpdateRequest(
-            "공간이름", "설명", createAddress);
+                "공간이름", "설명", createAddress);
         Long spaceId = spaceService.createSpace(category.getId(), createRequest,
-            hostMember.getEmail());
+                hostMember.getEmail());
         AddressCreateUpdateRequest updateAddress = AddressCreateUpdateRequest.builder()
-            .depthFirst("시도")
-            .depthSecond("구")
-            .depthThird("동")
-            .detailAddress("상세주소")
-            .build();
+                .depthFirst("시도")
+                .depthSecond("구")
+                .depthThird("동")
+                .detailAddress("상세주소")
+                .build();
         SpaceCreateUpdateRequest updateRequest = new SpaceCreateUpdateRequest("업데이트공간", "업데이트설명",
-            updateAddress);
+                updateAddress);
 
         spaceService.updateSpace(spaceId, updateRequest, email);
 
         SpaceDetailResponse retSpaceResponse = spaceService.findSpace(spaceId);
         assertAll(
-            () -> assertThat(retSpaceResponse.getName()).isEqualTo("업데이트공간"),
-            () -> assertThat(retSpaceResponse.getDescription()).isEqualTo("업데이트설명"),
-            () -> assertThat(retSpaceResponse.getAddress().getDepthFirst())
-                .isEqualTo(updateAddress.getDepthFirst()),
-            () -> assertThat(retSpaceResponse.getAddress().getDepthSecond())
-                .isEqualTo(updateAddress.getDepthSecond()),
-            () -> assertThat(retSpaceResponse.getAddress().getDepthThird())
-                .isEqualTo(updateAddress.getDepthThird())
+                () -> assertThat(retSpaceResponse.getName()).isEqualTo("업데이트공간"),
+                () -> assertThat(retSpaceResponse.getDescription()).isEqualTo("업데이트설명"),
+                () -> assertThat(retSpaceResponse.getAddress().getDepthFirst())
+                        .isEqualTo(updateAddress.getDepthFirst()),
+                () -> assertThat(retSpaceResponse.getAddress().getDepthSecond())
+                        .isEqualTo(updateAddress.getDepthSecond()),
+                () -> assertThat(retSpaceResponse.getAddress().getDepthThird())
+                        .isEqualTo(updateAddress.getDepthThird())
         );
     }
 
@@ -151,19 +148,19 @@ class SpaceServiceTest {
     @Test
     public void updateSpace_throwException_IfAdminMemberOrOwnSpace() {
         SpaceCreateUpdateRequest createRequest = new SpaceCreateUpdateRequest(
-            "공간이름", "설명", createAddress);
+                "공간이름", "설명", createAddress);
         Long spaceId = spaceService.createSpace(category.getId(), createRequest,
-            hostMember.getEmail());
+                hostMember.getEmail());
         SpaceCreateUpdateRequest updateRequest = new SpaceCreateUpdateRequest(
-            "업데이트공간", "업데이트설명", createAddress);
+                "업데이트공간", "업데이트설명", createAddress);
 
         assertAll(
-            () -> assertThatThrownBy(
-                () -> spaceService.updateSpace(spaceId, updateRequest, "notMember@Email"))
-                .isInstanceOf(NotFoundEntityException.class),
-            () -> assertThatThrownBy(
-                () -> spaceService.updateSpace(spaceId, updateRequest, visitorMember.getEmail()))
-                .isInstanceOf(PermissionDeniedException.class)
+                () -> assertThatThrownBy(
+                        () -> spaceService.updateSpace(spaceId, updateRequest, "notMember@Email"))
+                        .isInstanceOf(NotFoundEntityException.class),
+                () -> assertThatThrownBy(
+                        () -> spaceService.updateSpace(spaceId, updateRequest, visitorMember.getEmail()))
+                        .isInstanceOf(PermissionDeniedException.class)
         );
     }
 
@@ -172,9 +169,9 @@ class SpaceServiceTest {
     @ValueSource(strings = {"host@email", "admin@email"})
     public void deleteSpace(String email) {
         SpaceCreateUpdateRequest createRequest = new SpaceCreateUpdateRequest(
-            "공간이름", "설명", createAddress);
+                "공간이름", "설명", createAddress);
         Long spaceId = spaceService.createSpace(category.getId(), createRequest,
-            hostMember.getEmail());
+                hostMember.getEmail());
 
         spaceService.deleteSpace(spaceId, email);
 
@@ -185,16 +182,16 @@ class SpaceServiceTest {
     @Test
     public void deleteSpace_throwException_IfAdminMemberOrOwnSpace() {
         SpaceCreateUpdateRequest createRequest = new SpaceCreateUpdateRequest(
-            "공간이름", "설명", createAddress);
+                "공간이름", "설명", createAddress);
         Long spaceId = spaceService.createSpace(category.getId(), createRequest,
-            hostMember.getEmail());
+                hostMember.getEmail());
 
         assertAll(
-            () -> assertThatThrownBy(() -> spaceService.deleteSpace(spaceId, "notMember@Email"))
-                .isInstanceOf(NotFoundEntityException.class),
-            () -> assertThatThrownBy(
-                () -> spaceService.deleteSpace(spaceId, visitorMember.getEmail()))
-                .isInstanceOf(PermissionDeniedException.class)
+                () -> assertThatThrownBy(() -> spaceService.deleteSpace(spaceId, "notMember@Email"))
+                        .isInstanceOf(NotFoundEntityException.class),
+                () -> assertThatThrownBy(
+                        () -> spaceService.deleteSpace(spaceId, visitorMember.getEmail()))
+                        .isInstanceOf(PermissionDeniedException.class)
         );
     }
 }
