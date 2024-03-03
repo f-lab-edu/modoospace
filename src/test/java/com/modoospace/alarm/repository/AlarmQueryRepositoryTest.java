@@ -2,7 +2,7 @@ package com.modoospace.alarm.repository;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-import com.modoospace.TestConfig;
+import com.modoospace.JpaTestConfig;
 import com.modoospace.alarm.controller.dto.AlarmEvent;
 import com.modoospace.alarm.controller.dto.AlarmResponse;
 import com.modoospace.alarm.domain.AlarmRepository;
@@ -22,7 +22,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.test.context.ActiveProfiles;
 
 @DataJpaTest
-@Import(TestConfig.class)
+@Import(JpaTestConfig.class)
 @ActiveProfiles("test")
 class AlarmQueryRepositoryTest {
 

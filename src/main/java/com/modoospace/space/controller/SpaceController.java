@@ -2,6 +2,7 @@ package com.modoospace.space.controller;
 
 import com.modoospace.config.auth.LoginEmail;
 import com.modoospace.space.controller.dto.space.SpaceCreateUpdateRequest;
+import com.modoospace.space.controller.dto.space.SpaceDetailResponse;
 import com.modoospace.space.controller.dto.space.SpaceResponse;
 import com.modoospace.space.controller.dto.space.SpaceSearchRequest;
 import com.modoospace.space.sevice.SpaceService;
@@ -38,13 +39,22 @@ public class SpaceController {
     @GetMapping()
     public ResponseEntity<Page<SpaceResponse>> search(SpaceSearchRequest searchRequest,
         Pageable pageable) {
+        searchRequest.updateTimeRange();
         Page<SpaceResponse> spaces = spaceService.searchSpace(searchRequest, pageable);
         return ResponseEntity.ok().body(spaces);
     }
 
+    @GetMapping("/query")
+    public ResponseEntity<Page<SpaceResponse>> searchQuery(SpaceSearchRequest searchRequest,
+        Pageable pageable) {
+        searchRequest.updateTimeRange();
+        Page<SpaceResponse> spaces = spaceService.searchSpaceQuery(searchRequest, pageable);
+        return ResponseEntity.ok().body(spaces);
+    }
+
     @GetMapping("/{spaceId}")
-    public ResponseEntity<SpaceResponse> find(@PathVariable Long spaceId) {
-        SpaceResponse space = spaceService.findSpace(spaceId);
+    public ResponseEntity<SpaceDetailResponse> find(@PathVariable Long spaceId) {
+        SpaceDetailResponse space = spaceService.findSpace(spaceId);
         return ResponseEntity.ok().body(space);
     }
 

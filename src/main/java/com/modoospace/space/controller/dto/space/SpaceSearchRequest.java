@@ -1,35 +1,41 @@
 package com.modoospace.space.controller.dto.space;
 
-import lombok.Builder;
+import com.modoospace.common.DateFormatManager;
+import com.modoospace.space.domain.TimeRange;
+import java.time.LocalDate;
+import javax.validation.constraints.Positive;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import org.springframework.format.annotation.DateTimeFormat;
 
 @Getter
 @Setter
 @NoArgsConstructor
 public class SpaceSearchRequest {
 
-    private String name;
+    private String query;
 
-    private String depthFirst;
+    private String depthFirst; // 시도
 
-    private String depthSecond;
+    private String depthSecond; // 구
 
-    private String depthThird;
+    private String depthThird; // 동
 
-    private Long hostId;
+    @Positive
+    private Integer maxUser; // 최대인원
 
-    private Long categoryId;
+    @DateTimeFormat(pattern = DateFormatManager.DATE_FORMAT)
+    private LocalDate useDate; // 사용일자
 
-    @Builder
-    public SpaceSearchRequest(String name, String depthFirst, String depthSecond,
-        String depthThird, Long hostId, Long categoryId) {
-        this.name = name;
-        this.depthFirst = depthFirst;
-        this.depthSecond = depthSecond;
-        this.depthThird = depthThird;
-        this.hostId = hostId;
-        this.categoryId = categoryId;
+    private Integer startHour; // 시작시간
+
+    private Integer endHour; // 시작시간
+
+    private TimeRange timeRange; // 사용시간
+
+    public void updateTimeRange() {
+        this.timeRange = startHour != null && endHour != null ?
+            new TimeRange(startHour, endHour) : null;
     }
 }
