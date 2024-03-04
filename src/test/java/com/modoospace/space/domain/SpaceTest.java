@@ -20,10 +20,6 @@ class SpaceTest {
     private Member hostMember;
     private Member visitorMember;
 
-    private Category category;
-
-    private Address address;
-
     @BeforeEach
     public void setUp() {
 
@@ -47,15 +43,6 @@ class SpaceTest {
                 .name("visitor")
                 .role(Role.VISITOR)
                 .build();
-
-        category = new Category("스터디 공간");
-
-        address = Address.builder()
-                .depthFirst("depthFirst")
-                .depthSecond("depthSecond")
-                .depthThird("depthThird")
-                .detailAddress("detailAddress")
-                .build();
     }
 
     @DisplayName("호스트만이 공간을 가질 수 있다.")
@@ -64,8 +51,6 @@ class SpaceTest {
         Space space = Space.builder()
                 .name("공간이름")
                 .description("테스트공간입니다.")
-                .address(address)
-                .category(category)
                 .host(hostMember)
                 .build();
 
@@ -79,15 +64,11 @@ class SpaceTest {
                 () -> assertThatThrownBy(() -> Space.builder()
                         .name("공간이름")
                         .description("테스트공간입니다.")
-                        .address(address)
-                        .category(category)
                         .host(visitorMember)
                         .build()),
                 () -> assertThatThrownBy(() -> Space.builder()
                         .name("공간이름")
                         .description("테스트공간입니다.")
-                        .address(address)
-                        .category(category)
                         .host(adminMember)
                         .build())
         );
@@ -99,8 +80,6 @@ class SpaceTest {
         Space space = Space.builder()
                 .name("공간이름")
                 .description("테스트공간입니다.")
-                .address(address)
-                .category(category)
                 .host(hostMember)
                 .build();
 
@@ -116,8 +95,6 @@ class SpaceTest {
         Space space = Space.builder()
                 .name("공간이름")
                 .description("테스트공간입니다.")
-                .address(address)
-                .category(category)
                 .host(hostMember)
                 .build();
 
@@ -137,8 +114,6 @@ class SpaceTest {
         Space space = Space.builder()
                 .name("공간이름")
                 .description("테스트공간입니다.")
-                .address(address)
-                .category(category)
                 .host(hostMember)
                 .facilities(Collections.singletonList(facility))
                 .build();
