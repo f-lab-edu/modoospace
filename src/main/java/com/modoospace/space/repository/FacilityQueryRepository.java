@@ -26,7 +26,7 @@ public class FacilityQueryRepository {
 
         List<Facility> content = jpaQueryFactory
                 .selectFrom(facility)
-                .where(spaceIdEq(spaceId)
+                .where(facility.space.id.eq(spaceId)
                         , nameContains(searchRequest.getName())
                         , reservationEnableEq(searchRequest.getReservationEnable()))
                 .offset(pageable.getOffset())
@@ -35,15 +35,11 @@ public class FacilityQueryRepository {
 
         JPAQuery<Facility> countQuery = jpaQueryFactory
                 .selectFrom(facility)
-                .where(spaceIdEq(spaceId)
+                .where(facility.space.id.eq(spaceId)
                         , nameContains(searchRequest.getName())
                         , reservationEnableEq(searchRequest.getReservationEnable()));
 
         return PageableExecutionUtils.getPage(content, pageable, countQuery::fetchCount);
-    }
-
-    private BooleanExpression spaceIdEq(Long spaceId) {
-        return spaceId != null ? facility.space.id.eq(spaceId) : null;
     }
 
     private BooleanExpression nameContains(String name) {

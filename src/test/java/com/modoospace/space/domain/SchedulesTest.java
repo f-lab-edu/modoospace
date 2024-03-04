@@ -1,17 +1,19 @@
 package com.modoospace.space.domain;
 
-import static org.assertj.core.api.Assertions.assertThatThrownBy;
-import static org.junit.jupiter.api.Assertions.assertAll;
-
 import com.modoospace.common.exception.ConflictingTimeException;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Test;
+
 import java.time.DayOfWeek;
 import java.time.LocalDate;
 import java.time.YearMonth;
 import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
-import org.junit.jupiter.api.DisplayName;
-import org.junit.jupiter.api.Test;
+
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.junit.jupiter.api.Assertions.assertAll;
 
 class SchedulesTest {
 
@@ -20,25 +22,46 @@ class SchedulesTest {
     public void createFacilitySchedules() {
         TimeSettings timeSettings = createTimeSetting(new TimeRange(0, 24));
         WeekdaySettings weekDaySetting = createWeekDaySetting(DayOfWeek.MONDAY, DayOfWeek.TUESDAY,
-            DayOfWeek.WEDNESDAY, DayOfWeek.THURSDAY, DayOfWeek.FRIDAY);
+                DayOfWeek.WEDNESDAY, DayOfWeek.THURSDAY, DayOfWeek.FRIDAY);
         Schedules schedules = Schedules
-            .create3MonthSchedules(timeSettings, weekDaySetting, YearMonth.now());
+                .create3MonthSchedules(timeSettings, weekDaySetting, YearMonth.now());
 
         System.out.println(schedules);
     }
 
     private TimeSettings createTimeSetting(TimeRange... timeRanges) {
         List<TimeSetting> timeSettings = Arrays.stream(timeRanges)
-            .map(TimeSetting::new)
-            .collect(Collectors.toList());
+                .map(TimeSetting::new)
+                .collect(Collectors.toList());
         return new TimeSettings(timeSettings);
     }
 
     private WeekdaySettings createWeekDaySetting(DayOfWeek... dayOfWeeks) {
         List<WeekdaySetting> weekdaySettings = Arrays.stream(dayOfWeeks)
-            .map(WeekdaySetting::new)
-            .collect(Collectors.toList());
+                .map(WeekdaySetting::new)
+                .collect(Collectors.toList());
         return new WeekdaySettings(weekdaySettings);
+    }
+
+    @DisplayName("스케줄들의 시설을 세팅한다.")
+    @Test
+    public void setFacility() {
+        TimeSettings timeSettings = createTimeSetting(new TimeRange(0, 24));
+        WeekdaySettings weekDaySetting = createWeekDaySetting(DayOfWeek.MONDAY, DayOfWeek.TUESDAY,
+                DayOfWeek.WEDNESDAY, DayOfWeek.THURSDAY, DayOfWeek.FRIDAY);
+        Facility facility = Facility.builder()
+                .name("4인실")
+                .minUser(2)
+                .maxUser(4)
+                .reservationEnable(true)
+                .timeSettings(timeSettings)
+                .weekdaySettings(weekDaySetting)
+                .build();
+        Schedules schedules = facility.getSchedules();
+
+        schedules.setFacility(facility);
+
+        assertThat(schedules.getSchedules().get(0).getFacility()).isEqualTo(facility);
     }
 
     @DisplayName("시설 스케줄을 추가한다.")
@@ -51,8 +74,8 @@ class SchedulesTest {
 
         Schedule retSchedule = schedules.getSchedules().get(1);
         assertAll(
-            () -> retSchedule.getStartHour().equals(13),
-            () -> retSchedule.getEndHour().equals(14)
+                () -> assertThat(retSchedule.getStartHour()).isEqualTo(13),
+                () -> assertThat(retSchedule.getEndHour()).isEqualTo(14)
         );
     }
 
@@ -66,8 +89,8 @@ class SchedulesTest {
 
         Schedule retSchedule = schedules.getSchedules().get(0);
         assertAll(
-            () -> retSchedule.getStartHour().equals(9),
-            () -> retSchedule.getEndHour().equals(14)
+                () -> assertThat(retSchedule.getStartHour()).isEqualTo(9),
+                () -> assertThat(retSchedule.getEndHour()).isEqualTo(14)
         );
     }
 
@@ -75,15 +98,15 @@ class SchedulesTest {
     @Test
     public void addFacilitySchedule_Merge2() {
         Schedules schedules = createSchedules(createNowDateSchedule(9, 12),
-            createNowDateSchedule(13, 18));
+                createNowDateSchedule(13, 18));
         Schedule addSchedule = createNowDateSchedule(12, 13);
 
         schedules.add(addSchedule);
 
         Schedule retSchedule = schedules.getSchedules().get(0);
         assertAll(
-            () -> retSchedule.getStartHour().equals(9),
-            () -> retSchedule.getEndHour().equals(18)
+                () -> assertThat(retSchedule.getStartHour()).isEqualTo(9),
+                () -> assertThat(retSchedule.getEndHour()).isEqualTo(18)
         );
     }
 
@@ -94,7 +117,7 @@ class SchedulesTest {
         Schedule addSchedule = createNowDateSchedule(11, 13);
 
         assertThatThrownBy(() -> schedules.add(addSchedule))
-            .isInstanceOf(ConflictingTimeException.class);
+                .isInstanceOf(ConflictingTimeException.class);
     }
 
     @DisplayName("시설 스케줄을 업데이트 한다.")
@@ -107,10 +130,10 @@ class SchedulesTest {
 
         schedules.update(updateSchedule, schedule2);
 
-        Schedule retSchedule = schedules.getSchedules().get(0);
+        Schedule retSchedule = schedules.getSchedules().get(1);
         assertAll(
-            () -> retSchedule.getStartHour().equals(13),
-            () -> retSchedule.getEndHour().equals(18)
+                () -> assertThat(retSchedule.getStartHour()).isEqualTo(13),
+                () -> assertThat(retSchedule.getEndHour()).isEqualTo(18)
         );
     }
 
@@ -126,8 +149,8 @@ class SchedulesTest {
 
         Schedule retSchedule = schedules.getSchedules().get(0);
         assertAll(
-            () -> retSchedule.getStartHour().equals(9),
-            () -> retSchedule.getEndHour().equals(18)
+                () -> assertThat(retSchedule.getStartHour()).isEqualTo(9),
+                () -> assertThat(retSchedule.getEndHour()).isEqualTo(18)
         );
     }
 
@@ -140,21 +163,21 @@ class SchedulesTest {
         Schedule updateSchedule = createNowDateSchedule(11, 18);
 
         assertThatThrownBy(() -> schedules.update(updateSchedule, schedule2))
-            .isInstanceOf(ConflictingTimeException.class);
+                .isInstanceOf(ConflictingTimeException.class);
     }
 
 
     private Schedule createNowDateSchedule(Integer start, Integer end) {
         TimeRange timeRange = new TimeRange(start, end);
         return Schedule.builder()
-            .date(LocalDate.now())
-            .timeRange(timeRange)
-            .build();
+                .date(LocalDate.now())
+                .timeRange(timeRange)
+                .build();
     }
 
     private Schedules createSchedules(Schedule... schedule) {
         List<Schedule> schedules = Arrays.stream(schedule)
-            .collect(Collectors.toList());
+                .collect(Collectors.toList());
         return new Schedules(schedules);
     }
 }

@@ -41,10 +41,10 @@ public class FacilityController {
 
     @GetMapping()
     public ResponseEntity<Page<FacilityResponse>> search(@PathVariable Long spaceId,
-        FacilitySearchRequest searchDto, Pageable pageable) {
-        Page<FacilityResponse> facilityReadDtos = facilityService
-            .searchFacility(spaceId, searchDto, pageable);
-        return ResponseEntity.ok().body(facilityReadDtos);
+        FacilitySearchRequest searchRequest, Pageable pageable) {
+        Page<FacilityResponse> facilityResponses = facilityService
+            .searchFacility(spaceId, searchRequest, pageable);
+        return ResponseEntity.ok().body(facilityResponses);
     }
 
     @GetMapping("/{facilityId}")

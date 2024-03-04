@@ -85,14 +85,14 @@ public class FacilityQueryRepositoryTest {
     @Test
     public void searchFacility() {
         FacilitySearchRequest searchRequest = new FacilitySearchRequest();
-        searchRequest.setName("스터디");
+        searchRequest.setName("스터디룸1");
         searchRequest.setReservationEnable(true);
 
         Page<Facility> resultPage = facilityQueryRepository
                 .searchFacility(space.getId(), searchRequest, PageRequest.of(0, 10));
 
         assertThat(resultPage.getContent()).extracting("name")
-                .containsExactly("스터디룸1", "스터디룸2");
+                .containsExactly("스터디룸1");
     }
 
     @DisplayName("검색 조건에 맞는 시설이 없다면 빈 페이지를 반환한다.")
@@ -105,5 +105,17 @@ public class FacilityQueryRepositoryTest {
                 .searchFacility(space.getId(), searchRequest, PageRequest.of(0, 10));
 
         assertThat(resultPage.getContent()).isEmpty();
+    }
+
+    @DisplayName("검색 조건이 없다면, 해당 Space의 모든 시설을 반환한다.")
+    @Test
+    public void searchFacility_AllFacility() {
+        FacilitySearchRequest searchRequest = new FacilitySearchRequest();
+
+        Page<Facility> resultPage = facilityQueryRepository
+                .searchFacility(space.getId(), searchRequest, PageRequest.of(0, 10));
+
+        assertThat(resultPage.getContent()).extracting("name")
+                .containsExactly("스터디룸1", "스터디룸2");
     }
 }

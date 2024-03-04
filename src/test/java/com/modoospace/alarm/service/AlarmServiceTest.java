@@ -5,6 +5,7 @@ import com.modoospace.alarm.controller.dto.AlarmEvent;
 import com.modoospace.alarm.domain.Alarm;
 import com.modoospace.alarm.domain.AlarmRepository;
 import com.modoospace.alarm.domain.AlarmType;
+import com.modoospace.alarm.repository.EmitterLocalCacheRepository;
 import com.modoospace.member.domain.Member;
 import com.modoospace.member.domain.MemberRepository;
 import com.modoospace.member.domain.Role;
@@ -16,6 +17,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 
 import java.util.Set;
 
@@ -35,6 +37,9 @@ class AlarmServiceTest extends AbstractIntegrationContainerBaseTest {
 
     @Autowired
     private StringRedisTemplate redisTemplate;
+
+    @Autowired
+    private EmitterLocalCacheRepository emitterRepository;
 
     private Member hostMember;
 
@@ -78,6 +83,16 @@ class AlarmServiceTest extends AbstractIntegrationContainerBaseTest {
         System.out.println("keys = " + keys);
     }
 
+    @DisplayName("로그인한 Email을 key값으로 SseEmitter를 저장한다.")
+    @Test
+    public void connectAlarm_saveSseEmitterByEmail() {
+        SseEmitter sseEmitter = alarmService.connectAlarm(hostMember.getEmail());
+
+        SseEmitter retSseEmitter = emitterRepository.find(hostMember.getEmail()).get();
+
+        assertThat(retSseEmitter).isEqualTo(sseEmitter);
+    }
+
     @DisplayName("알람을 새로 save하면 redis에 저장되어있던 해당 멤버의 알람 페이징 데이터가 전부 삭제된다.")
     @Test
     public void saveAndSend_EmptyRedisKeys() {
@@ -89,6 +104,7 @@ class AlarmServiceTest extends AbstractIntegrationContainerBaseTest {
                 .facilityName("테스트 시설")
                 .alarmType(AlarmType.NEW_RESERVATION)
                 .build();
+
         alarmService.saveAndSend(testEvent);
 
         String pattern = "searchAlarms::" + hostMember.getEmail() + ":*";
