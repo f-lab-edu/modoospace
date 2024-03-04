@@ -1,28 +1,69 @@
 <!DOCTYPE HTML>
 <html xmlns:th="http://www.thymeleaf.org">
 <head>
-  <title>Modoo Space</title>
-  <meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/>
-
-  <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css">
+    <title>Modoo Space</title>
+    <meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css">
 </head>
+<script type="text/javaScript">
+    function subscribe() {
+        const eventSource = new EventSource(`/api/v1/alarms/subscribe`);
+        eventSource.addEventListener("sse", function (event) {
+            console.log(event.data);
+            try {
+                const data = JSON.parse(event.data);
+
+                // 브라우저 알림
+                const showNotification = () => {
+                    const options = {
+                        body: data.message,
+                    };
+                    const notification = new Notification('Notification', options);
+                    notification.onclick = function () {
+                        // 사용자가 알림을 클릭했을 때의 동작
+                        alert('예약 조회 url 필요.');
+                    };
+                };
+
+                // 브라우저 알림 허용 권한
+                if (!("Notification" in window)) {
+                    console.log('Desktop notifications are not available in your browser.');
+                    return;
+                }
+
+                if (Notification.permission === 'granted') {
+                    // 이미 권한이 부여되었다면 알림을 바로 보여줍니다.
+                    showNotification();
+                } else if (Notification.permission !== 'denied') {
+                    Notification.requestPermission().then(permission => {
+                        if (permission === 'granted') {
+                            showNotification();
+                        }
+                    });
+                }
+            } catch (error) {
+
+            }
+        });
+    }
+</script>
+
 <body>
 <div class="page-header">
-  <h1>Modoo Space</h1>
+    <h1>Modoo Space</h1>
 </div>
-
 <div class="row">
-  <div class="col-md-6" th:if="${userName != null}">
-    <span th:text="'Logged in as: ' + ${userName}"/>
-    <a href="/logout" class="btn btn-info active" role="button">Logout</a>
-  </div>
-  <div class="col-md-6" th:if="${userName == null}">
-    <a href="/oauth2/authorization/google" class="btn btn-primary active" role="button">Google Login</a>
-    <a href="/oauth2/authorization/naver" class="btn btn-success active" role="button">Naver Login</a>
-    <a href="/oauth2/authorization/kakao" class="btn btn-warning active" role="button">KaKao Login</a>
-  </div>
+    <div class="col-md-6" th:if="${userName != null}">
+        <span th:text="'Logged in as: ' + ${userName}"/>
+        <a href="/logout" class="btn btn-info active" role="button">Logout</a>
+        <button type="button" class="btn btn-primary active" onclick="subscribe()">알람구독</button>
+    </div>
+    <div class="col-md-6" th:if="${userName == null}">
+        <a href="/oauth2/authorization/google" class="btn btn-primary active" role="button">Google Login</a>
+        <a href="/oauth2/authorization/naver" class="btn btn-success active" role="button">Naver Login</a>
+        <a href="/oauth2/authorization/kakao" class="btn btn-warning active" role="button">KaKao Login</a>
+    </div>
 </div>
-
 <script src="https://code.jquery.com/jquery-3.3.1.min.js"></script>
 <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js"></script>
 </body>
