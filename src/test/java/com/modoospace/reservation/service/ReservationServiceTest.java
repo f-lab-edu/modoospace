@@ -159,7 +159,7 @@ public class ReservationServiceTest extends AbstractIntegrationContainerBaseTest
         assertAll(
                 () -> assertThat(retResponse.getId()).isEqualTo(reservationId),
                 () -> assertThat(retResponse.getFacility().getId()).isEqualTo(facilityOpen9Close24.getId()),
-                () -> assertThat(retResponse.getMember().getId()).isEqualTo(visitorMember.getId()),
+                () -> assertThat(retResponse.getVisitor().getId()).isEqualTo(visitorMember.getId()),
                 () -> assertThat(retResponse.getStatus()).isEqualTo(ReservationStatus.WAITING)
         );
     }
@@ -248,7 +248,7 @@ public class ReservationServiceTest extends AbstractIntegrationContainerBaseTest
 
         assertAll(
                 () -> assertThat(retResponse.getId()).isEqualTo(reservationId),
-                () -> assertThat(retResponse.getMember().getEmail()).isEqualTo(visitorMember.getEmail())
+                () -> assertThat(retResponse.getVisitor().getEmail()).isEqualTo(visitorMember.getEmail())
         );
     }
 
@@ -263,7 +263,7 @@ public class ReservationServiceTest extends AbstractIntegrationContainerBaseTest
 
         assertAll(
                 () -> assertThat(retResponse.getId()).isEqualTo(reservationId),
-                () -> assertThat(retResponse.getMember().getEmail()).isEqualTo(visitorMember.getEmail())
+                () -> assertThat(retResponse.getVisitor().getEmail()).isEqualTo(visitorMember.getEmail())
         );
     }
 
@@ -279,7 +279,7 @@ public class ReservationServiceTest extends AbstractIntegrationContainerBaseTest
         ReservationResponse retResponse = reservationService.findReservation(reservationId, hostMember.getEmail());
         assertAll(
                 () -> assertThat(retResponse.getId()).isEqualTo(reservationId),
-                () -> assertThat(retResponse.getMember().getEmail()).isEqualTo(visitorMember.getEmail()),
+                () -> assertThat(retResponse.getVisitor().getEmail()).isEqualTo(visitorMember.getEmail()),
                 () -> assertThat(retResponse.getStatus()).isEqualTo(ReservationStatus.COMPLETED)
         );
     }
@@ -310,7 +310,7 @@ public class ReservationServiceTest extends AbstractIntegrationContainerBaseTest
         ReservationResponse retResponse = reservationService.findReservation(reservationId, visitorMember.getEmail());
         assertAll(
                 () -> assertThat(retResponse.getId()).isEqualTo(reservationId),
-                () -> assertThat(retResponse.getMember().getEmail()).isEqualTo(visitorMember.getEmail()),
+                () -> assertThat(retResponse.getVisitor().getEmail()).isEqualTo(visitorMember.getEmail()),
                 () -> assertThat(retResponse.getStatus()).isEqualTo(ReservationStatus.CANCELED)
         );
     }

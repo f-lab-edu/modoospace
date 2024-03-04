@@ -6,12 +6,13 @@ import com.modoospace.member.controller.dto.MemberResponse;
 import com.modoospace.reservation.domain.Reservation;
 import com.modoospace.reservation.domain.ReservationStatus;
 import com.modoospace.space.controller.dto.facility.FacilityResponse;
-import java.time.LocalDate;
-import javax.validation.constraints.NotEmpty;
-import javax.validation.constraints.NotNull;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+
+import javax.validation.constraints.NotEmpty;
+import javax.validation.constraints.NotNull;
+import java.time.LocalDate;
 
 @Getter
 @NoArgsConstructor
@@ -42,12 +43,12 @@ public class ReservationResponse {
     private FacilityResponse facility;
 
     @NotEmpty
-    private MemberResponse member;
+    private MemberResponse visitor;
 
     @Builder
     public ReservationResponse(Long id, Integer numOrUser, LocalDate startDate, Integer startHour,
-        LocalDate endDate, Integer endHour, ReservationStatus status, FacilityResponse facility,
-        MemberResponse member) {
+                               LocalDate endDate, Integer endHour, ReservationStatus status, FacilityResponse facility,
+                               MemberResponse visitor) {
         this.id = id;
         this.numOrUser = numOrUser;
         this.startDate = startDate;
@@ -56,21 +57,21 @@ public class ReservationResponse {
         this.endHour = endHour;
         this.status = status;
         this.facility = facility;
-        this.member = member;
+        this.visitor = visitor;
     }
 
 
     public static ReservationResponse of(Reservation reservation) {
         return ReservationResponse.builder()
-            .id(reservation.getId())
-            .numOrUser(reservation.getNumOfUser())
-            .startDate(reservation.getStartDate())
-            .startHour(reservation.getStartHour())
-            .endDate(reservation.getEndDate())
-            .endHour(reservation.getEndHour())
-            .status(reservation.getStatus())
-            .facility(FacilityResponse.of(reservation.getFacility()))
-            .member(MemberResponse.of(reservation.getVisitor()))
-            .build();
+                .id(reservation.getId())
+                .numOrUser(reservation.getNumOfUser())
+                .startDate(reservation.getStartDate())
+                .startHour(reservation.getStartHour())
+                .endDate(reservation.getEndDate())
+                .endHour(reservation.getEndHour())
+                .status(reservation.getStatus())
+                .facility(FacilityResponse.of(reservation.getFacility()))
+                .visitor(MemberResponse.of(reservation.getVisitor()))
+                .build();
     }
 }
