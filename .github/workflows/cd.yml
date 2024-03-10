@@ -31,6 +31,11 @@ jobs:
           touch ./application.yml
           echo "${{ secrets.APPLICATION_YAML }}" | base64 --decode > ./application.yml
         shell: bash
+      - name: Set Pinpoint Ip
+        run: |
+          cd ./pinpoint-agent-2.5.3/profiles/release
+          sed -i 's/127.0.0.1/${{ secrets.PINPOINT_IP }}/g' pinpoint.config
+        shell: bash
       # Gradle 빌드 (테스트 제외)
       - name: Build with Gradle
         run: ./gradlew clean build -x test
