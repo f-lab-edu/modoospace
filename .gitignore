@@ -36,3 +36,6 @@ out/
 
 ### VS Code ###
 .vscode/
+
+### pinpoint-agent-2.5.2 ###
+/pinpoint-agent-2.5.2/logs
