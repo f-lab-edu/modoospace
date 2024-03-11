@@ -1,9 +1,9 @@
 FROM adoptopenjdk/openjdk11
 EXPOSE 8080
 ARG JAR_FILE=build/libs/*-SNAPSHOT.jar
-ARG PINPOINT_AGENT_DIR=pinpoint-agent-2.5.3
+ARG PINPOINT_AGENT_DIR=pinpoint-agent-2.5.2
 COPY ${JAR_FILE} app.jar
 COPY ${PINPOINT_AGENT_DIR} /pinpoint-agent
 ENV TZ=Asia/Seoul
 
-ENTRYPOINT ["java", "-jar", "-javaagent:/pinpoint-agent/pinpoint-bootstrap-2.5.3.jar", "-Dpinpoint.agentId=modoospace-release", "-Dpinpoint.applicationName=modoospace-release", "-Dpinpoint.profiler.profiles.active=release", "app.jar"]
+ENTRYPOINT ["java", "-jar", "-javaagent:/pinpoint-agent/pinpoint-bootstrap-2.5.2.jar", "-Dpinpoint.agentId=modoospace-release", "-Dpinpoint.applicationName=modoospace-release", "-Dpinpoint.profiler.profiles.active=release", "app.jar"]
