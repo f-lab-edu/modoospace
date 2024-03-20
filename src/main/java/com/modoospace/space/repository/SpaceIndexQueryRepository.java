@@ -1,11 +1,14 @@
 package com.modoospace.space.repository;
 
 import com.modoospace.space.domain.SpaceIndex;
+
 import java.util.List;
 import java.util.stream.Collectors;
+
 import lombok.RequiredArgsConstructor;
 import org.elasticsearch.index.query.BoolQueryBuilder;
 import org.elasticsearch.index.query.QueryBuilders;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.elasticsearch.core.ElasticsearchOperations;
 import org.springframework.data.elasticsearch.core.query.NativeSearchQuery;
 import org.springframework.data.elasticsearch.core.query.NativeSearchQueryBuilder;
@@ -21,13 +24,14 @@ public class SpaceIndexQueryRepository {
         BoolQueryBuilder queryBuilder = makeQuery(queryString);
 
         NativeSearchQuery searchQuery = new NativeSearchQueryBuilder()
-            .withQuery(queryBuilder)
-            .build();
+                .withQuery(queryBuilder)
+                .withPageable(PageRequest.of(0, 1000))
+                .build();
 
         return elasticsearchOperations.search(searchQuery, SpaceIndex.class)
-            .stream()
-            .map(searchHit -> searchHit.getContent().getId())
-            .collect(Collectors.toList());
+                .stream()
+                .map(searchHit -> searchHit.getContent().getId())
+                .collect(Collectors.toList());
     }
 
     /**
@@ -39,8 +43,8 @@ public class SpaceIndexQueryRepository {
         BoolQueryBuilder queryBuilder = QueryBuilders.boolQuery();
         for (String term : terms) {
             queryBuilder = queryBuilder.must(
-                QueryBuilders.queryStringQuery("*" + term + "*")
-                    .field("name").field("description").field("categoryName").field("address")
+                    QueryBuilders.queryStringQuery("*" + term + "*")
+                            .field("name").field("description").field("categoryName").field("address")
             );
         }
         return queryBuilder;

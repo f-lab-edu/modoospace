@@ -22,6 +22,7 @@ public class SecurityConfiguration {
                 .authorizeHttpRequests(request -> request
                                 .antMatchers(HttpMethod.GET, "/", "/error", "/api/v1/spaces/**",
                                         "/api/v1/spaces/*/facilities/**",
+                                        "/api/v1/test/**",
                                         "/api/v1/facilities/*/schedules/**",
                                         "/api/v1/visitors/reservations/facilities/*/availability/**").permitAll()
                                 .antMatchers(HttpMethod.POST, "/api/v1/alarms/send/**").permitAll()

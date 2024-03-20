@@ -34,12 +34,14 @@ public class SpaceQueryRepository {
     private final SpaceIndexQueryRepository spaceIndexQueryRepository;
 
     public Page<Space> searchSpace(SpaceSearchRequest searchRequest, Pageable pageable) {
+
+        BooleanExpression spaceIdInExpression = spaceIdInQueryResult(searchRequest.getQuery());
         List<Space> content = jpaQueryFactory
                 .selectFrom(space)
                 .join(space.host, member).fetchJoin()
                 .join(space.category, category).fetchJoin()
                 .where(
-                        spaceIdInQueryResult(searchRequest.getQuery())
+                        spaceIdInExpression
                         , eqDepthFirst(searchRequest.getDepthFirst())
                         , eqDepthSecond(searchRequest.getDepthSecond())
                         , eqDepthThird(searchRequest.getDepthThird())
@@ -54,7 +56,7 @@ public class SpaceQueryRepository {
         JPAQuery<Space> countQuery = jpaQueryFactory
                 .selectFrom(space)
                 .where(
-                        spaceIdInQueryResult(searchRequest.getQuery())
+                        spaceIdInExpression
                         , eqDepthFirst(searchRequest.getDepthFirst())
                         , eqDepthSecond(searchRequest.getDepthSecond())
                         , eqDepthThird(searchRequest.getDepthThird())
