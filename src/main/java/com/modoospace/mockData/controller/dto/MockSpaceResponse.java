@@ -1,9 +1,9 @@
-package com.modoospace.data.controller.dto;
+package com.modoospace.mockData.controller.dto;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.modoospace.data.controller.dto.space.*;
 import com.modoospace.member.domain.Member;
+import com.modoospace.mockData.controller.dto.space.*;
 import com.modoospace.space.domain.*;
 import lombok.Getter;
 import lombok.Setter;
@@ -17,7 +17,7 @@ import java.util.stream.Collectors;
 @Getter
 @Setter
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class SpaceResponse {
+public class MockSpaceResponse {
 
     @JsonProperty("products")
     private List<FacilityResponse> facilityResponses = new ArrayList<>();
@@ -40,8 +40,7 @@ public class SpaceResponse {
         return facilityResponses.stream()
                 .findFirst()
                 .flatMap(p -> p.getCategories().stream().findFirst())
-                .map(FacilityCategory::getName)
-                .get();
+                .map(FacilityCategory::getName).orElse("스터디룸");
     }
 
     public Space toSpace(Address address, Category category, Member member) {
@@ -83,11 +82,10 @@ public class SpaceResponse {
     // end 10 ~ start 2
     private static List<TimeRange> makeTimeRangeFromBreakTime(BreakTime breakTime) {
         List<TimeRange> list = new ArrayList<>();
-        if(breakTime.getEndHour() > breakTime.getStartHour()) {
+        if (breakTime.getEndHour() > breakTime.getStartHour()) {
             list.add(new TimeRange(breakTime.getEndHour(), 24));
             list.add(new TimeRange(0, breakTime.getStartHour()));
-        }
-        else {
+        } else {
             list.add(new TimeRange(breakTime.getEndHour(), breakTime.getStartHour()));
         }
         return list;

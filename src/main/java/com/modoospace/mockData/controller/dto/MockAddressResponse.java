@@ -1,19 +1,20 @@
-package com.modoospace.data.controller.dto;
+package com.modoospace.mockData.controller.dto;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import com.modoospace.data.controller.dto.address.Document;
+import com.modoospace.mockData.controller.dto.address.Document;
 import com.modoospace.space.domain.Address;
 import lombok.Getter;
 import lombok.Setter;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @Getter
 @Setter
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class AddressResponse {
+public class MockAddressResponse {
 
-    List<Document> documents;
+    List<Document> documents = new ArrayList<>();
 
     public Address toAddress(String detailAddress) {
         Document document = documents.get(0);

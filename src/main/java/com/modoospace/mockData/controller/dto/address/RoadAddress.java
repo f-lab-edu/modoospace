@@ -1,4 +1,4 @@
-package com.modoospace.data.controller.dto.address;
+package com.modoospace.mockData.controller.dto.address;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;

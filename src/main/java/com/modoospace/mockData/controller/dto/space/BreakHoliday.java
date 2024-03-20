@@ -1,4 +1,4 @@
-package com.modoospace.data.controller.dto.space;
+package com.modoospace.mockData.controller.dto.space;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -8,11 +8,11 @@ import lombok.Setter;
 @Getter
 @Setter
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class BreakTime {
+public class BreakHoliday {
 
-    @JsonProperty("start_time")
-    Integer startHour;
+    @JsonProperty("BRK_DAY_TP_CD")
+    String breakDayCd;
 
-    @JsonProperty("end_time")
-    Integer endHour;
+    @JsonProperty("DAYW_CD")
+    String dayCd;
 }
