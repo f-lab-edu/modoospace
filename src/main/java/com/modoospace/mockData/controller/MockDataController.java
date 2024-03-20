@@ -1,16 +1,15 @@
-package com.modoospace.data.controller;
+package com.modoospace.mockData.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.modoospace.common.exception.EmptyResponseException;
 import com.modoospace.config.auth.LoginEmail;
-import com.modoospace.data.controller.dto.AddressResponse;
-import com.modoospace.data.controller.dto.SpaceResponse;
-import com.modoospace.data.service.DataService;
-import com.modoospace.space.controller.dto.space.SpaceDetailResponse;
-import com.modoospace.space.domain.SpaceIndex;
+import com.modoospace.mockData.controller.dto.MockAddressResponse;
+import com.modoospace.mockData.controller.dto.MockSpaceResponse;
+import com.modoospace.mockData.service.MockDataService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.io.IOException;
@@ -23,20 +22,24 @@ import java.nio.charset.StandardCharsets;
 
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("/api/v1/test")
+@RequestMapping("/api/v1/mock-data")
 @Slf4j
-public class DataController {
+public class MockDataController {
 
     private final ObjectMapper objectMapper = new ObjectMapper();
     private final HttpClient client = HttpClient.newHttpClient();
 
-    private final DataService dataService;
+    private final MockDataService mockDataService;
 
     @Value("${spring.kakao.apikey}")
     private String key;
 
     @GetMapping("/space/{spaceId}")
-    public SpaceResponse getSpace(@PathVariable String spaceId) throws IOException, InterruptedException {
+    public ResponseEntity<MockSpaceResponse> getSpace(@PathVariable String spaceId) throws IOException, InterruptedException {
+        return ResponseEntity.ok(getMockSpace(spaceId));
+    }
+
+    private MockSpaceResponse getMockSpace(String spaceId) throws IOException, InterruptedException {
         HttpRequest spaceRequest = HttpRequest.newBuilder()
                 .uri(URI.create("https://new-api.spacecloud.kr/spaces/" + spaceId))
                 .build();
@@ -44,8 +47,7 @@ public class DataController {
         if (isResponseSpaceEmpty(httpSpaceResponse.body())) {
             throw new EmptyResponseException("Space", spaceId);
         }
-        log.info("exist space: {}", spaceId);
-        return objectMapper.readValue(httpSpaceResponse.body(), SpaceResponse.class);
+        return objectMapper.readValue(httpSpaceResponse.body(), MockSpaceResponse.class);
     }
 
     private boolean isResponseSpaceEmpty(String responseBody) {
@@ -53,14 +55,18 @@ public class DataController {
     }
 
     @GetMapping("/address")
-    public AddressResponse getAddress(String address) throws IOException, InterruptedException {
+    public ResponseEntity<MockAddressResponse> getAddress(String address) throws IOException, InterruptedException {
+        return ResponseEntity.ok(getMockAddress(address));
+    }
+
+    private MockAddressResponse getMockAddress(String address) throws IOException, InterruptedException {
         String encodedAddress = URLEncoder.encode(address, StandardCharsets.UTF_8);
         HttpRequest addressRequest = HttpRequest.newBuilder()
                 .uri(URI.create("https://dapi.kakao.com/v2/local/search/address?query=" + encodedAddress))
                 .header("Authorization", "KakaoAK " + key)
                 .build();
         HttpResponse<String> httpAddressResponse = client.send(addressRequest, HttpResponse.BodyHandlers.ofString());
-        AddressResponse addressResponse = objectMapper.readValue(httpAddressResponse.body(), AddressResponse.class);
+        MockAddressResponse addressResponse = objectMapper.readValue(httpAddressResponse.body(), MockAddressResponse.class);
         if (addressResponse.getDocuments().isEmpty()) {
             throw new EmptyResponseException("Address", address);
         }
@@ -68,14 +74,10 @@ public class DataController {
     }
 
     @PostMapping("/space/{spaceId}")
-    public SpaceDetailResponse saveSpace(@PathVariable String spaceId, @LoginEmail String email) throws IOException, InterruptedException {
-        SpaceResponse spaceResponse = getSpace(spaceId);
-        AddressResponse addressResponse = getAddress(spaceResponse.getLocation().getAddress());
-        return dataService.saveEntity(spaceResponse, addressResponse, email);
-    }
-
-    @PostMapping("/space-index/{spaceId}")
-    public SpaceIndex saveSpaceIndex(@PathVariable Long spaceId) {
-        return dataService.saveIndex(spaceId);
+    public ResponseEntity<Void> saveSpace(@PathVariable String spaceId, @LoginEmail String email) throws IOException, InterruptedException {
+        MockSpaceResponse spaceResponse = getMockSpace(spaceId);
+        MockAddressResponse addressResponse = getMockAddress(spaceResponse.getLocation().getAddress());
+        Long entitySpaceId = mockDataService.saveEntity(spaceResponse, addressResponse, email);
+        return ResponseEntity.created(URI.create("/api/v1/spaces/" + entitySpaceId)).build();
     }
 }
