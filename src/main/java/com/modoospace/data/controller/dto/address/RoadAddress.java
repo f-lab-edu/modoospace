@@ -20,6 +20,6 @@ public class RoadAddress {
     String subBuildingNo;
 
     public String getFullBuildingNo() {
-        return buildingNo + "-" + subBuildingNo;
+        return subBuildingNo == null || subBuildingNo.isBlank() ? buildingNo : buildingNo + "-" + subBuildingNo;
     }
 }

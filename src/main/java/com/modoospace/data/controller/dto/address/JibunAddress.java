@@ -26,6 +26,6 @@ public class JibunAddress {
     String subAddressNo;
 
     public String getFullAddressNo() {
-        return subAddressNo != null ? addressNo + "-" + subAddressNo : addressNo;
+        return subAddressNo == null || subAddressNo.isBlank() ? addressNo : addressNo + "-" + subAddressNo;
     }
 }

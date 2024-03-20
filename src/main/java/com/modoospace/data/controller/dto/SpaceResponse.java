@@ -1,19 +1,17 @@
 package com.modoospace.data.controller.dto;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.modoospace.data.controller.dto.space.*;
 import com.modoospace.member.domain.Member;
 import com.modoospace.space.domain.*;
 import lombok.Getter;
 import lombok.Setter;
 
-import java.net.URLEncoder;
-import java.nio.charset.StandardCharsets;
 import java.time.DayOfWeek;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Getter
@@ -21,38 +19,39 @@ import java.util.stream.Collectors;
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class SpaceResponse {
 
-    private List<Product> products;
-    private SpaceInfo info;
+    @JsonProperty("products")
+    private List<FacilityResponse> facilityResponses = new ArrayList<>();
+
+    @JsonProperty("info")
+    private SpaceInfo spaceInfo;
+
     private Location location;
-    private List<BreakDay> break_days;
-    private List<BreakHoliday> break_holidays;
-    private List<BreakTime> break_times;
 
-    public Optional<String> getEncodedAddress() {
-        return Optional.ofNullable(location)
-                .map(Location::getAddress)
-                .map(address -> URLEncoder.encode(address, StandardCharsets.UTF_8));
-    }
+    @JsonProperty("break_days")
+    private List<BreakDay> breakDays = new ArrayList<>();
 
-    public Optional<String> getCategoryName() {
-        return products.stream()
+    @JsonProperty("break_holidays")
+    private List<BreakHoliday> breakHolidays = new ArrayList<>();
+
+    @JsonProperty("break_times")
+    private List<BreakTime> breakTimes = new ArrayList<>();
+
+    public String getCategoryName() {
+        return facilityResponses.stream()
                 .findFirst()
                 .flatMap(p -> p.getCategories().stream().findFirst())
-                .map(FacilityCategory::getName);
+                .map(FacilityCategory::getName)
+                .get();
     }
 
     public Space toSpace(Address address, Category category, Member member) {
         return Space.builder()
-                .name(info.getName())
-                .description(info.getDescription())
+                .name(spaceInfo.getName())
+                .description(spaceInfo.getDescription())
                 .address(address)
                 .category(category)
                 .host(member)
                 .build();
-    }
-
-    public List<Facility> toFacilities(Space space) {
-        return null;
     }
 
     public WeekdaySettings getWeekdaySettings() {
@@ -64,7 +63,7 @@ public class SpaceResponse {
                 new WeekdaySetting(DayOfWeek.FRIDAY))
         );
 
-        if (break_days.isEmpty() && break_holidays.isEmpty()) {
+        if (breakDays.isEmpty() && breakHolidays.isEmpty()) {
             weekdaySettings.add(new WeekdaySetting(DayOfWeek.SATURDAY));
             weekdaySettings.add(new WeekdaySetting(DayOfWeek.SUNDAY));
         }
@@ -73,11 +72,24 @@ public class SpaceResponse {
     }
 
     public TimeSettings getTimeSettings() {
-        List<TimeSetting> timeSettings = break_times.stream()
-                .map(breakTime -> new TimeRange(breakTime.getStartHour(), breakTime.getEndHour()))
+        List<TimeSetting> timeSettings = breakTimes.stream()
+                .flatMap(breakTime -> makeTimeRangeFromBreakTime(breakTime).stream())
                 .map(TimeSetting::new)
                 .collect(Collectors.toList());
 
         return new TimeSettings(timeSettings);
+    }
+
+    // end 10 ~ start 2
+    private static List<TimeRange> makeTimeRangeFromBreakTime(BreakTime breakTime) {
+        List<TimeRange> list = new ArrayList<>();
+        if(breakTime.getEndHour() > breakTime.getStartHour()) {
+            list.add(new TimeRange(breakTime.getEndHour(), 24));
+            list.add(new TimeRange(0, breakTime.getStartHour()));
+        }
+        else {
+            list.add(new TimeRange(breakTime.getEndHour(), breakTime.getStartHour()));
+        }
+        return list;
     }
 }

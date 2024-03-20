@@ -11,7 +11,7 @@ import lombok.Setter;
 public class BreakHoliday {
 
     @JsonProperty("BRK_DAY_TP_CD")
-    String breakDayCd; // HOLID
+    String breakDayCd;
 
     @JsonProperty("DAYW_CD")
     String dayCd;

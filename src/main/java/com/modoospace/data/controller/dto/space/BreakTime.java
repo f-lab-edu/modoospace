@@ -10,9 +10,9 @@ import lombok.Setter;
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class BreakTime {
 
-    @JsonProperty("end_time")
+    @JsonProperty("start_time")
     Integer startHour;
 
-    @JsonProperty("start_time")
+    @JsonProperty("end_time")
     Integer endHour;
 }

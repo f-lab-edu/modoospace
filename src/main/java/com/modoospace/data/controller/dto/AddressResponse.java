@@ -15,7 +15,7 @@ public class AddressResponse {
 
     List<Document> documents;
 
-    public Address toAddress() {
+    public Address toAddress(String detailAddress) {
         Document document = documents.get(0);
         return Address.builder()
                 .depthFirst(document.getAddress().getDepthFirst())
@@ -24,6 +24,7 @@ public class AddressResponse {
                 .addressNo(document.getAddress().getFullAddressNo())
                 .roadName(document.getRoadAddress().getRoadName())
                 .buildingNo(document.getRoadAddress().getFullBuildingNo())
+                .detailAddress(detailAddress)
                 .x(document.getX())
                 .y(document.getY())
                 .build();
