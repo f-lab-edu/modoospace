@@ -49,6 +49,11 @@ public class GlobalExceptionHandler {
         return new ResponseEntity<>(exception.getMessage(), HttpStatus.NOT_FOUND);
     }
 
+    @ExceptionHandler(EmptyResponseException.class)
+    public ResponseEntity<String> handleEmptyResponseException(EmptyResponseException exception) {
+        return new ResponseEntity<>(exception.getMessage(), HttpStatus.NOT_FOUND);
+    }
+
     @ExceptionHandler(InvalidTimeRangeException.class)
     public ResponseEntity<String> handleInvalidTimeRangeException(InvalidTimeRangeException exception) {
         return new ResponseEntity<>(exception.getMessage(), HttpStatus.BAD_REQUEST);

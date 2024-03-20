@@ -93,4 +93,8 @@ public class Space extends BaseTimeEntity {
      private boolean hasFacilities() {
         return !facilities.isEmpty();
     }
+
+    public void setFacilities(List<Facility> facilities) {
+        this.facilities.addAll(facilities);
+    }
 }
