@@ -76,14 +76,14 @@ class DataControllerTest extends AbstractIntegrationContainerBaseTest {
         assertThat(address.getDocuments().get(0).getY()).isEqualTo("37.5969625614596");
     }
 
-    @DisplayName("외부Api로 받아온 데이터를 모두스페이스 엔티티로 변환 후 저장하여 반환한다.")
+    @DisplayName("외부api로 받아온 공간데이터가 비어있을 경우 변환하지 않고 Exception을 던진다.")
     @Test
     public void saveSpace_throwException_ifEmptyResponse() {
         assertThatThrownBy(() -> dataController.saveSpace("2", member.getEmail()))
                 .isInstanceOf(EmptyResponseException.class);
     }
 
-    @DisplayName("외부api로 받아온 공간데이터가 비어있을 경우 변환하지 않고 Exception을 던진다.")
+    @DisplayName("외부Api로 받아온 데이터를 모두스페이스 엔티티로 변환 후 저장하여 반환한다.")
     @Test
     public void saveSpace() throws IOException, InterruptedException {
         SpaceDetailResponse space = dataController.saveSpace("58861", member.getEmail());
