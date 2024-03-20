@@ -7,6 +7,8 @@ import org.springframework.data.elasticsearch.client.ClientConfiguration;
 import org.springframework.data.elasticsearch.client.RestClients;
 import org.springframework.data.elasticsearch.config.AbstractElasticsearchConfiguration;
 
+import java.time.Duration;
+
 @Configuration
 public class RestClientConfig extends AbstractElasticsearchConfiguration {
 
@@ -24,6 +26,7 @@ public class RestClientConfig extends AbstractElasticsearchConfiguration {
         final ClientConfiguration clientConfiguration = ClientConfiguration.builder()
                 .connectedTo(host + ":" + port)
                 .withBasicAuth(username, password)
+                .withConnectTimeout(Duration.ofSeconds(5))
                 .build();
 
         return RestClients.create(clientConfiguration).rest();
