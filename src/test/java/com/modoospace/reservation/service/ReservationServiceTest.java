@@ -199,7 +199,7 @@ public class ReservationServiceTest extends AbstractIntegrationContainerBaseTest
     @Test
     public void getAvailabilityTime() {
         AvailabilityTimeResponse retResponse = reservationService.getAvailabilityTime(facilityOpen9Close24.getId(),
-                now);
+                now.plusDays(1));
 
         // 9~23
         Assertions.assertThat(retResponse.getTimeResponses().stream()
@@ -211,7 +211,7 @@ public class ReservationServiceTest extends AbstractIntegrationContainerBaseTest
     @Test
     public void getAvailabilityTime_24Open() {
         AvailabilityTimeResponse retResponse = reservationService.getAvailabilityTime(facilityOpenClose24.getId(),
-                LocalDate.now());
+                LocalDate.now().plusDays(1));
 
         // 0~23
         Assertions.assertThat(retResponse.getTimeResponses().stream()
@@ -222,13 +222,13 @@ public class ReservationServiceTest extends AbstractIntegrationContainerBaseTest
     @DisplayName("특정 날짜의 예약가능시간을 조회할 수 있다.(12~15시 예약존재)")
     @Test
     public void getAvailableTimes_ifPresentReservation() {
-        ReservationCreateRequest createRequest = new ReservationCreateRequest(3, now, 12, now, 15);
+        LocalDate tomorrow = LocalDate.now().plusDays(1);
+        ReservationCreateRequest createRequest = new ReservationCreateRequest(3, tomorrow, 12, tomorrow, 15);
 
         reservationService.createReservation(createRequest, facilityOpen9Close24.getId(),
                 visitorMember.getEmail());
 
-        AvailabilityTimeResponse retResponse = reservationService.getAvailabilityTime(facilityOpen9Close24.getId(),
-                LocalDate.now());
+        AvailabilityTimeResponse retResponse = reservationService.getAvailabilityTime(facilityOpen9Close24.getId(), tomorrow);
 
         // 9시 ~ 12시, 15시 ~ 24시
         Assertions.assertThat(retResponse.getTimeResponses().stream()
