@@ -46,10 +46,10 @@ public class FacilityService {
         return facilities.map(FacilityResponse::of);
     }
 
-    public FacilityDetailResponse findFacility(Long facilityId) {
+    public FacilityResponse findFacility(Long facilityId) {
         Facility facility = findFacilityById(facilityId);
 
-        return FacilityDetailResponse.of(facility);
+        return FacilityResponse.of(facility);
     }
 
     @Transactional

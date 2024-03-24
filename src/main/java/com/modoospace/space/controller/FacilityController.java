@@ -2,7 +2,6 @@ package com.modoospace.space.controller;
 
 import com.modoospace.config.auth.LoginEmail;
 import com.modoospace.space.controller.dto.facility.FacilityCreateRequest;
-import com.modoospace.space.controller.dto.facility.FacilityDetailResponse;
 import com.modoospace.space.controller.dto.facility.FacilityResponse;
 import com.modoospace.space.controller.dto.facility.FacilitySearchRequest;
 import com.modoospace.space.controller.dto.facility.FacilitySettingUpdateRequest;
@@ -48,8 +47,8 @@ public class FacilityController {
     }
 
     @GetMapping("/{facilityId}")
-    public ResponseEntity<FacilityDetailResponse> find(@PathVariable Long facilityId) {
-        FacilityDetailResponse facilityReadDto = facilityService.findFacility(facilityId);
+    public ResponseEntity<FacilityResponse> find(@PathVariable Long facilityId) {
+        FacilityResponse facilityReadDto = facilityService.findFacility(facilityId);
         return ResponseEntity.ok().body(facilityReadDto);
     }
 
