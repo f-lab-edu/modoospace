@@ -15,6 +15,7 @@ import com.modoospace.space.domain.SpaceIndexRepository;
 import com.modoospace.space.domain.SpaceRepository;
 import com.modoospace.space.repository.SpaceQueryRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -31,6 +32,7 @@ public class SpaceService {
     private final SpaceIndexRepository spaceIndexRepository;
 
     @Transactional
+    @CacheEvict(value = "findSpaceId")
     public Long createSpace(Long categoryId, SpaceCreateUpdateRequest createRequest,
         String loginEmail) {
         Member host = memberService.findMemberByEmail(loginEmail);
@@ -62,6 +64,7 @@ public class SpaceService {
     }
 
     @Transactional
+    @CacheEvict(value = "findSpaceId")
     public void updateSpace(Long spaceId, SpaceCreateUpdateRequest updateRequest,
         String loginEmail) {
         Member loginMember = memberService.findMemberByEmail(loginEmail);
@@ -74,6 +77,7 @@ public class SpaceService {
     }
 
     @Transactional
+    @CacheEvict(value = "findSpaceId")
     public void deleteSpace(Long spaceId, String loginEmail) {
         Member loginMember = memberService.findMemberByEmail(loginEmail);
         Space space = findSpaceById(spaceId);
