@@ -1,7 +1,5 @@
 package com.modoospace.space.repository;
 
-import static org.assertj.core.api.Assertions.assertThat;
-
 import com.modoospace.AbstractIntegrationContainerBaseTest;
 import com.modoospace.member.domain.Member;
 import com.modoospace.member.domain.MemberRepository;
@@ -13,11 +11,6 @@ import com.modoospace.space.controller.dto.facility.FacilityCreateRequest;
 import com.modoospace.space.controller.dto.space.SpaceSearchRequest;
 import com.modoospace.space.controller.dto.timeSetting.TimeSettingCreateRequest;
 import com.modoospace.space.domain.*;
-
-import java.io.IOException;
-import java.time.LocalDate;
-import java.util.List;
-
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -25,8 +18,15 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.data.redis.core.StringRedisTemplate;
 
 import javax.transaction.Transactional;
+import java.io.IOException;
+import java.time.LocalDate;
+import java.util.List;
+import java.util.Objects;
+
+import static org.assertj.core.api.Assertions.assertThat;
 
 @Transactional
 public class SpaceQueryRepositoryTest extends AbstractIntegrationContainerBaseTest {
@@ -52,6 +52,9 @@ public class SpaceQueryRepositoryTest extends AbstractIntegrationContainerBaseTe
     @Autowired
     private SpaceIndexRepository spaceIndexRepository;
 
+    @Autowired
+    private StringRedisTemplate redisTemplate;
+
     private Member visitorMember;
 
     private Facility facility;
@@ -61,70 +64,70 @@ public class SpaceQueryRepositoryTest extends AbstractIntegrationContainerBaseTe
     @BeforeEach
     public void setup() throws IOException, InterruptedException {
         Member hostMember = Member.builder()
-            .email("host@email")
-            .name("host")
-            .role(Role.HOST)
-            .build();
+                .email("host@email")
+                .name("host")
+                .role(Role.HOST)
+                .build();
         memberRepository.save(hostMember);
 
         visitorMember = Member.builder()
-            .email("visitor@email")
-            .name("visitor")
-            .role(Role.VISITOR)
-            .build();
+                .email("visitor@email")
+                .name("visitor")
+                .role(Role.VISITOR)
+                .build();
         memberRepository.save(visitorMember);
 
         Category category = new Category("스터디 공간");
         categoryRepository.save(category);
 
         Address address = Address.builder()
-            .depthFirst("서울")
-            .depthSecond("관악구")
-            .depthThird("남현동")
-            .build();
+                .depthFirst("서울")
+                .depthSecond("관악구")
+                .depthThird("남현동")
+                .build();
         Space space = Space.builder()
-            .name("사당 스터디룸")
-            .description("사당역 3번출구 5분거리에요.")
-            .category(category)
-            .host(hostMember)
-            .address(address)
-            .build();
+                .name("사당 스터디룸")
+                .description("사당역 3번출구 5분거리에요.")
+                .category(category)
+                .host(hostMember)
+                .address(address)
+                .build();
         spaceRepository.save(space);
         spaceIndexRepository.save(SpaceIndex.of(space));
 
         Address address2 = Address.builder()
-            .depthFirst("서울")
-            .depthSecond("서초구")
-            .depthThird("서초동")
-            .build();
+                .depthFirst("서울")
+                .depthSecond("서초구")
+                .depthThird("서초동")
+                .build();
         Space space2 = Space.builder()
-            .name("강남 스터디룸")
-            .description("강남역 3번출구 5분거리에요.")
-            .category(category)
-            .host(hostMember)
-            .address(address2)
-            .build();
+                .name("강남 스터디룸")
+                .description("강남역 3번출구 5분거리에요.")
+                .category(category)
+                .host(hostMember)
+                .address(address2)
+                .build();
         spaceRepository.save(space2);
         spaceIndexRepository.save(SpaceIndex.of(space2));
 
         // TimeSetting, WeekSetting 기본값이 필요하여 Request 사용.
         FacilityCreateRequest createRequest = FacilityCreateRequest.builder()
-            .name("A스터디룸")
-            .reservationEnable(true)
-            .minUser(1)
-            .maxUser(4)
-            .description("1~4인실 입니다.")
-            .build();
+                .name("A스터디룸")
+                .reservationEnable(true)
+                .minUser(1)
+                .maxUser(4)
+                .description("1~4인실 입니다.")
+                .build();
         facility = facilityRepository.save(createRequest.toEntity(space));
 
         FacilityCreateRequest createRequest2 = FacilityCreateRequest.builder()
-            .name("B스터디룸")
-            .reservationEnable(true)
-            .minUser(3)
-            .maxUser(8)
-            .timeSettings(List.of(new TimeSettingCreateRequest(8, 23)))
-            .description("3~8인실 입니다.")
-            .build();
+                .name("B스터디룸")
+                .reservationEnable(true)
+                .minUser(3)
+                .maxUser(8)
+                .timeSettings(List.of(new TimeSettingCreateRequest(8, 23)))
+                .description("3~8인실 입니다.")
+                .build();
         facilityRepository.save(createRequest2.toEntity(space2));
 
         now = LocalDate.now();
@@ -137,10 +140,10 @@ public class SpaceQueryRepositoryTest extends AbstractIntegrationContainerBaseTe
         searchRequest.setQuery("사당");
 
         Page<Space> resultPage = spaceQueryRepository
-            .searchSpace(searchRequest, PageRequest.of(0, 10));
+                .searchSpace(searchRequest, PageRequest.of(0, 10));
 
         assertThat(resultPage.getContent()).extracting("name")
-            .containsExactly("사당 스터디룸");
+                .containsExactly("사당 스터디룸");
     }
 
     @DisplayName("쿼리(사당)에 맞는 공간을 반환한다.(쿼리 활용)")
@@ -163,10 +166,10 @@ public class SpaceQueryRepositoryTest extends AbstractIntegrationContainerBaseTe
         searchRequest.setQuery("스터디룸");
 
         Page<Space> resultPage = spaceQueryRepository
-            .searchSpace(searchRequest, PageRequest.of(0, 10));
+                .searchSpace(searchRequest, PageRequest.of(0, 10));
 
         assertThat(resultPage.getContent()).extracting("name")
-            .containsExactly("사당 스터디룸", "강남 스터디룸");
+                .containsExactly("사당 스터디룸", "강남 스터디룸");
     }
 
     @DisplayName("쿼리(스터디룸)에 맞는 공간을 반환한다.(쿼리 활용)")
@@ -190,10 +193,10 @@ public class SpaceQueryRepositoryTest extends AbstractIntegrationContainerBaseTe
         searchRequest.setDepthSecond("관악구");
 
         Page<Space> resultPage = spaceQueryRepository
-            .searchSpace(searchRequest, PageRequest.of(0, 10));
+                .searchSpace(searchRequest, PageRequest.of(0, 10));
 
         assertThat(resultPage.getContent()).extracting("name")
-            .containsExactly("사당 스터디룸");
+                .containsExactly("사당 스터디룸");
     }
 
     @DisplayName("최대 인원에 맞는 공간을 반환한다.")
@@ -203,10 +206,10 @@ public class SpaceQueryRepositoryTest extends AbstractIntegrationContainerBaseTe
         searchRequest.setMaxUser(5);
 
         Page<Space> resultPage = spaceQueryRepository
-            .searchSpace(searchRequest, PageRequest.of(0, 10));
+                .searchSpace(searchRequest, PageRequest.of(0, 10));
 
         assertThat(resultPage.getContent()).extracting("name")
-            .containsExactly("강남 스터디룸");
+                .containsExactly("강남 스터디룸");
     }
 
     @DisplayName("사용일자와 시간에 맞는 공간을 반환한다.")
@@ -217,10 +220,10 @@ public class SpaceQueryRepositoryTest extends AbstractIntegrationContainerBaseTe
         searchRequest.setTimeRange(new TimeRange(5, 8));
 
         Page<Space> resultPage = spaceQueryRepository
-            .searchSpace(searchRequest, PageRequest.of(0, 10));
+                .searchSpace(searchRequest, PageRequest.of(0, 10));
 
         assertThat(resultPage.getContent()).extracting("name")
-            .containsExactly("사당 스터디룸");
+                .containsExactly("사당 스터디룸");
     }
 
     @DisplayName("사용일자와 시간에 맞는 공간을 반환한다.(예약이 존재하는 케이스)")
@@ -228,11 +231,11 @@ public class SpaceQueryRepositoryTest extends AbstractIntegrationContainerBaseTe
     public void searchSpace_byUseDateTime_ifReservationExist() {
         DateTimeRange dateTimeRange = new DateTimeRange(now, 9, now, 12);
         Reservation reservation = Reservation.builder()
-            .numOfUser(3)
-            .dateTimeRange(dateTimeRange)
-            .visitor(visitorMember)
-            .facility(facility)
-            .build();
+                .numOfUser(3)
+                .dateTimeRange(dateTimeRange)
+                .visitor(visitorMember)
+                .facility(facility)
+                .build();
         reservationRepository.save(reservation);
 
         SpaceSearchRequest searchRequest = new SpaceSearchRequest();
@@ -240,14 +243,15 @@ public class SpaceQueryRepositoryTest extends AbstractIntegrationContainerBaseTe
         searchRequest.setTimeRange(new TimeRange(9, 11));
 
         Page<Space> resultPage = spaceQueryRepository
-            .searchSpace(searchRequest, PageRequest.of(0, 10));
+                .searchSpace(searchRequest, PageRequest.of(0, 10));
 
         assertThat(resultPage.getContent()).extracting("name")
-            .containsExactly("강남 스터디룸");
+                .containsExactly("강남 스터디룸");
     }
 
     @AfterEach
     public void clear() {
+        Objects.requireNonNull(redisTemplate.getConnectionFactory()).getConnection().flushAll();
         spaceIndexRepository.deleteAll();
     }
 }

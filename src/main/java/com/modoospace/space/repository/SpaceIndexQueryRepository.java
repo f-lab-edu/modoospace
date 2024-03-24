@@ -8,6 +8,7 @@ import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import org.elasticsearch.index.query.BoolQueryBuilder;
 import org.elasticsearch.index.query.QueryBuilders;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.elasticsearch.core.ElasticsearchOperations;
 import org.springframework.data.elasticsearch.core.query.NativeSearchQuery;
@@ -20,6 +21,7 @@ public class SpaceIndexQueryRepository {
 
     private final ElasticsearchOperations elasticsearchOperations;
 
+    @Cacheable(cacheNames = "findSpaceId", key = "#queryString")
     public List<Long> findIdByQuery(String queryString) {
         BoolQueryBuilder queryBuilder = makeQuery(queryString);
 
