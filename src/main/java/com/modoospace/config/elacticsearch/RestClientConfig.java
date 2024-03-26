@@ -36,7 +36,7 @@ public class RestClientConfig extends AbstractElasticsearchConfiguration {
                 httpClientBuilder
                         .setDefaultCredentialsProvider(credentialsProvider)
                         .setMaxConnTotal(100) // 전체 최대 연결 수를 100개로 설정
-                        .setMaxConnPerRoute(50) // 단일 라우트(호스트) 당 최대 연결 수 -> 단일 node이므로 50개가 최대임.
+                        .setMaxConnPerRoute(50) // 단일 라우트(호스트) 당 최대 연결 수
         );
         return new RestHighLevelClient(builder);
     }

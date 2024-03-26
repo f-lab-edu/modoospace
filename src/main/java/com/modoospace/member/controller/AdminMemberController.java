@@ -1,7 +1,9 @@
 package com.modoospace.member.controller;
 
-import com.modoospace.config.auth.LoginEmail;
+import com.modoospace.config.auth.aop.CheckLogin;
+import com.modoospace.config.auth.resolver.LoginMember;
 import com.modoospace.member.controller.dto.MemberUpdateRequest;
+import com.modoospace.member.domain.Member;
 import com.modoospace.member.service.MemberService;
 import javax.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -19,11 +21,12 @@ public class AdminMemberController {
 
   private final MemberService memberService;
 
+  @CheckLogin
   @PutMapping("/{memberId}")
   public ResponseEntity<Void> updateRole(@PathVariable Long memberId,
       @RequestBody @Valid MemberUpdateRequest updateRequest,
-      @LoginEmail String loginEmail) {
-    memberService.updateMemberRole(memberId, updateRequest, loginEmail);
+      @LoginMember Member member) {
+    memberService.updateMemberRole(memberId, updateRequest, member);
     return ResponseEntity.noContent().build();
   }
 }

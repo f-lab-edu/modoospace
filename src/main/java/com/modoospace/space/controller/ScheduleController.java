@@ -1,7 +1,9 @@
 package com.modoospace.space.controller;
 
 import com.modoospace.common.DateFormatManager;
-import com.modoospace.config.auth.LoginEmail;
+import com.modoospace.config.auth.aop.CheckLogin;
+import com.modoospace.config.auth.resolver.LoginMember;
+import com.modoospace.member.domain.Member;
 import com.modoospace.space.controller.dto.schedule.ScheduleCreateUpdateRequest;
 import com.modoospace.space.controller.dto.schedule.ScheduleResponse;
 import com.modoospace.space.sevice.ScheduleService;
@@ -29,11 +31,12 @@ public class ScheduleController {
 
     private final ScheduleService scheduleService;
 
+    @CheckLogin
     @PostMapping()
     public ResponseEntity<Void> create(@PathVariable Long facilityId,
         @RequestBody @Valid ScheduleCreateUpdateRequest createRequest,
-        @LoginEmail String loginEmail) {
-        scheduleService.createSchedule(facilityId, createRequest, loginEmail);
+        @LoginMember Member loginMember) {
+        scheduleService.createSchedule(facilityId, createRequest, loginMember);
         return ResponseEntity.ok().build();
     }
 
@@ -43,18 +46,20 @@ public class ScheduleController {
         return ResponseEntity.ok().body(schedule);
     }
 
+    @CheckLogin
     @PutMapping("/{scheduleId}")
     public ResponseEntity<Void> update(@PathVariable Long scheduleId,
         @RequestBody @Valid ScheduleCreateUpdateRequest updateRequest,
-        @LoginEmail String loginEmail) {
-        scheduleService.updateSchedule(scheduleId, updateRequest, loginEmail);
+                                       @LoginMember Member loginMember) {
+        scheduleService.updateSchedule(scheduleId, updateRequest, loginMember);
         return ResponseEntity.noContent().build();
     }
 
+    @CheckLogin
     @DeleteMapping("/{scheduleId}")
     public ResponseEntity<Void> delete(@PathVariable Long scheduleId,
-        @LoginEmail String loginEmail) {
-        scheduleService.deleteSchedule(scheduleId, loginEmail);
+                                       @LoginMember Member loginMember) {
+        scheduleService.deleteSchedule(scheduleId, loginMember);
         return ResponseEntity.noContent().build();
     }
 
@@ -66,11 +71,12 @@ public class ScheduleController {
         return ResponseEntity.ok().body(schedules);
     }
 
+    @CheckLogin
     @PostMapping("/month")
     public ResponseEntity<Void> create1MonthDefault(@PathVariable Long facilityId,
         @RequestParam @DateTimeFormat(pattern = DateFormatManager.YEARMONTH_FORMAT) final YearMonth yearMonth,
-        @LoginEmail String loginEmail) {
-        scheduleService.create1MonthDefaultSchedules(facilityId, yearMonth, loginEmail);
+                                                    @LoginMember Member loginMember) {
+        scheduleService.create1MonthDefaultSchedules(facilityId, yearMonth, loginMember);
         return ResponseEntity.noContent().build();
     }
 
@@ -82,12 +88,13 @@ public class ScheduleController {
         return ResponseEntity.ok().body(schedules);
     }
 
+    @CheckLogin
     @DeleteMapping("/month")
     public ResponseEntity<Void> delete1Month(@PathVariable Long facilityId,
         @RequestParam @DateTimeFormat(pattern = DateFormatManager.YEARMONTH_FORMAT) final YearMonth yearMonth,
-        @LoginEmail String loginEmail) {
+        @LoginMember Member loginMember) {
         scheduleService
-            .delete1MonthSchedules(facilityId, yearMonth, loginEmail);
+            .delete1MonthSchedules(facilityId, yearMonth, loginMember);
         return ResponseEntity.noContent().build();
     }
 }

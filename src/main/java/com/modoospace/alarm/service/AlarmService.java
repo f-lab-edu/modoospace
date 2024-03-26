@@ -35,8 +35,7 @@ public class AlarmService {
     private final AlarmQueryRepository alarmQueryRepository;
     private final EmitterLocalCacheRepository emitterRepository;
 
-    public Page<AlarmResponse> searchAlarms(String loginEmail, Pageable pageable) {
-        Member loginMember = memberService.findMemberByEmail(loginEmail);
+    public Page<AlarmResponse> searchAlarms(Member loginMember, Pageable pageable) {
 
         return alarmQueryRepository.searchByMember(loginMember, pageable);
     }
@@ -80,9 +79,8 @@ public class AlarmService {
     }
 
     @Transactional
-    @CachePrefixEvict(cacheNames = "searchAlarms", key = "#loginEmail")
-    public void delete(Long alarmId, String loginEmail) {
-        Member loginMember = memberService.findMemberByEmail(loginEmail);
+    @CachePrefixEvict(cacheNames = "searchAlarms", key = "#loginMember.email")
+    public void delete(Long alarmId, Member loginMember) {
         Alarm alarm = findAlarmById(alarmId);
 
         alarm.verifyManagementPermission(loginMember);

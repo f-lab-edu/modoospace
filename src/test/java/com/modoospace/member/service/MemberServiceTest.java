@@ -14,6 +14,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.Objects;
+
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.junit.jupiter.api.Assertions.assertAll;
 
@@ -29,12 +31,13 @@ class MemberServiceTest extends AbstractIntegrationContainerBaseTest {
     @Autowired
     private StringRedisTemplate redisTemplate;
 
+    private Member adminMember;
     private Member hostMember;
     private Member visitorMember;
 
     @BeforeEach
     public void setUp() {
-        Member adminMember = Member.builder()
+        adminMember = Member.builder()
                 .email("admin@email")
                 .name("admin")
                 .role(Role.ADMIN)
@@ -52,14 +55,14 @@ class MemberServiceTest extends AbstractIntegrationContainerBaseTest {
                 .role(Role.VISITOR)
                 .build();
 
-        memberRepository.save(adminMember);
-        memberRepository.save(hostMember);
-        memberRepository.save(visitorMember);
+        adminMember = memberRepository.save(adminMember);
+        hostMember = memberRepository.save(hostMember);
+        visitorMember = memberRepository.save(visitorMember);
     }
 
     @AfterEach
     public void after() {
-        redisTemplate.getConnectionFactory().getConnection().flushAll();
+        Objects.requireNonNull(redisTemplate.getConnectionFactory()).getConnection().flushAll();
     }
 
     @DisplayName("Visitor 사용자를 Host로 변경한디.")
@@ -69,7 +72,7 @@ class MemberServiceTest extends AbstractIntegrationContainerBaseTest {
                 .role(Role.HOST)
                 .build();
 
-        memberService.updateMemberRole(visitorMember.getId(), updateRequest, "admin@email");
+        memberService.updateMemberRole(visitorMember.getId(), updateRequest, adminMember);
 
         Member updateMember = memberRepository.findByEmail("visitor@email").get();
         updateMember.verifyRolePermission(Role.HOST);
@@ -84,10 +87,10 @@ class MemberServiceTest extends AbstractIntegrationContainerBaseTest {
 
         assertAll(
                 () -> assertThatThrownBy(
-                        () -> memberService.updateMemberRole(visitorMember.getId(), updateRequest, "visitor@email"))
+                        () -> memberService.updateMemberRole(visitorMember.getId(), updateRequest, visitorMember))
                         .isInstanceOf(PermissionDeniedException.class),
                 () -> assertThatThrownBy(
-                        () -> memberService.updateMemberRole(hostMember.getId(), updateRequest, "host@email"))
+                        () -> memberService.updateMemberRole(hostMember.getId(), updateRequest, hostMember))
                         .isInstanceOf(PermissionDeniedException.class)
         );
     }

@@ -2,7 +2,9 @@ package com.modoospace.mockData.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.modoospace.common.exception.EmptyResponseException;
-import com.modoospace.config.auth.LoginEmail;
+import com.modoospace.config.auth.aop.CheckLogin;
+import com.modoospace.config.auth.resolver.LoginMember;
+import com.modoospace.member.domain.Member;
 import com.modoospace.mockData.controller.dto.MockAddressResponse;
 import com.modoospace.mockData.controller.dto.MockSpaceResponse;
 import com.modoospace.mockData.service.MockDataService;
@@ -73,11 +75,12 @@ public class MockDataController {
         return addressResponse;
     }
 
+    @CheckLogin
     @PostMapping("/space/{spaceId}")
-    public ResponseEntity<Void> saveSpace(@PathVariable String spaceId, @LoginEmail String email) throws IOException, InterruptedException {
+    public ResponseEntity<Void> saveSpace(@PathVariable String spaceId, @LoginMember Member loginMember) throws IOException, InterruptedException {
         MockSpaceResponse spaceResponse = getMockSpace(spaceId);
         MockAddressResponse addressResponse = getMockAddress(spaceResponse.getLocation().getAddress());
-        Long entitySpaceId = mockDataService.saveEntity(spaceResponse, addressResponse, email);
+        Long entitySpaceId = mockDataService.saveEntity(spaceResponse, addressResponse, loginMember);
         return ResponseEntity.created(URI.create("/api/v1/spaces/" + entitySpaceId)).build();
     }
 }

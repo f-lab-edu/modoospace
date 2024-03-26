@@ -1,7 +1,6 @@
 package com.modoospace.space.sevice;
 
 import com.modoospace.AbstractIntegrationContainerBaseTest;
-import com.modoospace.common.exception.NotFoundEntityException;
 import com.modoospace.common.exception.PermissionDeniedException;
 import com.modoospace.member.domain.Member;
 import com.modoospace.member.domain.MemberRepository;
@@ -15,8 +14,6 @@ import com.modoospace.space.domain.SpaceRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.ValueSource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -41,6 +38,9 @@ class SpaceServiceTest extends AbstractIntegrationContainerBaseTest {
 
     private Member hostMember;
     private Member visitorMember;
+
+    private Member adminMember;
+
     private AddressCreateUpdateRequest createAddress;
     private Category category;
 
@@ -58,15 +58,15 @@ class SpaceServiceTest extends AbstractIntegrationContainerBaseTest {
                 .role(Role.VISITOR)
                 .build();
 
-        Member adminMember = Member.builder()
+        adminMember = Member.builder()
                 .email("admin@email")
                 .name("admin")
                 .role(Role.ADMIN)
                 .build();
 
-        memberRepository.save(hostMember);
-        memberRepository.save(visitorMember);
-        memberRepository.save(adminMember);
+        hostMember = memberRepository.save(hostMember);
+        visitorMember = memberRepository.save(visitorMember);
+        adminMember = memberRepository.save(adminMember);
 
         createAddress = AddressCreateUpdateRequest.builder()
                 .depthFirst("depthFirst")
@@ -85,7 +85,7 @@ class SpaceServiceTest extends AbstractIntegrationContainerBaseTest {
         SpaceCreateUpdateRequest createRequest = new SpaceCreateUpdateRequest(
                 "공간이름", "설명", createAddress);
         Long spaceId = spaceService.createSpace(category.getId(), createRequest,
-                hostMember.getEmail());
+                hostMember);
 
         SpaceDetailResponse retSpaceResponse = spaceService.findSpace(spaceId);
         assertAll(
@@ -102,23 +102,35 @@ class SpaceServiceTest extends AbstractIntegrationContainerBaseTest {
     }
 
     @DisplayName("로그인한 멤버가 호스트가 아닐 경우 공간 등록 시 예외를 던진다.")
-    @ParameterizedTest
-    @ValueSource(strings = {"admin@email", "visitor@email"})
-    public void createSpace_throwException_IfNotHost(String email) {
+    @Test
+    public void createSpace_throwException_IfNotHost() {
         SpaceCreateUpdateRequest createRequest = new SpaceCreateUpdateRequest(
                 "공간이름", "설명", createAddress);
-        assertThatThrownBy(() -> spaceService.createSpace(category.getId(), createRequest, email))
+
+        assertThatThrownBy(() -> spaceService.createSpace(category.getId(), createRequest, adminMember))
+                .isInstanceOf(PermissionDeniedException.class);
+        assertThatThrownBy(() -> spaceService.createSpace(category.getId(), createRequest, visitorMember))
                 .isInstanceOf(PermissionDeniedException.class);
     }
 
-    @DisplayName("공간의 주인/관리자만이 공간을 수정할 수 있다.")
-    @ParameterizedTest
-    @ValueSource(strings = {"host@email", "admin@email"})
-    public void updateSpace(String email) {
+
+    @DisplayName("공간의 주인은 공간을 수정할 수 있다.")
+    @Test
+    public void updateSpace_byHost() {
+        updateSpace(hostMember);
+    }
+
+    @DisplayName("관리자는 공간을 수정할 수 있다.")
+    @Test
+    public void updateSpace_byAdmin() {
+        updateSpace(adminMember);
+    }
+
+    private void updateSpace(Member loginMember) {
         SpaceCreateUpdateRequest createRequest = new SpaceCreateUpdateRequest(
                 "공간이름", "설명", createAddress);
         Long spaceId = spaceService.createSpace(category.getId(), createRequest,
-                hostMember.getEmail());
+                hostMember);
         AddressCreateUpdateRequest updateAddress = AddressCreateUpdateRequest.builder()
                 .depthFirst("시도")
                 .depthSecond("구")
@@ -128,7 +140,7 @@ class SpaceServiceTest extends AbstractIntegrationContainerBaseTest {
         SpaceCreateUpdateRequest updateRequest = new SpaceCreateUpdateRequest("업데이트공간", "업데이트설명",
                 updateAddress);
 
-        spaceService.updateSpace(spaceId, updateRequest, email);
+        spaceService.updateSpace(spaceId, updateRequest, loginMember);
 
         SpaceDetailResponse retSpaceResponse = spaceService.findSpace(spaceId);
         assertAll(
@@ -149,30 +161,35 @@ class SpaceServiceTest extends AbstractIntegrationContainerBaseTest {
         SpaceCreateUpdateRequest createRequest = new SpaceCreateUpdateRequest(
                 "공간이름", "설명", createAddress);
         Long spaceId = spaceService.createSpace(category.getId(), createRequest,
-                hostMember.getEmail());
+                hostMember);
         SpaceCreateUpdateRequest updateRequest = new SpaceCreateUpdateRequest(
                 "업데이트공간", "업데이트설명", createAddress);
 
-        assertAll(
-                () -> assertThatThrownBy(
-                        () -> spaceService.updateSpace(spaceId, updateRequest, "notMember@Email"))
-                        .isInstanceOf(NotFoundEntityException.class),
-                () -> assertThatThrownBy(
-                        () -> spaceService.updateSpace(spaceId, updateRequest, visitorMember.getEmail()))
-                        .isInstanceOf(PermissionDeniedException.class)
-        );
+
+        assertThatThrownBy(
+                () -> spaceService.updateSpace(spaceId, updateRequest, visitorMember))
+                .isInstanceOf(PermissionDeniedException.class);
     }
 
-    @DisplayName("공간의 주인/관리자만이 공간을 삭제할 수 있다.")
-    @ParameterizedTest
-    @ValueSource(strings = {"host@email", "admin@email"})
-    public void deleteSpace(String email) {
+    @DisplayName("공간의 주인은 공간을 삭제할 수 있다.")
+    @Test
+    public void deleteSpace_byHost() {
+        deleteSpace(hostMember);
+    }
+
+    @DisplayName("관리자는 공간을 삭제할 수 있다.")
+    @Test
+    public void deleteSpace_byAdmin() {
+        deleteSpace(adminMember);
+    }
+
+    private void deleteSpace(Member loginMember) {
         SpaceCreateUpdateRequest createRequest = new SpaceCreateUpdateRequest(
                 "공간이름", "설명", createAddress);
         Long spaceId = spaceService.createSpace(category.getId(), createRequest,
-                hostMember.getEmail());
+                hostMember);
 
-        spaceService.deleteSpace(spaceId, email);
+        spaceService.deleteSpace(spaceId, loginMember);
 
         assertThat(spaceRepository.existsById(spaceId)).isFalse();
     }
@@ -183,14 +200,10 @@ class SpaceServiceTest extends AbstractIntegrationContainerBaseTest {
         SpaceCreateUpdateRequest createRequest = new SpaceCreateUpdateRequest(
                 "공간이름", "설명", createAddress);
         Long spaceId = spaceService.createSpace(category.getId(), createRequest,
-                hostMember.getEmail());
+                hostMember);
 
-        assertAll(
-                () -> assertThatThrownBy(() -> spaceService.deleteSpace(spaceId, "notMember@Email"))
-                        .isInstanceOf(NotFoundEntityException.class),
-                () -> assertThatThrownBy(
-                        () -> spaceService.deleteSpace(spaceId, visitorMember.getEmail()))
-                        .isInstanceOf(PermissionDeniedException.class)
-        );
+        assertThatThrownBy(
+                () -> spaceService.deleteSpace(spaceId, visitorMember))
+                .isInstanceOf(PermissionDeniedException.class);
     }
 }

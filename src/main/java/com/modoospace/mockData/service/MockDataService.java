@@ -1,7 +1,6 @@
 package com.modoospace.mockData.service;
 
 import com.modoospace.member.domain.Member;
-import com.modoospace.member.service.MemberService;
 import com.modoospace.mockData.controller.dto.MockAddressResponse;
 import com.modoospace.mockData.controller.dto.MockSpaceResponse;
 import com.modoospace.space.domain.*;
@@ -14,25 +13,23 @@ import java.util.Optional;
 @RequiredArgsConstructor
 public class MockDataService {
 
-    private final MemberService memberService;
     private final CategoryRepository categoryRepository;
     private final SpaceRepository spaceRepository;
     private final SpaceIndexRepository spaceIndexRepository;
     private final FacilityRepository facilityRepository;
 
-    public Long saveEntity(MockSpaceResponse spaceResponse, MockAddressResponse addressResponse, String email) {
-        Space space = makeSpace(spaceResponse, addressResponse, email);
+    public Long saveEntity(MockSpaceResponse spaceResponse, MockAddressResponse addressResponse, Member loginMember) {
+        Space space = makeSpace(spaceResponse, addressResponse, loginMember);
         spaceIndexRepository.save(SpaceIndex.of(space));
         makeFacility(spaceResponse, space);
         return space.getId();
     }
 
-    private Space makeSpace(MockSpaceResponse spaceResponse, MockAddressResponse addressResponse, String email) {
-        Member member = memberService.findMemberByEmail(email);
+    private Space makeSpace(MockSpaceResponse spaceResponse, MockAddressResponse addressResponse, Member loginMember) {
         Address address = addressResponse.toAddress(spaceResponse.getLocation().getDetailAddress());
         Category category = findCategory(spaceResponse.getCategoryName());
 
-        return spaceRepository.save(spaceResponse.toSpace(address, category, member));
+        return spaceRepository.save(spaceResponse.toSpace(address, category, loginMember));
     }
 
     private Category findCategory(String name) {
