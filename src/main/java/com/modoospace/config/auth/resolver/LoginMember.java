@@ -1,4 +1,4 @@
-package com.modoospace.config.auth;
+package com.modoospace.config.auth.resolver;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
@@ -7,6 +7,6 @@ import java.lang.annotation.Target;
 
 @Target(ElementType.PARAMETER)
 @Retention(RetentionPolicy.RUNTIME)
-public @interface LoginEmail {
+public @interface LoginMember {
 
 }
