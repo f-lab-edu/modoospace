@@ -1,19 +1,17 @@
 package com.modoospace.reservation.controller;
 
-import com.modoospace.config.auth.LoginEmail;
+import com.modoospace.config.auth.aop.CheckLogin;
+import com.modoospace.config.auth.resolver.LoginMember;
+import com.modoospace.member.domain.Member;
 import com.modoospace.reservation.controller.dto.ReservationResponse;
 import com.modoospace.reservation.controller.dto.ReservationUpdateRequest;
 import com.modoospace.reservation.serivce.ReservationService;
-import java.util.List;
-import javax.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
+
+import javax.validation.Valid;
+import java.util.List;
 
 @RequiredArgsConstructor
 @RestController
@@ -22,34 +20,37 @@ public class HostReservationController {
 
     private final ReservationService reservationService;
 
+    @CheckLogin
     @GetMapping
-    public ResponseEntity<List<ReservationResponse>> findAll(@LoginEmail final String loginEmail) {
-        List<ReservationResponse> reservations = reservationService.findAllAsHost(loginEmail);
+    public ResponseEntity<List<ReservationResponse>> findAll(@LoginMember Member loginMember) {
+        List<ReservationResponse> reservations = reservationService.findAllAsHost(loginMember);
         return ResponseEntity.ok().body(reservations);
     }
 
+    @CheckLogin
     @PutMapping("/{reservationId}/approve")
     public ResponseEntity<Void> approveReservation(@PathVariable Long reservationId,
-        @LoginEmail final String loginEmail) {
-        reservationService.approveReservation(reservationId, loginEmail);
+                                                   @LoginMember Member loginMember) {
+        reservationService.approveReservation(reservationId, loginMember);
         return ResponseEntity.noContent().build();
     }
 
+    @CheckLogin
     @PutMapping("/{reservationId}")
     public ResponseEntity<Void> update(
-        @PathVariable Long reservationId,
-        @RequestBody @Valid ReservationUpdateRequest updateRequest,
-        @LoginEmail String loginEmail) {
+            @PathVariable Long reservationId,
+            @RequestBody @Valid ReservationUpdateRequest updateRequest,
+            @LoginMember Member loginMember) {
 
-        reservationService.updateReservation(reservationId, updateRequest, loginEmail);
+        reservationService.updateReservation(reservationId, updateRequest, loginMember);
         return ResponseEntity.ok().build();
     }
 
+    @CheckLogin
     @GetMapping("/{reservationId}")
     public ResponseEntity<ReservationResponse> find(@PathVariable Long reservationId,
-        @LoginEmail String loginEmail) {
-        ReservationResponse reservation = reservationService
-            .findReservation(reservationId, loginEmail);
+                                                    @LoginMember Member loginMember) {
+        ReservationResponse reservation = reservationService.findReservation(reservationId, loginMember);
         return ResponseEntity.ok().body(reservation);
     }
 }

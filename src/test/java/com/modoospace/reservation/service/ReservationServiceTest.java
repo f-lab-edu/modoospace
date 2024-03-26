@@ -92,14 +92,14 @@ public class ReservationServiceTest extends AbstractIntegrationContainerBaseTest
                 .name("host")
                 .role(Role.HOST)
                 .build();
-        memberRepository.save(hostMember);
+        hostMember = memberRepository.save(hostMember);
 
         visitorMember = Member.builder()
                 .email("visitor@email")
                 .name("visitor")
                 .role(Role.VISITOR)
                 .build();
-        memberRepository.save(visitorMember);
+        visitorMember = memberRepository.save(visitorMember);
 
         Category category = new Category("스터디 공간");
         categoryRepository.save(category);
@@ -152,10 +152,10 @@ public class ReservationServiceTest extends AbstractIntegrationContainerBaseTest
         ReservationCreateRequest createRequest = new ReservationCreateRequest(3, now, 18, now, 21);
 
         Long reservationId = reservationService.createReservation(createRequest, facilityOpen9Close24.getId(),
-                visitorMember.getEmail());
+                visitorMember);
 
         ReservationResponse retResponse = reservationService.findReservation(reservationId,
-                visitorMember.getEmail());
+                visitorMember);
         assertAll(
                 () -> assertThat(retResponse.getId()).isEqualTo(reservationId),
                 () -> assertThat(retResponse.getFacility().getId()).isEqualTo(facilityOpen9Close24.getId()),
@@ -169,11 +169,11 @@ public class ReservationServiceTest extends AbstractIntegrationContainerBaseTest
     public void createReservationRoom_throwException_ifOverlappingReservation() {
         ReservationCreateRequest createRequest = new ReservationCreateRequest(3, now, 12, now, 15);
         reservationService.createReservation(createRequest, facilityOpen9Close24.getId(),
-                visitorMember.getEmail());
+                visitorMember);
 
         ReservationCreateRequest createRequest2 = new ReservationCreateRequest(3, now, 13, now, 15);
         assertThatThrownBy(() -> reservationService
-                .createReservation(createRequest2, facilityOpen9Close24.getId(), visitorMember.getEmail()))
+                .createReservation(createRequest2, facilityOpen9Close24.getId(), visitorMember))
                 .isInstanceOf(ConflictingReservationException.class);
     }
 
@@ -182,7 +182,7 @@ public class ReservationServiceTest extends AbstractIntegrationContainerBaseTest
     public void createReservationRoom_throwException_ifNotAvailable() {
         ReservationCreateRequest createRequest = new ReservationCreateRequest(3, now, 12, now, 15);
         assertThatThrownBy(() -> reservationService.createReservation(createRequest, facilityNotAvailable.getId(),
-                visitorMember.getEmail()))
+                visitorMember))
                 .isInstanceOf(NotOpenedFacilityException.class);
     }
 
@@ -191,7 +191,7 @@ public class ReservationServiceTest extends AbstractIntegrationContainerBaseTest
     public void createReservationRoom_throwException_ifNotOpen() {
         ReservationCreateRequest createRequest = new ReservationCreateRequest(3, now, 6, now, 9);
         assertThatThrownBy(() -> reservationService.createReservation(createRequest, facilityOpen9Close24.getId(),
-                visitorMember.getEmail()))
+                visitorMember))
                 .isInstanceOf(NotOpenedFacilityException.class);
     }
 
@@ -226,7 +226,7 @@ public class ReservationServiceTest extends AbstractIntegrationContainerBaseTest
         ReservationCreateRequest createRequest = new ReservationCreateRequest(3, tomorrow, 12, tomorrow, 15);
 
         reservationService.createReservation(createRequest, facilityOpen9Close24.getId(),
-                visitorMember.getEmail());
+                visitorMember);
 
         AvailabilityTimeResponse retResponse = reservationService.getAvailabilityTime(facilityOpen9Close24.getId(), tomorrow);
 
@@ -242,9 +242,9 @@ public class ReservationServiceTest extends AbstractIntegrationContainerBaseTest
     public void findReservation_ByVisitor() {
         ReservationCreateRequest createRequest = new ReservationCreateRequest(3, now, 12, now, 15);
         Long reservationId = reservationService
-                .createReservation(createRequest, facilityOpen9Close24.getId(), visitorMember.getEmail());
+                .createReservation(createRequest, facilityOpen9Close24.getId(), visitorMember);
 
-        ReservationResponse retResponse = reservationService.findReservation(reservationId, visitorMember.getEmail());
+        ReservationResponse retResponse = reservationService.findReservation(reservationId, visitorMember);
 
         assertAll(
                 () -> assertThat(retResponse.getId()).isEqualTo(reservationId),
@@ -257,9 +257,9 @@ public class ReservationServiceTest extends AbstractIntegrationContainerBaseTest
     public void findReservation_ByHost() {
         ReservationCreateRequest createRequest = new ReservationCreateRequest(3, now, 12, now, 15);
         Long reservationId = reservationService
-                .createReservation(createRequest, facilityOpen9Close24.getId(), visitorMember.getEmail());
+                .createReservation(createRequest, facilityOpen9Close24.getId(), visitorMember);
 
-        ReservationResponse retResponse = reservationService.findReservation(reservationId, hostMember.getEmail());
+        ReservationResponse retResponse = reservationService.findReservation(reservationId, hostMember);
 
         assertAll(
                 () -> assertThat(retResponse.getId()).isEqualTo(reservationId),
@@ -272,11 +272,11 @@ public class ReservationServiceTest extends AbstractIntegrationContainerBaseTest
     public void approveReservation_ByHost() {
         ReservationCreateRequest createRequest = new ReservationCreateRequest(3, now, 12, now, 15);
         Long reservationId = reservationService
-                .createReservation(createRequest, facilityOpen9Close24.getId(), visitorMember.getEmail());
+                .createReservation(createRequest, facilityOpen9Close24.getId(), visitorMember);
 
-        reservationService.approveReservation(reservationId, hostMember.getEmail());
+        reservationService.approveReservation(reservationId, hostMember);
 
-        ReservationResponse retResponse = reservationService.findReservation(reservationId, hostMember.getEmail());
+        ReservationResponse retResponse = reservationService.findReservation(reservationId, hostMember);
         assertAll(
                 () -> assertThat(retResponse.getId()).isEqualTo(reservationId),
                 () -> assertThat(retResponse.getVisitor().getEmail()).isEqualTo(visitorMember.getEmail()),
@@ -289,12 +289,12 @@ public class ReservationServiceTest extends AbstractIntegrationContainerBaseTest
     public void approveReservation_throwException_IfNotHost() {
         ReservationCreateRequest createRequest = new ReservationCreateRequest(3, now, 12, now, 15);
         Long reservationId = reservationService
-                .createReservation(createRequest, facilityOpen9Close24.getId(), visitorMember.getEmail());
+                .createReservation(createRequest, facilityOpen9Close24.getId(), visitorMember);
 
-        reservationService.approveReservation(reservationId, hostMember.getEmail());
+        reservationService.approveReservation(reservationId, hostMember);
 
         assertThatThrownBy(
-                () -> reservationService.approveReservation(reservationId, visitorMember.getEmail()))
+                () -> reservationService.approveReservation(reservationId, visitorMember))
                 .isInstanceOf(PermissionDeniedException.class);
     }
 
@@ -303,11 +303,11 @@ public class ReservationServiceTest extends AbstractIntegrationContainerBaseTest
     public void cancelReservation_ByVisitor() {
         ReservationCreateRequest createRequest = new ReservationCreateRequest(3, now, 12, now, 15);
         Long reservationId = reservationService
-                .createReservation(createRequest, facilityOpen9Close24.getId(), visitorMember.getEmail());
+                .createReservation(createRequest, facilityOpen9Close24.getId(), visitorMember);
 
-        reservationService.cancelReservation(reservationId, visitorMember.getEmail());
+        reservationService.cancelReservation(reservationId, visitorMember);
 
-        ReservationResponse retResponse = reservationService.findReservation(reservationId, visitorMember.getEmail());
+        ReservationResponse retResponse = reservationService.findReservation(reservationId, visitorMember);
         assertAll(
                 () -> assertThat(retResponse.getId()).isEqualTo(reservationId),
                 () -> assertThat(retResponse.getVisitor().getEmail()).isEqualTo(visitorMember.getEmail()),
@@ -320,10 +320,10 @@ public class ReservationServiceTest extends AbstractIntegrationContainerBaseTest
     public void cancelReservation_throwException_IfNotMyReservation() {
         ReservationCreateRequest createRequest = new ReservationCreateRequest(3, now, 12, now, 15);
         Long reservationId = reservationService
-                .createReservation(createRequest, facilityOpen9Close24.getId(), visitorMember.getEmail());
+                .createReservation(createRequest, facilityOpen9Close24.getId(), visitorMember);
 
         assertThatThrownBy(
-                () -> reservationService.cancelReservation(reservationId, hostMember.getEmail()))
+                () -> reservationService.cancelReservation(reservationId, hostMember))
                 .isInstanceOf(PermissionDeniedException.class);
     }
 }
