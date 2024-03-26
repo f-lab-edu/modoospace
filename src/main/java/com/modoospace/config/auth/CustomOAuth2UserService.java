@@ -1,7 +1,6 @@
 package com.modoospace.config.auth;
 
 import com.modoospace.config.auth.dto.OAuthAttributes;
-import com.modoospace.config.auth.dto.SessionMember;
 import com.modoospace.member.domain.Member;
 import com.modoospace.member.domain.MemberRepository;
 import com.modoospace.member.repository.MemberCacheRepository;
@@ -40,11 +39,8 @@ public class CustomOAuth2UserService implements OAuth2UserService<OAuth2UserRequ
     OAuthAttributes attributes = OAuthAttributes
         .of(registrationId, userNameAttributeName, oAuth2User.getAttributes());
 
-    //4. SessionUser : 세션에 사용자 정보를 저장하기 위한 Dto클래스
-    // 왜 Member를 사용하지않고 SessionMember를 사용 ? Member 클래스가 엔티티이기 때문.
-    // 엔티티 클래스를 직렬화한다면, 의존관계를 갖는 다른 엔티티들까지 직렬화할 가능성이 있어 성능이 느려질 수 있다.
     Member member = saveOrUpdate(attributes);
-    httpSession.setAttribute("member", new SessionMember(member));
+    httpSession.setAttribute("member", member.getEmail());
 
     return new DefaultOAuth2User(
         Collections.singleton(member.createGrantedAuthority()),

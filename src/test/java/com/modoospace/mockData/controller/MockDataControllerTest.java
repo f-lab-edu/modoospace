@@ -2,7 +2,6 @@ package com.modoospace.mockData.controller;
 
 import com.modoospace.AbstractIntegrationContainerBaseTest;
 import com.modoospace.common.exception.EmptyResponseException;
-import com.modoospace.config.auth.dto.SessionMember;
 import com.modoospace.member.domain.Member;
 import com.modoospace.member.domain.MemberRepository;
 import com.modoospace.member.domain.Role;
@@ -54,7 +53,7 @@ class MockDataControllerTest extends AbstractIntegrationContainerBaseTest {
                 .role(Role.HOST)
                 .build();
         member = memberRepository.save(member);
-        httpSession.setAttribute("member", new SessionMember(member));
+        httpSession.setAttribute("member", member.getEmail());
 
         Category category = new Category("스터디룸");
         categoryRepository.save(category);
