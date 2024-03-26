@@ -2,6 +2,7 @@ package com.modoospace.mockData.controller;
 
 import com.modoospace.AbstractIntegrationContainerBaseTest;
 import com.modoospace.common.exception.EmptyResponseException;
+import com.modoospace.config.auth.dto.SessionMember;
 import com.modoospace.member.domain.Member;
 import com.modoospace.member.domain.MemberRepository;
 import com.modoospace.member.domain.Role;
@@ -17,6 +18,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.transaction.annotation.Transactional;
 
+import javax.servlet.http.HttpSession;
 import java.io.IOException;
 import java.net.URI;
 import java.util.Optional;
@@ -39,6 +41,9 @@ class MockDataControllerTest extends AbstractIntegrationContainerBaseTest {
     @Autowired
     private CategoryRepository categoryRepository;
 
+    @Autowired
+    HttpSession httpSession;
+
     private Member member;
 
     @BeforeEach
@@ -48,7 +53,9 @@ class MockDataControllerTest extends AbstractIntegrationContainerBaseTest {
                 .email("wjdghkwhdl@jr.naver.com")
                 .role(Role.HOST)
                 .build();
-        memberRepository.save(member);
+        member = memberRepository.save(member);
+        httpSession.setAttribute("member", new SessionMember(member));
+
         Category category = new Category("스터디룸");
         categoryRepository.save(category);
     }
@@ -89,14 +96,14 @@ class MockDataControllerTest extends AbstractIntegrationContainerBaseTest {
     @DisplayName("외부api로 받아온 공간데이터가 비어있을 경우 변환하지 않고 Exception을 던진다.")
     @Test
     public void saveSpace_throwException_ifEmptyResponse() {
-        assertThatThrownBy(() -> mockDataController.saveSpace("2", member.getEmail()))
+        assertThatThrownBy(() -> mockDataController.saveSpace("2", member))
                 .isInstanceOf(EmptyResponseException.class);
     }
 
     @DisplayName("외부Api로 받아온 데이터를 모두스페이스 엔티티로 변환 후 저장하여 반환한다.")
     @Test
     public void saveSpace() throws IOException, InterruptedException {
-        URI location = mockDataController.saveSpace("58861", member.getEmail()).getHeaders().getLocation();
+        URI location = mockDataController.saveSpace("58861", member).getHeaders().getLocation();
         assertThat(location).isNotNull();
 
         Optional<Space> space = spaceRepository.findById(extractId(location));
