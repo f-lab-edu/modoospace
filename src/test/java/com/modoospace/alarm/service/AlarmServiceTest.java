@@ -19,6 +19,7 @@ import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 
+import java.util.Objects;
 import java.util.Set;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -53,7 +54,7 @@ class AlarmServiceTest extends AbstractIntegrationContainerBaseTest {
                 .role(Role.HOST)
                 .build();
 
-        memberRepository.save(hostMember);
+        hostMember = memberRepository.save(hostMember);
 
         for (int i = 0; i < 10; i++) {
             AlarmEvent testEvent = AlarmEvent.builder()
@@ -68,14 +69,14 @@ class AlarmServiceTest extends AbstractIntegrationContainerBaseTest {
 
     @AfterEach
     public void after() {
-        redisTemplate.getConnectionFactory().getConnection().flushAll();
+        Objects.requireNonNull(redisTemplate.getConnectionFactory()).getConnection().flushAll();
     }
 
     @DisplayName("알람을 검색하면, searchAlarms::이메일:페이지넘버를 키값으로 결과가 캐싱된다.")
     @Test
     public void searchAlarms_redisSave() {
         PageRequest pageRequest = PageRequest.of(0, 10);
-        alarmService.searchAlarms("host@email", pageRequest);
+        alarmService.searchAlarms(hostMember, pageRequest);
 
         String pattern = "searchAlarms::" + hostMember.getEmail() + ":*";
         Set<String> keys = redisTemplate.keys(pattern);
@@ -97,7 +98,7 @@ class AlarmServiceTest extends AbstractIntegrationContainerBaseTest {
     @Test
     public void saveAndSend_EmptyRedisKeys() {
         PageRequest pageRequest = PageRequest.of(0, 10);
-        alarmService.searchAlarms("host@email", pageRequest);
+        alarmService.searchAlarms(hostMember, pageRequest);
         AlarmEvent testEvent = AlarmEvent.builder()
                 .email(hostMember.getEmail())
                 .reservationId(1L)
@@ -116,9 +117,9 @@ class AlarmServiceTest extends AbstractIntegrationContainerBaseTest {
     @Test
     public void deleteAlarm_EmptyRedisKeys() {
         PageRequest pageRequest = PageRequest.of(0, 10);
-        alarmService.searchAlarms("host@email", pageRequest);
+        alarmService.searchAlarms(hostMember, pageRequest);
 
-        alarmService.delete(alarm.getId(), "host@email");
+        alarmService.delete(alarm.getId(), hostMember);
 
         String pattern = "searchAlarms::" + hostMember.getEmail() + ":*";
         Set<String> keys = redisTemplate.keys(pattern);
