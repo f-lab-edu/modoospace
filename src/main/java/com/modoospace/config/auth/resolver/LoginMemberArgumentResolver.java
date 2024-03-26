@@ -1,6 +1,6 @@
 package com.modoospace.config.auth.resolver;
 
-import com.modoospace.common.exception.PermissionDeniedException;
+import com.modoospace.common.exception.UnAuthenticatedException;
 import com.modoospace.member.domain.Member;
 import com.modoospace.member.service.MemberService;
 import lombok.RequiredArgsConstructor;
@@ -38,7 +38,7 @@ public class LoginMemberArgumentResolver implements HandlerMethodArgumentResolve
             String email = (String) httpSession.getAttribute("member");
             return memberService.findMemberByEmail(email);
         } catch (RuntimeException e) {
-            throw new PermissionDeniedException();
+            throw new UnAuthenticatedException();
         }
     }
 }

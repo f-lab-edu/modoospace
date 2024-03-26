@@ -26,7 +26,6 @@ public class SecurityConfiguration {
                                         "/api/v1/facilities/*/schedules/**",
                                         "/api/v1/visitors/reservations/facilities/*/availability/**").permitAll()
                                 .antMatchers(HttpMethod.POST, "/api/v1/alarms/send/**").permitAll()
-//            .antMatchers(HttpMethod.POST, "/api/v1/space").hasRole(Role.HOST.name())
                                 .antMatchers("/api/v1/admin/**").hasRole(Role.ADMIN.name())
                                 .anyRequest().authenticated()
                 )

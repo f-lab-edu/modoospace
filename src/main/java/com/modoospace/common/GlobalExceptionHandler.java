@@ -44,6 +44,11 @@ public class GlobalExceptionHandler {
         return new ResponseEntity<>(exception.getMessage(), HttpStatus.FORBIDDEN);
     }
 
+    @ExceptionHandler(UnAuthenticatedException.class)
+    public ResponseEntity<String> handleUnAuthenticatedException(UnAuthenticatedException exception) {
+        return new ResponseEntity<>(exception.getMessage(), HttpStatus.UNAUTHORIZED);
+    }
+
     @ExceptionHandler(NotFoundEntityException.class)
     public ResponseEntity<String> handleNotFoundEntityException(NotFoundEntityException exception) {
         return new ResponseEntity<>(exception.getMessage(), HttpStatus.NOT_FOUND);

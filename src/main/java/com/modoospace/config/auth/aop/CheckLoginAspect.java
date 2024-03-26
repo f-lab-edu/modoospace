@@ -1,6 +1,6 @@
 package com.modoospace.config.auth.aop;
 
-import com.modoospace.common.exception.PermissionDeniedException;
+import com.modoospace.common.exception.UnAuthenticatedException;
 import lombok.RequiredArgsConstructor;
 import org.aspectj.lang.annotation.Aspect;
 import org.aspectj.lang.annotation.Before;
@@ -22,7 +22,7 @@ public class CheckLoginAspect {
         String email = (String) httpSession.getAttribute("member");
 
         if (email == null) {
-            throw new PermissionDeniedException();
+            throw new UnAuthenticatedException();
         }
     }
 }
