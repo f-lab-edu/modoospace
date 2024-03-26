@@ -18,7 +18,7 @@ import org.springframework.transaction.annotation.Transactional;
 @RequiredArgsConstructor
 @Service
 public class FacilityService {
-¬
+
     private final SpaceRepository spaceRepository;
     private final FacilityRepository facilityRepository;
     private final ScheduleQueryRepository scheduleQueryRepository;

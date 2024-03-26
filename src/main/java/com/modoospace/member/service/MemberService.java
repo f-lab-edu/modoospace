@@ -17,8 +17,7 @@ public class MemberService {
   private final MemberCacheRepository memberCacheRepository;
 
   @Transactional
-  public void updateMemberRole(Long memberId, MemberUpdateRequest updateRequest, String loginEmail) {
-    Member loginMember = findMemberByEmail(loginEmail);
+  public void updateMemberRole(Long memberId, MemberUpdateRequest updateRequest, Member loginMember) {
     Member member = findMemberById(memberId);
 
     member.updateRoleOnlyAdmin(updateRequest.getRole(), loginMember);
@@ -34,8 +33,7 @@ public class MemberService {
   }
 
   public Member findMemberById(Long id) {
-    Member member = memberRepository.findById(id)
+      return memberRepository.findById(id)
         .orElseThrow(() -> new NotFoundEntityException("사용자", id));
-    return member;
   }
 }
