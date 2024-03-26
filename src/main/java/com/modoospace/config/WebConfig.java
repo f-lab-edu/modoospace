@@ -1,6 +1,6 @@
 package com.modoospace.config;
 
-import com.modoospace.config.auth.LoginEmailArgumentResolver;
+import com.modoospace.config.auth.resolver.LoginMemberArgumentResolver;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Configuration;
@@ -12,7 +12,7 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 @Configuration
 public class WebConfig implements WebMvcConfigurer {
 
-  private final LoginEmailArgumentResolver loginEmailArgumentResolver;
+  private final LoginMemberArgumentResolver loginEmailArgumentResolver;
 
   @Override
   public void addArgumentResolvers(List<HandlerMethodArgumentResolver> resolvers) {

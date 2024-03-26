@@ -59,8 +59,7 @@ public class ScheduleServiceTest extends AbstractIntegrationContainerBaseTest {
                 .name("host")
                 .role(Role.HOST)
                 .build();
-        memberRepository.save(hostMember);
-        memberRepository.flush();
+        hostMember = memberRepository.save(hostMember);
 
         Category category = new Category("스터디 공간");
         categoryRepository.save(category);
@@ -95,7 +94,7 @@ public class ScheduleServiceTest extends AbstractIntegrationContainerBaseTest {
                 24);
 
         scheduleService.createSchedule(
-                facility.getId(), createRequest, hostMember.getEmail());
+                facility.getId(), createRequest, hostMember);
 
         ScheduleResponse retSchedule = scheduleService.find1DaySchedules(
                 facility.getId(), nowDate).get(1);
@@ -112,7 +111,7 @@ public class ScheduleServiceTest extends AbstractIntegrationContainerBaseTest {
                 24);
 
         scheduleService.createSchedule(
-                facility.getId(), createRequest, hostMember.getEmail());
+                facility.getId(), createRequest, hostMember);
 
         ScheduleResponse retSchedule = scheduleService.find1DaySchedules(
                 facility.getId(), nowDate).get(0);
@@ -129,7 +128,7 @@ public class ScheduleServiceTest extends AbstractIntegrationContainerBaseTest {
                 nowDate, 16, 24);
 
         assertThatThrownBy(() -> scheduleService
-                .createSchedule(facility.getId(), createRequest, hostMember.getEmail()))
+                .createSchedule(facility.getId(), createRequest, hostMember))
                 .isInstanceOf(ConflictingTimeException.class);
     }
 
@@ -142,7 +141,7 @@ public class ScheduleServiceTest extends AbstractIntegrationContainerBaseTest {
                 facility.getId(), nowDate).get(0);
 
         scheduleService
-                .updateSchedule(targetSchedule.getId(), updateRequest, hostMember.getEmail());
+                .updateSchedule(targetSchedule.getId(), updateRequest, hostMember);
 
         ScheduleResponse retSchedule = scheduleService.find1DaySchedules(
                 facility.getId(), nowDate).get(0);
@@ -158,14 +157,14 @@ public class ScheduleServiceTest extends AbstractIntegrationContainerBaseTest {
         ScheduleCreateUpdateRequest createRequest = new ScheduleCreateUpdateRequest(
                 nowDate, 20, 24);
         scheduleService.createSchedule(
-                facility.getId(), createRequest, hostMember.getEmail());
+                facility.getId(), createRequest, hostMember);
         ScheduleResponse createSchedule = scheduleService.find1DaySchedules(
                 facility.getId(), nowDate).get(1);
         ScheduleCreateUpdateRequest updateRequest = new ScheduleCreateUpdateRequest(
                 nowDate, 18, 24);
 
         scheduleService.updateSchedule(
-                createSchedule.getId(), updateRequest, hostMember.getEmail());
+                createSchedule.getId(), updateRequest, hostMember);
 
         ScheduleResponse retSchedule = scheduleService.find1DaySchedules(
                 facility.getId(), nowDate).get(0);
@@ -181,14 +180,14 @@ public class ScheduleServiceTest extends AbstractIntegrationContainerBaseTest {
         ScheduleCreateUpdateRequest createRequest = new ScheduleCreateUpdateRequest(
                 nowDate, 20, 24);
         scheduleService.createSchedule(
-                facility.getId(), createRequest, hostMember.getEmail());
+                facility.getId(), createRequest, hostMember);
         ScheduleCreateUpdateRequest updateRequest = new ScheduleCreateUpdateRequest(
                 nowDate, 16, 24);
         ScheduleResponse createSchedule = scheduleService.find1DaySchedules(
                 facility.getId(), nowDate).get(1);
 
         assertThatThrownBy(() -> scheduleService.updateSchedule(
-                createSchedule.getId(), updateRequest, hostMember.getEmail()))
+                createSchedule.getId(), updateRequest, hostMember))
                 .isInstanceOf(ConflictingTimeException.class);
     }
 
@@ -199,7 +198,7 @@ public class ScheduleServiceTest extends AbstractIntegrationContainerBaseTest {
                 .find1DaySchedules(facility.getId(), nowDate).get(0);
 
         scheduleService.deleteSchedule(
-                targetSchedule.getId(), hostMember.getEmail());
+                targetSchedule.getId(), hostMember);
 
         assertThatThrownBy(
                 () -> scheduleService.findSchedule(targetSchedule.getId()))
@@ -221,7 +220,7 @@ public class ScheduleServiceTest extends AbstractIntegrationContainerBaseTest {
         YearMonth createYearMonth = nowYearMonth.plusMonths(3);
 
         scheduleService.create1MonthDefaultSchedules(
-                facility.getId(), createYearMonth, hostMember.getEmail());
+                facility.getId(), createYearMonth, hostMember);
 
         List<ScheduleResponse> retReponses = scheduleService.find1MonthSchedules(
                 facility.getId(), createYearMonth);
@@ -254,7 +253,7 @@ public class ScheduleServiceTest extends AbstractIntegrationContainerBaseTest {
         TestTransaction.start();
         YearMonth createYearMonth = nowYearMonth.plusMonths(2);
         scheduleService.create1MonthDefaultSchedules(
-                facility.getId(), createYearMonth, hostMember.getEmail());
+                facility.getId(), createYearMonth, hostMember);
         assertAllSchedules(createYearMonth);
         TestTransaction.end();
 
@@ -291,7 +290,7 @@ public class ScheduleServiceTest extends AbstractIntegrationContainerBaseTest {
         YearMonth deleteYearMonth = nowYearMonth.plusMonths(2);
 
         scheduleService.delete1MonthSchedules(
-                facility.getId(), deleteYearMonth, hostMember.getEmail());
+                facility.getId(), deleteYearMonth, hostMember);
 
         List<ScheduleResponse> retResponses = scheduleService
                 .find1MonthSchedules(facility.getId(), deleteYearMonth);
