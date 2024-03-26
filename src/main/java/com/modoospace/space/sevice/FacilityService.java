@@ -2,7 +2,6 @@ package com.modoospace.space.sevice;
 
 import com.modoospace.common.exception.NotFoundEntityException;
 import com.modoospace.member.domain.Member;
-import com.modoospace.member.service.MemberService;
 import com.modoospace.space.controller.dto.facility.*;
 import com.modoospace.space.domain.Facility;
 import com.modoospace.space.domain.FacilityRepository;
@@ -19,8 +18,7 @@ import org.springframework.transaction.annotation.Transactional;
 @RequiredArgsConstructor
 @Service
 public class FacilityService {
-
-    private final MemberService memberService;
+¬
     private final SpaceRepository spaceRepository;
     private final FacilityRepository facilityRepository;
     private final ScheduleQueryRepository scheduleQueryRepository;
@@ -28,8 +26,7 @@ public class FacilityService {
 
     @Transactional
     public Long createFacility(Long spaceId, FacilityCreateRequest createRequest,
-                               String loginEmail) {
-        Member loginMember = memberService.findMemberByEmail(loginEmail);
+                               Member loginMember) {
         Space space = findSpaceById(spaceId);
         space.verifyManagementPermission(loginMember);
 
@@ -54,8 +51,7 @@ public class FacilityService {
 
     @Transactional
     public void updateFacility(Long facilityId, FacilityUpdateRequest updateRequest,
-                               String loginEmail) {
-        Member loginMember = memberService.findMemberByEmail(loginEmail);
+                               Member loginMember) {
         Facility facility = findFacilityById(facilityId);
         facility.verifyManagementPermission(loginMember);
 
@@ -65,8 +61,7 @@ public class FacilityService {
 
     @Transactional
     public void updateFacilitySetting(Long facilityId, FacilitySettingUpdateRequest updateRequest,
-                                      String loginEmail) {
-        Member loginMember = memberService.findMemberByEmail(loginEmail);
+                                      Member loginMember) {
         Facility facility = findFacilityById(facilityId);
         facility.verifyManagementPermission(loginMember);
 
@@ -75,8 +70,7 @@ public class FacilityService {
     }
 
     @Transactional
-    public void deleteFacility(Long facilityId, String loginEmail) {
-        Member loginMember = memberService.findMemberByEmail(loginEmail);
+    public void deleteFacility(Long facilityId, Member loginMember) {
         Facility facility = findFacilityById(facilityId);
         facility.verifyManagementPermission(loginMember);
 

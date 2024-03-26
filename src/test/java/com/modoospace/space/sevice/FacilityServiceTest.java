@@ -62,7 +62,7 @@ class FacilityServiceTest extends AbstractIntegrationContainerBaseTest {
                 .name("host")
                 .role(Role.HOST)
                 .build();
-        memberRepository.save(hostMember);
+        hostMember = memberRepository.save(hostMember);
 
         Category category = new Category("스터디 공간");
         categoryRepository.save(category);
@@ -89,7 +89,7 @@ class FacilityServiceTest extends AbstractIntegrationContainerBaseTest {
     public void createFacility_24HourOpen_ifNotSelectSetting() {
         FacilityCreateRequest createRequest = createFacility(true);
         Long facilityId = facilityService
-                .createFacility(space.getId(), createRequest, hostMember.getEmail());
+                .createFacility(space.getId(), createRequest, hostMember);
 
         Facility facility = facilityRepository.findById(facilityId).get();
 
@@ -131,7 +131,7 @@ class FacilityServiceTest extends AbstractIntegrationContainerBaseTest {
                 weekdaySettings);
 
         Long facilityId = facilityService
-                .createFacility(space.getId(), createRequest, hostMember.getEmail());
+                .createFacility(space.getId(), createRequest, hostMember);
 
         Facility facility = facilityRepository.findById(facilityId).get();
         assertThat(facility.getId()).isEqualTo(facilityId);
@@ -169,7 +169,7 @@ class FacilityServiceTest extends AbstractIntegrationContainerBaseTest {
     public void updateFacility() {
         FacilityCreateRequest createRequest = createFacility(false);
         Long facilityId = facilityService
-                .createFacility(space.getId(), createRequest, hostMember.getEmail());
+                .createFacility(space.getId(), createRequest, hostMember);
         FacilityUpdateRequest updateRequest = FacilityUpdateRequest.builder()
                 .name("스터디룸2")
                 .reservationEnable(true)
@@ -179,7 +179,7 @@ class FacilityServiceTest extends AbstractIntegrationContainerBaseTest {
                 .build();
 
         facilityService
-                .updateFacility(facilityId, updateRequest, hostMember.getEmail());
+                .updateFacility(facilityId, updateRequest, hostMember);
 
         Facility facility = facilityRepository.findById(facilityId).get();
         assertThatFacilityInfo(facility, updateRequest);
@@ -201,7 +201,7 @@ class FacilityServiceTest extends AbstractIntegrationContainerBaseTest {
     public void updateFacilitySetting() {
         // 1. 데이터 생성 Transaction(Commit)
         Long facilityId = facilityService
-                .createFacility(space.getId(), createFacility(true), hostMember.getEmail());
+                .createFacility(space.getId(), createFacility(true), hostMember);
         TestTransaction.flagForCommit();
         TestTransaction.end();
 
@@ -225,7 +225,7 @@ class FacilityServiceTest extends AbstractIntegrationContainerBaseTest {
                         DayOfWeek.MONDAY, DayOfWeek.TUESDAY, DayOfWeek.WEDNESDAY, DayOfWeek.THURSDAY,
                         DayOfWeek.FRIDAY)
         );
-        facilityService.updateFacilitySetting(facilityId, updateRequest, hostMember.getEmail());
+        facilityService.updateFacilitySetting(facilityId, updateRequest, hostMember);
     }
 
     private void assertThatSchedules(Long facilityId) {
