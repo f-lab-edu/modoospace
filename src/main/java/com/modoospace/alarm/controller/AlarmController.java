@@ -3,7 +3,6 @@ package com.modoospace.alarm.controller;
 import com.modoospace.alarm.controller.dto.AlarmResponse;
 import com.modoospace.alarm.domain.AlarmType;
 import com.modoospace.alarm.service.AlarmService;
-import com.modoospace.config.auth.aop.CheckLogin;
 import com.modoospace.config.auth.resolver.LoginMember;
 import com.modoospace.member.domain.Member;
 import lombok.RequiredArgsConstructor;
@@ -20,7 +19,7 @@ public class AlarmController {
 
     private final AlarmService alarmService;
 
-    @CheckLogin
+
     @GetMapping()
     public ResponseEntity<Page<AlarmResponse>> search(@LoginMember Member loginMember,
                                                       Pageable pageable) {
@@ -28,7 +27,7 @@ public class AlarmController {
         return ResponseEntity.ok().body(alarms);
     }
 
-    @CheckLogin
+
     @DeleteMapping("/{alarmId}")
     public ResponseEntity<Void> delete(@PathVariable Long alarmId,
                                        @LoginMember Member loginMember) {
@@ -36,7 +35,7 @@ public class AlarmController {
         return ResponseEntity.noContent().build();
     }
 
-    @CheckLogin
+
     @GetMapping(value = "/subscribe", produces = "text/event-stream")
     public ResponseEntity<SseEmitter> subscribe(@LoginMember Member loginMember) {
         return ResponseEntity.ok(alarmService.connectAlarm(loginMember.getEmail()));
