@@ -4,8 +4,7 @@ on:
   pull_request:
     branches: [ "develop" ]
 
-permissions:
-  contents: read
+permissions: write-all
 
 jobs:
   CI:
@@ -44,4 +43,4 @@ jobs:
           token: ${{ secrets.GITHUB_TOKEN }}
           min-coverage-overall: 80
           min-coverage-changed-files: 80
-          title: "Code Coverage"
+          title: "⭐️Code Coverage"
