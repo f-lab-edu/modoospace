@@ -1,6 +1,5 @@
 package com.modoospace.reservation.controller;
 
-import com.modoospace.config.auth.aop.CheckLogin;
 import com.modoospace.config.auth.resolver.LoginMember;
 import com.modoospace.member.domain.Member;
 import com.modoospace.reservation.controller.dto.ReservationResponse;
@@ -20,7 +19,6 @@ public class AdminReservationController {
 
     private final ReservationService reservationService;
 
-    @CheckLogin
     @GetMapping("/visitor/{memberId}")
     public ResponseEntity<List<ReservationResponse>> findAllAsMember(@PathVariable Long memberId,
                                                                      @LoginMember Member loginMember) {
@@ -29,7 +27,6 @@ public class AdminReservationController {
         return ResponseEntity.ok().body(reservations);
     }
 
-    @CheckLogin
     @GetMapping("/host/{memberId}")
     public ResponseEntity<List<ReservationResponse>> findAllAsHost(@PathVariable Long memberId,
                                                                    @LoginMember Member loginMember) {
@@ -38,7 +35,6 @@ public class AdminReservationController {
         return ResponseEntity.ok().body(reservations);
     }
 
-    @CheckLogin
     @PutMapping("/{reservationId}")
     public ResponseEntity<Void> update(
             @PathVariable Long reservationId,
@@ -49,7 +45,6 @@ public class AdminReservationController {
         return ResponseEntity.ok().build();
     }
 
-    @CheckLogin
     @GetMapping("/{reservationId}")
     public ResponseEntity<ReservationResponse> find(@PathVariable Long reservationId,
                                                     @LoginMember Member loginMember) {

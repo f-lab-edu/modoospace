@@ -1,6 +1,5 @@
 package com.modoospace.space.controller;
 
-import com.modoospace.config.auth.aop.CheckLogin;
 import com.modoospace.config.auth.resolver.LoginMember;
 import com.modoospace.member.domain.Member;
 import com.modoospace.space.controller.dto.facility.*;
@@ -21,7 +20,6 @@ public class FacilityController {
 
     private final FacilityService facilityService;
 
-    @CheckLogin
     @PostMapping()
     public ResponseEntity<Void> create(@PathVariable Long spaceId,
                                        @RequestBody @Valid FacilityCreateRequest createRequest,
@@ -45,7 +43,6 @@ public class FacilityController {
         return ResponseEntity.ok().body(facilityReadDto);
     }
 
-    @CheckLogin
     @PutMapping("/{facilityId}")
     public ResponseEntity<Void> update(@PathVariable Long facilityId,
                                        @RequestBody @Valid FacilityUpdateRequest updateRequest,
@@ -54,7 +51,6 @@ public class FacilityController {
         return ResponseEntity.noContent().build();
     }
 
-    @CheckLogin
     @PutMapping("/{facilityId}/setting")
     public ResponseEntity<Void> updateSetting(@PathVariable Long facilityId,
                                               @RequestBody @Valid FacilitySettingUpdateRequest updateRequest,
@@ -63,7 +59,6 @@ public class FacilityController {
         return ResponseEntity.noContent().build();
     }
 
-    @CheckLogin
     @DeleteMapping("/{facilityId}")
     public ResponseEntity<Void> delete(@PathVariable Long facilityId,
                                        @LoginMember Member loginMember) {

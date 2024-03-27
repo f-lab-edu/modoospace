@@ -1,6 +1,5 @@
 package com.modoospace.space.controller;
 
-import com.modoospace.config.auth.aop.CheckLogin;
 import com.modoospace.config.auth.resolver.LoginMember;
 import com.modoospace.member.domain.Member;
 import com.modoospace.space.controller.dto.space.SpaceCreateUpdateRequest;
@@ -24,7 +23,7 @@ public class SpaceController {
 
     private final SpaceService spaceService;
 
-    @CheckLogin
+
     @PostMapping("/category/{categoryId}")
     public ResponseEntity<Void> create(@PathVariable Long categoryId,
                                        @RequestBody @Valid SpaceCreateUpdateRequest createRequest,
@@ -55,7 +54,7 @@ public class SpaceController {
         return ResponseEntity.ok().body(space);
     }
 
-    @CheckLogin
+
     @PutMapping("/{spaceId}")
     public ResponseEntity<Void> update(@PathVariable Long spaceId,
                                        @RequestBody @Valid SpaceCreateUpdateRequest updateRequest,
@@ -64,7 +63,7 @@ public class SpaceController {
         return ResponseEntity.noContent().build();
     }
 
-    @CheckLogin
+
     @DeleteMapping("/{spaceId}")
     public ResponseEntity<Void> delete(@PathVariable Long spaceId,
                                        @LoginMember Member loginMember) {

@@ -1,7 +1,6 @@
 package com.modoospace.reservation.controller;
 
 import com.modoospace.common.DateFormatManager;
-import com.modoospace.config.auth.aop.CheckLogin;
 import com.modoospace.config.auth.resolver.LoginMember;
 import com.modoospace.member.domain.Member;
 import com.modoospace.reservation.controller.dto.AvailabilityTimeResponse;
@@ -24,7 +23,6 @@ public class VisitorsReservationController {
 
     private final ReservationService reservationService;
 
-    @CheckLogin
     @GetMapping
     public ResponseEntity<List<ReservationResponse>> findAll(@LoginMember Member loginMember) {
         List<ReservationResponse> reservations = reservationService.findAllAsVisitor(loginMember);
@@ -40,7 +38,6 @@ public class VisitorsReservationController {
         return ResponseEntity.ok().body(availableTimes);
     }
 
-    @CheckLogin
     @PostMapping("/facilities/{facilityId}")
     public ResponseEntity<Long> createReservation(@PathVariable Long facilityId,
                                                   @LoginMember Member loginMember,
@@ -50,7 +47,6 @@ public class VisitorsReservationController {
         return ResponseEntity.ok().body(reservationId);
     }
 
-    @CheckLogin
     @GetMapping("/{reservationId}")
     public ResponseEntity<ReservationResponse> find(@PathVariable Long reservationId,
                                                     @LoginMember Member loginMember) {
@@ -59,7 +55,6 @@ public class VisitorsReservationController {
         return ResponseEntity.ok().body(reservation);
     }
 
-    @CheckLogin
     @PutMapping("/{reservationId}/cancel")
     public ResponseEntity<Void> cancelReservation(@PathVariable Long reservationId,
                                                   @LoginMember Member loginMember) {
