@@ -34,7 +34,7 @@ jobs:
       - name: Build with Gradle
         run: ./gradlew clean build
         shell: bash
-      # 테스트커버리지 체크 결과 확인
+      # 테스트커버리지 체크 결과 확인 (Instruction 기준)
       - name: Jacoco Report to PR
         id: jacoco
         uses: madrapps/jacoco-report@v1.6.1
@@ -44,3 +44,4 @@ jobs:
           min-coverage-overall: 80
           min-coverage-changed-files: 80
           title: "⭐️Code Coverage"
+          update-comment: true

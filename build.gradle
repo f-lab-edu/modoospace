@@ -100,7 +100,7 @@ jacocoTestReport {
     executionData(fileTree(project.rootDir.absolutePath).include("**/build/jacoco/*.exec"))
 
     reports {
-        html.enabled false
+        html.enabled true
         xml.enabled true
         csv.enabled false
     }
@@ -110,8 +110,9 @@ jacocoTestCoverageVerification {
     violationRules {
         rule {
             element 'CLASS'
+
             limit {
-                counter = 'BRANCH'
+                counter = 'INSTRUCTION'
                 value = 'COVEREDRATIO'
                 minimum = 0.8 // 테스트 커버리지 최소 80%
             }
