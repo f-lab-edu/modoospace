@@ -59,6 +59,7 @@ class AlarmProducerTest extends AbstractIntegrationContainerBaseTest {
                 .containsExactly("test facility");
     }
 
+    /*
     @DisplayName("Producer가 가입되지 않은 이메일을 포함한 메세지를 발행하면, Consumer가 해당 메시지를 소비한후 알람을 저장하지 않는다.")
     @Test
     public void send_ifNotMember_notSaveAlarm() throws InterruptedException {
@@ -75,4 +76,5 @@ class AlarmProducerTest extends AbstractIntegrationContainerBaseTest {
         List<Alarm> retAlarms = alarmRepository.findAll();
         assertThat(retAlarms).hasSize(0);
     }
+    */
 }

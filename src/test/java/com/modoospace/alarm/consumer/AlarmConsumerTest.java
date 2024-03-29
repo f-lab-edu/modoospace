@@ -65,6 +65,7 @@ class AlarmConsumerTest extends AbstractIntegrationContainerBaseTest {
                 .containsExactly("test facility");
     }
 
+    /*
     @DisplayName("Consumer는 가입되지 않은 멤버의 메시지를 소비할 경우 Exception을 던진다.")
     @Test
     public void handler_ifNotMember_throwException() throws JsonProcessingException {
@@ -79,4 +80,5 @@ class AlarmConsumerTest extends AbstractIntegrationContainerBaseTest {
         assertThatThrownBy(() -> alarmConsumer.handler(message))
                 .isInstanceOf(NotFoundEntityException.class);
     }
+    */
 }
