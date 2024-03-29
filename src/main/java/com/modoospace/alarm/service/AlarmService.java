@@ -8,7 +8,7 @@ import com.modoospace.alarm.repository.AlarmQueryRepository;
 import com.modoospace.alarm.repository.EmitterLocalCacheRepository;
 import com.modoospace.common.exception.NotFoundEntityException;
 import com.modoospace.common.exception.SSEConnectError;
-import com.modoospace.config.redis.CachePrefixEvict;
+import com.modoospace.config.redis.aspect.CachePrefixEvict;
 import com.modoospace.member.domain.Member;
 import com.modoospace.member.service.MemberService;
 import lombok.RequiredArgsConstructor;
