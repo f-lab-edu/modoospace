@@ -1,13 +1,12 @@
 package com.modoospace.space.sevice;
 
 import com.modoospace.AbstractIntegrationContainerBaseTest;
+import com.modoospace.common.exception.NotFoundEntityException;
 import com.modoospace.member.domain.Member;
 import com.modoospace.member.domain.MemberRepository;
 import com.modoospace.member.domain.Role;
 import com.modoospace.reservation.domain.DateTimeRange;
-import com.modoospace.space.controller.dto.facility.FacilityCreateRequest;
-import com.modoospace.space.controller.dto.facility.FacilitySettingUpdateRequest;
-import com.modoospace.space.controller.dto.facility.FacilityUpdateRequest;
+import com.modoospace.space.controller.dto.facility.*;
 import com.modoospace.space.controller.dto.timeSetting.TimeSettingCreateRequest;
 import com.modoospace.space.controller.dto.weekdaySetting.WeekdaySettingCreateRequest;
 import com.modoospace.space.domain.*;
@@ -16,6 +15,8 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.test.context.transaction.TestTransaction;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -26,6 +27,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.junit.jupiter.api.Assertions.assertAll;
 
 @Transactional
@@ -162,6 +164,75 @@ class FacilityServiceTest extends AbstractIntegrationContainerBaseTest {
                 .timeSettings(timeSettings)
                 .weekdaySettings(weekdaySettings)
                 .build();
+    }
+
+    @DisplayName("시설검색 시 검색 조건에 맞는 시설을 반환한다.")
+    @Test
+    public void searchFacility(){
+        facilityService.createFacility(space.getId(), createFacility(true), hostMember);
+        facilityService.createFacility(space.getId(), createFacility(false), hostMember);
+
+        FacilitySearchRequest searchRequest = new FacilitySearchRequest();
+        searchRequest.setReservationEnable(true);
+        Page<FacilityResponse> facilityResponses = facilityService
+                .searchFacility(space.getId(), searchRequest, PageRequest.of(0, 10));
+
+        assertThat(facilityResponses).hasSize(1);
+    }
+
+    @DisplayName("시설검색 시 검색 조건에 맞는 시설이 없다면 빈 페이지를 반환한다.")
+    @Test
+    public void searchFacility_emptyPage(){
+        facilityService.createFacility(space.getId(), createFacility(true), hostMember);
+        facilityService.createFacility(space.getId(), createFacility(false), hostMember);
+
+        FacilitySearchRequest searchRequest = new FacilitySearchRequest();
+        searchRequest.setName("파티룸");
+        Page<FacilityResponse> facilityResponses = facilityService
+                .searchFacility(space.getId(), searchRequest, PageRequest.of(0, 10));
+
+        assertThat(facilityResponses).isEmpty();
+    }
+
+    @DisplayName("시설검색 시 검색 조건이 없다면, 해당 Space의 모든 시설을 반환한다.")
+    @Test
+    public void searchFacility_AllFacility(){
+        facilityService.createFacility(space.getId(), createFacility(true), hostMember);
+        facilityService.createFacility(space.getId(), createFacility(false), hostMember);
+
+        FacilitySearchRequest searchRequest = new FacilitySearchRequest();
+        Page<FacilityResponse> facilityResponses = facilityService
+                .searchFacility(space.getId(), searchRequest, PageRequest.of(0, 10));
+
+        assertThat(facilityResponses).hasSize(2);
+    }
+
+    @DisplayName("시설을 찾는다.")
+    @Test
+    public void findFacility(){
+        Long facilityId = facilityService.createFacility(space.getId(), createFacility(true), hostMember);
+
+        FacilityResponse facility = facilityService.findFacility(facilityId);
+
+        assertThat(facility.getId()).isEqualTo(facilityId);
+    }
+
+    @DisplayName("존재하지 않는 시설의 ID일 경우 예외를 던진다.")
+    @Test
+    public void findFacility_ifNotExistFacility_throwException(){
+        assertThatThrownBy(() -> facilityService.findFacility(1L))
+                .isInstanceOf(NotFoundEntityException.class);
+    }
+
+    @DisplayName("시설을 삭제한다.")
+    @Test
+    public void deleteFacility(){
+        Long facilityId = facilityService.createFacility(space.getId(), createFacility(true), hostMember);
+
+        facilityService.deleteFacility(facilityId, hostMember);
+
+        assertThatThrownBy(() -> facilityService.findFacility(facilityId))
+                .isInstanceOf(NotFoundEntityException.class);
     }
 
     @DisplayName("시설 정보를 업데이트한다.")
