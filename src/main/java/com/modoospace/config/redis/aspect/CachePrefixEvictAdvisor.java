@@ -1,4 +1,4 @@
-package com.modoospace.config.redis;
+package com.modoospace.config.redis.aspect;
 
 import com.modoospace.common.CustomSpELParser;
 import java.util.Set;
@@ -19,7 +19,7 @@ public class CachePrefixEvictAdvisor {
   @Autowired
   StringRedisTemplate redisTemplate;
 
-  @Around("@annotation(com.modoospace.config.redis.CachePrefixEvict)")
+  @Around("@annotation(com.modoospace.config.redis.aspect.CachePrefixEvict)")
   public Object processCachePrefixEvict(ProceedingJoinPoint joinPoint) throws Throwable {
     MethodSignature methodSignature = (MethodSignature) joinPoint.getSignature();
     CachePrefixEvict annotation = methodSignature.getMethod().getAnnotation(CachePrefixEvict.class);
