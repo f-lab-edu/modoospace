@@ -6,8 +6,11 @@ import com.modoospace.member.domain.Member;
 import com.modoospace.member.domain.MemberRepository;
 import com.modoospace.member.domain.Role;
 import com.modoospace.space.controller.dto.address.AddressCreateUpdateRequest;
+import com.modoospace.space.controller.dto.facility.FacilityCreateRequest;
 import com.modoospace.space.controller.dto.space.SpaceCreateUpdateRequest;
 import com.modoospace.space.controller.dto.space.SpaceDetailResponse;
+import com.modoospace.space.controller.dto.space.SpaceResponse;
+import com.modoospace.space.controller.dto.space.SpaceSearchRequest;
 import com.modoospace.space.domain.Category;
 import com.modoospace.space.domain.CategoryRepository;
 import com.modoospace.space.domain.SpaceRepository;
@@ -15,6 +18,8 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.transaction.annotation.Transactional;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -26,6 +31,9 @@ class SpaceServiceTest extends AbstractIntegrationContainerBaseTest {
 
     @Autowired
     private SpaceService spaceService;
+
+    @Autowired
+    private FacilityService facilityService;
 
     @Autowired
     private MemberRepository memberRepository;
@@ -111,6 +119,52 @@ class SpaceServiceTest extends AbstractIntegrationContainerBaseTest {
                 .isInstanceOf(PermissionDeniedException.class);
         assertThatThrownBy(() -> spaceService.createSpace(category.getId(), createRequest, visitorMember))
                 .isInstanceOf(PermissionDeniedException.class);
+    }
+
+    @DisplayName("쿼리(공간)에 맞는 공간을 검색한다.(ElasticSearch 활용)")
+    @Test
+    public void searchSpace() {
+        SpaceCreateUpdateRequest createRequest = new SpaceCreateUpdateRequest(
+                "공간이름", "설명", createAddress);
+        Long spaceId = spaceService.createSpace(category.getId(), createRequest, hostMember);
+        FacilityCreateRequest facilityCreateRequest = FacilityCreateRequest.builder()
+                .name("스터디룸1")
+                .reservationEnable(true)
+                .minUser(1)
+                .maxUser(4)
+                .description("1~4인실 입니다.")
+                .build();
+        facilityService.createFacility(spaceId, facilityCreateRequest, hostMember);
+
+        SpaceSearchRequest spaceSearchRequest = new SpaceSearchRequest();
+        spaceSearchRequest.setQuery("공간");
+        Page<SpaceResponse> spaceResponses = spaceService.searchSpace(spaceSearchRequest, PageRequest.of(0, 10));
+
+        assertThat(spaceResponses.getContent()).extracting("name")
+                .containsExactly("공간이름");
+    }
+
+    @DisplayName("쿼리(공간)에 맞는 공간을 검색한다.(쿼리 활용)")
+    @Test
+    public void searchSpaceQuery() {
+        SpaceCreateUpdateRequest createRequest = new SpaceCreateUpdateRequest(
+                "공간이름", "설명", createAddress);
+        Long spaceId = spaceService.createSpace(category.getId(), createRequest, hostMember);
+        FacilityCreateRequest facilityCreateRequest = FacilityCreateRequest.builder()
+                .name("스터디룸1")
+                .reservationEnable(true)
+                .minUser(1)
+                .maxUser(4)
+                .description("1~4인실 입니다.")
+                .build();
+        facilityService.createFacility(spaceId, facilityCreateRequest, hostMember);
+
+        SpaceSearchRequest spaceSearchRequest = new SpaceSearchRequest();
+        spaceSearchRequest.setQuery("공간");
+        Page<SpaceResponse> spaceResponses = spaceService.searchSpaceQuery(spaceSearchRequest, PageRequest.of(0, 10));
+
+        assertThat(spaceResponses.getContent()).extracting("name")
+                .containsExactly("공간이름");
     }
 
 
