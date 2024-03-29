@@ -24,6 +24,7 @@ import java.time.DayOfWeek;
 import java.time.LocalDate;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -93,7 +94,8 @@ class FacilityServiceTest extends AbstractIntegrationContainerBaseTest {
         Long facilityId = facilityService
                 .createFacility(space.getId(), createRequest, hostMember);
 
-        Facility facility = facilityRepository.findById(facilityId).get();
+        Facility facility = facilityRepository.findById(facilityId)
+                .orElseThrow(() -> new NotFoundEntityException("시설", facilityId));
 
         assertThat(facility.getId()).isEqualTo(facilityId);
         assertThatFacilityInfo(facility, createRequest);
@@ -135,7 +137,8 @@ class FacilityServiceTest extends AbstractIntegrationContainerBaseTest {
         Long facilityId = facilityService
                 .createFacility(space.getId(), createRequest, hostMember);
 
-        Facility facility = facilityRepository.findById(facilityId).get();
+        Facility facility = facilityRepository.findById(facilityId)
+                .orElseThrow(() -> new NotFoundEntityException("시설", facilityId));
         assertThat(facility.getId()).isEqualTo(facilityId);
         assertThatFacilityInfo(facility, createRequest);
         assertThat(scheduleQueryRepository.isIncludingSchedule(facility,
@@ -252,7 +255,8 @@ class FacilityServiceTest extends AbstractIntegrationContainerBaseTest {
         facilityService
                 .updateFacility(facilityId, updateRequest, hostMember);
 
-        Facility facility = facilityRepository.findById(facilityId).get();
+        Facility facility = facilityRepository.findById(facilityId)
+                .orElseThrow(() -> new NotFoundEntityException("시설", facilityId));
         assertThatFacilityInfo(facility, updateRequest);
     }
 
@@ -300,7 +304,8 @@ class FacilityServiceTest extends AbstractIntegrationContainerBaseTest {
     }
 
     private void assertThatSchedules(Long facilityId) {
-        Facility facility = facilityRepository.findById(facilityId).get();
+        Facility facility = facilityRepository.findById(facilityId)
+                .orElseThrow(() -> new NotFoundEntityException("시설", facilityId));
         assertThat(scheduleQueryRepository.isIncludingSchedule(facility,
                 new DateTimeRange(workingDay, 0, workingDay, 24))).isFalse();
     }
