@@ -3,7 +3,7 @@ package com.modoospace.space.controller.dto.space;
 import com.modoospace.member.controller.dto.MemberResponse;
 import com.modoospace.space.controller.dto.address.AddressResponse;
 import com.modoospace.space.controller.dto.category.CategoryResponse;
-import com.modoospace.space.controller.dto.facility.FacilityResponse;
+import com.modoospace.space.controller.dto.facility.FacilityDetailResponse;
 import com.modoospace.space.domain.Space;
 import java.util.List;
 import javax.validation.constraints.NotEmpty;
@@ -33,11 +33,12 @@ public class SpaceDetailResponse {
     @NotNull
     private CategoryResponse category;
 
-    private List<FacilityResponse> facilities;
+    private List<FacilityDetailResponse> facilities;
 
     @Builder
     public SpaceDetailResponse(Long id, String name, String description, AddressResponse address,
-        MemberResponse host, CategoryResponse category, List<FacilityResponse> facilities) {
+            MemberResponse host, CategoryResponse category,
+            List<FacilityDetailResponse> facilities) {
         this.id = id;
         this.name = name;
         this.description = description;
@@ -49,13 +50,13 @@ public class SpaceDetailResponse {
 
     public static SpaceDetailResponse of(Space space) {
         return SpaceDetailResponse.builder()
-            .id(space.getId())
-            .name(space.getName())
-            .description(space.getDescription())
-            .host(MemberResponse.of(space.getHost()))
-            .address(AddressResponse.of(space.getAddress()))
-            .category(CategoryResponse.of(space.getCategory()))
-            .facilities(FacilityResponse.of(space.getFacilities()))
-            .build();
+                .id(space.getId())
+                .name(space.getName())
+                .description(space.getDescription())
+                .host(MemberResponse.of(space.getHost()))
+                .address(AddressResponse.of(space.getAddress()))
+                .category(CategoryResponse.of(space.getCategory()))
+                .facilities(FacilityDetailResponse.of(space.getFacilities()))
+                .build();
     }
 }

@@ -57,7 +57,7 @@ public class Space extends BaseTimeEntity {
     private List<Facility> facilities = new ArrayList<>();
 
     public Space(Long id, String name, String description, Address address,
-        Category category, Member host, List<Facility> facilities) {
+            Category category, Member host, List<Facility> facilities) {
         this.id = id;
         this.name = name;
         this.description = description;
@@ -90,7 +90,7 @@ public class Space extends BaseTimeEntity {
         verifyManagementPermission(loginMember);
     }
 
-     private boolean hasFacilities() {
+    private boolean hasFacilities() {
         return !facilities.isEmpty();
     }
 }
