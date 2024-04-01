@@ -1,16 +1,35 @@
 package com.modoospace.space.sevice;
 
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.junit.jupiter.api.Assertions.assertAll;
+
 import com.modoospace.AbstractIntegrationContainerBaseTest;
 import com.modoospace.common.exception.NotFoundEntityException;
 import com.modoospace.member.domain.Member;
 import com.modoospace.member.domain.MemberRepository;
 import com.modoospace.member.domain.Role;
 import com.modoospace.reservation.domain.DateTimeRange;
-import com.modoospace.space.controller.dto.facility.*;
+import com.modoospace.space.controller.dto.facility.FacilityCreateRequest;
+import com.modoospace.space.controller.dto.facility.FacilityDetailResponse;
+import com.modoospace.space.controller.dto.facility.FacilityResponse;
+import com.modoospace.space.controller.dto.facility.FacilitySearchRequest;
+import com.modoospace.space.controller.dto.facility.FacilitySettingUpdateRequest;
+import com.modoospace.space.controller.dto.facility.FacilityUpdateRequest;
 import com.modoospace.space.controller.dto.timeSetting.TimeSettingCreateRequest;
 import com.modoospace.space.controller.dto.weekdaySetting.WeekdaySettingCreateRequest;
-import com.modoospace.space.domain.*;
+import com.modoospace.space.domain.Category;
+import com.modoospace.space.domain.CategoryRepository;
+import com.modoospace.space.domain.Facility;
+import com.modoospace.space.domain.FacilityRepository;
+import com.modoospace.space.domain.Space;
+import com.modoospace.space.domain.SpaceRepository;
 import com.modoospace.space.repository.ScheduleQueryRepository;
+import java.time.DayOfWeek;
+import java.time.LocalDate;
+import java.util.Arrays;
+import java.util.List;
+import java.util.stream.Collectors;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -19,17 +38,6 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.test.context.transaction.TestTransaction;
 import org.springframework.transaction.annotation.Transactional;
-
-import java.time.DayOfWeek;
-import java.time.LocalDate;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Optional;
-import java.util.stream.Collectors;
-
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatThrownBy;
-import static org.junit.jupiter.api.Assertions.assertAll;
 
 @Transactional
 class FacilityServiceTest extends AbstractIntegrationContainerBaseTest {
@@ -156,8 +164,8 @@ class FacilityServiceTest extends AbstractIntegrationContainerBaseTest {
     }
 
     private FacilityCreateRequest createFacilityWithSetting(Boolean enable,
-                                                            List<TimeSettingCreateRequest> timeSettings,
-                                                            List<WeekdaySettingCreateRequest> weekdaySettings) {
+            List<TimeSettingCreateRequest> timeSettings,
+            List<WeekdaySettingCreateRequest> weekdaySettings) {
         return FacilityCreateRequest.builder()
                 .name("스터디룸1")
                 .reservationEnable(enable)
@@ -171,7 +179,7 @@ class FacilityServiceTest extends AbstractIntegrationContainerBaseTest {
 
     @DisplayName("시설검색 시 검색 조건에 맞는 시설을 반환한다.")
     @Test
-    public void searchFacility(){
+    public void searchFacility() {
         facilityService.createFacility(space.getId(), createFacility(true), hostMember);
         facilityService.createFacility(space.getId(), createFacility(false), hostMember);
 
@@ -185,7 +193,7 @@ class FacilityServiceTest extends AbstractIntegrationContainerBaseTest {
 
     @DisplayName("시설검색 시 검색 조건에 맞는 시설이 없다면 빈 페이지를 반환한다.")
     @Test
-    public void searchFacility_emptyPage(){
+    public void searchFacility_emptyPage() {
         facilityService.createFacility(space.getId(), createFacility(true), hostMember);
         facilityService.createFacility(space.getId(), createFacility(false), hostMember);
 
@@ -199,7 +207,7 @@ class FacilityServiceTest extends AbstractIntegrationContainerBaseTest {
 
     @DisplayName("시설검색 시 검색 조건이 없다면, 해당 Space의 모든 시설을 반환한다.")
     @Test
-    public void searchFacility_AllFacility(){
+    public void searchFacility_AllFacility() {
         facilityService.createFacility(space.getId(), createFacility(true), hostMember);
         facilityService.createFacility(space.getId(), createFacility(false), hostMember);
 
@@ -212,25 +220,27 @@ class FacilityServiceTest extends AbstractIntegrationContainerBaseTest {
 
     @DisplayName("시설을 찾는다.")
     @Test
-    public void findFacility(){
-        Long facilityId = facilityService.createFacility(space.getId(), createFacility(true), hostMember);
+    public void findFacility() {
+        Long facilityId = facilityService.createFacility(space.getId(), createFacility(true),
+                hostMember);
 
-        FacilityResponse facility = facilityService.findFacility(facilityId);
+        FacilityDetailResponse facility = facilityService.findFacility(facilityId);
 
         assertThat(facility.getId()).isEqualTo(facilityId);
     }
 
     @DisplayName("존재하지 않는 시설의 ID일 경우 예외를 던진다.")
     @Test
-    public void findFacility_ifNotExistFacility_throwException(){
+    public void findFacility_ifNotExistFacility_throwException() {
         assertThatThrownBy(() -> facilityService.findFacility(1L))
                 .isInstanceOf(NotFoundEntityException.class);
     }
 
     @DisplayName("시설을 삭제한다.")
     @Test
-    public void deleteFacility(){
-        Long facilityId = facilityService.createFacility(space.getId(), createFacility(true), hostMember);
+    public void deleteFacility() {
+        Long facilityId = facilityService.createFacility(space.getId(), createFacility(true),
+                hostMember);
 
         facilityService.deleteFacility(facilityId, hostMember);
 
@@ -297,8 +307,8 @@ class FacilityServiceTest extends AbstractIntegrationContainerBaseTest {
         FacilitySettingUpdateRequest updateRequest = new FacilitySettingUpdateRequest(
                 createTimeSetting(9, 21),
                 createWeekDaySetting(
-                        DayOfWeek.MONDAY, DayOfWeek.TUESDAY, DayOfWeek.WEDNESDAY, DayOfWeek.THURSDAY,
-                        DayOfWeek.FRIDAY)
+                        DayOfWeek.MONDAY, DayOfWeek.TUESDAY, DayOfWeek.WEDNESDAY,
+                        DayOfWeek.THURSDAY, DayOfWeek.FRIDAY)
         );
         facilityService.updateFacilitySetting(facilityId, updateRequest, hostMember);
     }
