@@ -1,4 +1,4 @@
-package com.modoospace.config.redis;
+package com.modoospace.config.redis.aspect;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;

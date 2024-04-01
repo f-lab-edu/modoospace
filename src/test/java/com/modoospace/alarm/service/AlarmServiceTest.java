@@ -81,7 +81,7 @@ class AlarmServiceTest extends AbstractIntegrationContainerBaseTest {
         String pattern = "searchAlarms::" + hostMember.getEmail() + ":*";
         Set<String> keys = redisTemplate.keys(pattern);
         assertThat(keys).hasSize(1);
-        System.out.println("keys = " + keys);
+        assertThat(keys).contains("searchAlarms::host@email:0");
     }
 
     @DisplayName("로그인한 Email을 key값으로 SseEmitter를 저장한다.")

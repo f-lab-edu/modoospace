@@ -53,7 +53,7 @@ public class Reservation extends BaseTimeEntity {
 
     @Builder
     public Reservation(Long id, Integer numOfUser, DateTimeRange dateTimeRange,
-        ReservationStatus status, Facility facility, Member visitor) {
+            ReservationStatus status, Facility facility, Member visitor) {
         this.id = id;
 
         facility.verityNumOfUser(numOfUser);

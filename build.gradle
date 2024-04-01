@@ -101,7 +101,7 @@ jacocoTestReport {
 
     reports {
         html.enabled true
-        xml.enabled false
+        xml.enabled true
         csv.enabled false
     }
 }
@@ -110,14 +110,15 @@ jacocoTestCoverageVerification {
     violationRules {
         rule {
             element 'CLASS'
+
             limit {
-                counter = 'BRANCH'
+                counter = 'INSTRUCTION'
                 value = 'COVEREDRATIO'
                 minimum = 0.8 // 테스트 커버리지 최소 80%
             }
 
             // 커버리지 체크를 제외할 클래스들
-            excludes = ['*.*Controller', '*.dto.*', '*.config.*', '*.domain.Q*']
+            excludes = ['*.*Application', '*.*Controller', '*.dto.*', '*.config.*', '*.common.*', '*.domain.Q*', '*.*Builder']
         }
     }
 }

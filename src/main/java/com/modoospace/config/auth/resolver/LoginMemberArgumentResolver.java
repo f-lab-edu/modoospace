@@ -11,13 +11,13 @@ import org.springframework.web.context.request.NativeWebRequest;
 import org.springframework.web.method.support.HandlerMethodArgumentResolver;
 import org.springframework.web.method.support.ModelAndViewContainer;
 
+import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
 
 @RequiredArgsConstructor
 @Component
 public class LoginMemberArgumentResolver implements HandlerMethodArgumentResolver {
 
-    private final HttpSession httpSession;
     private final MemberService memberService;
 
     /**
@@ -28,6 +28,7 @@ public class LoginMemberArgumentResolver implements HandlerMethodArgumentResolve
         return parameter.hasParameterAnnotation(LoginMember.class) && parameter.getParameterType().equals(Member.class);
     }
 
+
     /**
      * 파라미터에 전달할 객체 생성
      */
@@ -35,10 +36,15 @@ public class LoginMemberArgumentResolver implements HandlerMethodArgumentResolve
     public Object resolveArgument(MethodParameter parameter, ModelAndViewContainer mavContainer,
                                   NativeWebRequest webRequest, WebDataBinderFactory binderFactory) throws Exception {
         try {
-            String email = (String) httpSession.getAttribute("member");
-            return memberService.findMemberByEmail(email);
+            return memberService.findMemberByEmail(getLoginEmail(webRequest));
         } catch (RuntimeException e) {
             throw new UnAuthenticatedException();
         }
+    }
+
+    private String getLoginEmail(NativeWebRequest webRequest) {
+        HttpServletRequest request = (HttpServletRequest) webRequest.getNativeRequest();
+        HttpSession session = request.getSession(false);
+        return (String) session.getAttribute("member");
     }
 }

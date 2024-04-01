@@ -2,7 +2,12 @@ package com.modoospace.space.sevice;
 
 import com.modoospace.common.exception.NotFoundEntityException;
 import com.modoospace.member.domain.Member;
-import com.modoospace.space.controller.dto.facility.*;
+import com.modoospace.space.controller.dto.facility.FacilityCreateRequest;
+import com.modoospace.space.controller.dto.facility.FacilityDetailResponse;
+import com.modoospace.space.controller.dto.facility.FacilityResponse;
+import com.modoospace.space.controller.dto.facility.FacilitySearchRequest;
+import com.modoospace.space.controller.dto.facility.FacilitySettingUpdateRequest;
+import com.modoospace.space.controller.dto.facility.FacilityUpdateRequest;
 import com.modoospace.space.domain.Facility;
 import com.modoospace.space.domain.FacilityRepository;
 import com.modoospace.space.domain.Space;
@@ -26,7 +31,7 @@ public class FacilityService {
 
     @Transactional
     public Long createFacility(Long spaceId, FacilityCreateRequest createRequest,
-                               Member loginMember) {
+            Member loginMember) {
         Space space = findSpaceById(spaceId);
         space.verifyManagementPermission(loginMember);
 
@@ -37,21 +42,22 @@ public class FacilityService {
     }
 
     public Page<FacilityResponse> searchFacility(Long spaceId, FacilitySearchRequest searchRequest,
-                                                 Pageable pageable) {
-        Page<Facility> facilities = facilityQueryRepository.searchFacility(spaceId, searchRequest, pageable);
+            Pageable pageable) {
+        Page<Facility> facilities = facilityQueryRepository.searchFacility(spaceId, searchRequest,
+                pageable);
 
         return facilities.map(FacilityResponse::of);
     }
 
-    public FacilityResponse findFacility(Long facilityId) {
+    public FacilityDetailResponse findFacility(Long facilityId) {
         Facility facility = findFacilityById(facilityId);
 
-        return FacilityResponse.of(facility);
+        return FacilityDetailResponse.of(facility);
     }
 
     @Transactional
     public void updateFacility(Long facilityId, FacilityUpdateRequest updateRequest,
-                               Member loginMember) {
+            Member loginMember) {
         Facility facility = findFacilityById(facilityId);
         facility.verifyManagementPermission(loginMember);
 
@@ -61,7 +67,7 @@ public class FacilityService {
 
     @Transactional
     public void updateFacilitySetting(Long facilityId, FacilitySettingUpdateRequest updateRequest,
-                                      Member loginMember) {
+            Member loginMember) {
         Facility facility = findFacilityById(facilityId);
         facility.verifyManagementPermission(loginMember);
 

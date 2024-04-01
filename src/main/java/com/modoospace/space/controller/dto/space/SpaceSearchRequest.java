@@ -36,6 +36,6 @@ public class SpaceSearchRequest {
 
     public void updateTimeRange() {
         this.timeRange = startHour != null && endHour != null ?
-            new TimeRange(startHour, endHour) : null;
+                new TimeRange(startHour, endHour) : null;
     }
 }

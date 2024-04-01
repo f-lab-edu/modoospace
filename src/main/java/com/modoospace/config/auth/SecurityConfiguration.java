@@ -24,10 +24,10 @@ public class SecurityConfiguration {
                                 "/api/v1/spaces/*/facilities/**",
                                 "/api/v1/test/**",
                                 "/api/v1/facilities/*/schedules/**",
-                                "/api/v1/visitors/reservations/facilities/*/availability/**").permitAll()
+                                "/api/v1/visitor/reservations/facilities/*/availability/**").permitAll()
                         .antMatchers(HttpMethod.POST, "/api/v1/alarms/send/**").permitAll()
                         .antMatchers("/api/v1/admin/**").hasRole(Role.ADMIN.name())
-                        .antMatchers("/api/v1/hosts/**").hasRole(Role.HOST.name())
+                        .antMatchers("/api/v1/host/**").hasRole(Role.HOST.name())
                         .anyRequest().authenticated()
                 )
                 .oauth2Login().userInfoEndpoint()

@@ -6,13 +6,12 @@ import com.modoospace.member.controller.dto.MemberResponse;
 import com.modoospace.reservation.domain.Reservation;
 import com.modoospace.reservation.domain.ReservationStatus;
 import com.modoospace.space.controller.dto.facility.FacilityResponse;
+import java.time.LocalDate;
+import javax.validation.constraints.NotEmpty;
+import javax.validation.constraints.NotNull;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-
-import javax.validation.constraints.NotEmpty;
-import javax.validation.constraints.NotNull;
-import java.time.LocalDate;
 
 @Getter
 @NoArgsConstructor
@@ -47,8 +46,8 @@ public class ReservationResponse {
 
     @Builder
     public ReservationResponse(Long id, Integer numOrUser, LocalDate startDate, Integer startHour,
-                               LocalDate endDate, Integer endHour, ReservationStatus status, FacilityResponse facility,
-                               MemberResponse visitor) {
+            LocalDate endDate, Integer endHour, ReservationStatus status, FacilityResponse facility,
+            MemberResponse visitor) {
         this.id = id;
         this.numOrUser = numOrUser;
         this.startDate = startDate;
