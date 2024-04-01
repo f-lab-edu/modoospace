@@ -5,7 +5,7 @@ import static com.modoospace.space.domain.QFacility.facility;
 import static com.modoospace.space.domain.QSpace.space;
 
 import com.modoospace.member.domain.QMember;
-import com.modoospace.reservation.controller.dto.ReservationSearchRequest;
+import com.modoospace.reservation.controller.dto.search.CommonSearchRequest;
 import com.modoospace.reservation.domain.DateTimeRange;
 import com.modoospace.reservation.domain.Reservation;
 import com.modoospace.reservation.domain.ReservationStatus;
@@ -52,7 +52,7 @@ public class ReservationQueryRepository {
                 .fetch();
     }
 
-    public Page<Reservation> searchSpace(ReservationSearchRequest request, Pageable pageable) {
+    public Page<Reservation> searchSpace(CommonSearchRequest request, Pageable pageable) {
 
         List<Reservation> content = jpaQueryFactory
                 .selectFrom(reservation)
@@ -87,24 +87,24 @@ public class ReservationQueryRepository {
         return PageableExecutionUtils.getPage(content, pageable, countQuery::fetchCount);
     }
 
-    private static BooleanExpression eqVisitorId(ReservationSearchRequest request) {
+    private static BooleanExpression eqVisitorId(CommonSearchRequest request) {
         return request.getVisitorId() != null ? visitor.id.eq(request.getVisitorId())
                 : null;
     }
 
-    private static BooleanExpression eqHostId(ReservationSearchRequest request) {
+    private static BooleanExpression eqHostId(CommonSearchRequest request) {
         return request.getHostId() != null ? space.host.id.eq(request.getHostId()) : null;
     }
 
-    private static BooleanExpression eqSpaceId(ReservationSearchRequest request) {
+    private static BooleanExpression eqSpaceId(CommonSearchRequest request) {
         return request.getSpaceId() != null ? space.id.eq(request.getSpaceId()) : null;
     }
 
-    private static BooleanExpression containsSpaceName(ReservationSearchRequest request) {
+    private static BooleanExpression containsSpaceName(CommonSearchRequest request) {
         return request.getSpaceName() != null ? space.name.contains(request.getSpaceName()) : null;
     }
 
-    private static BooleanExpression eqStatus(ReservationSearchRequest request) {
+    private static BooleanExpression eqStatus(CommonSearchRequest request) {
         return request.getStatus() != null ? reservation.status.eq(request.getStatus()) : null;
     }
 }

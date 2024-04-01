@@ -10,7 +10,7 @@ import com.modoospace.member.domain.Role;
 import com.modoospace.reservation.controller.dto.AvailabilityTimeResponse;
 import com.modoospace.reservation.controller.dto.ReservationCreateRequest;
 import com.modoospace.reservation.controller.dto.ReservationResponse;
-import com.modoospace.reservation.controller.dto.ReservationSearchRequest;
+import com.modoospace.reservation.controller.dto.search.CommonSearchRequest;
 import com.modoospace.reservation.controller.dto.ReservationUpdateRequest;
 import com.modoospace.reservation.controller.dto.TimeResponse;
 import com.modoospace.reservation.controller.dto.search.AdminSearchRequest;
@@ -123,14 +123,14 @@ public class ReservationService {
             Pageable pageable, Member loginMember) {
         loginMember.verifyRolePermission(Role.ADMIN);
 
-        return searchReservation(new ReservationSearchRequest(searchRequest), pageable);
+        return searchReservation(new CommonSearchRequest(searchRequest), pageable);
     }
 
     public Page<ReservationResponse> searchReservationByHost(HostSearchRequest searchRequest,
             Pageable pageable, Member loginMember) {
         loginMember.verifyRolePermission(Role.HOST);
 
-        return searchReservation(new ReservationSearchRequest(searchRequest, loginMember),
+        return searchReservation(new CommonSearchRequest(searchRequest, loginMember),
                 pageable);
     }
 
@@ -138,11 +138,11 @@ public class ReservationService {
             Pageable pageable, Member loginMember) {
         loginMember.verifyRolePermission(Role.VISITOR);
 
-        return searchReservation(new ReservationSearchRequest(searchRequest, loginMember),
+        return searchReservation(new CommonSearchRequest(searchRequest, loginMember),
                 pageable);
     }
 
-    private Page<ReservationResponse> searchReservation(ReservationSearchRequest searchRequest,
+    private Page<ReservationResponse> searchReservation(CommonSearchRequest searchRequest,
             Pageable pageable) {
         Page<Reservation> reservations = reservationQueryRepository.searchSpace(searchRequest,
                 pageable);
