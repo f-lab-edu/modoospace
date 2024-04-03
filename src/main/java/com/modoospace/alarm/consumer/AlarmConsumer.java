@@ -15,17 +15,17 @@ import org.springframework.stereotype.Component;
 @Slf4j
 public class AlarmConsumer {
 
-  private final AlarmService alarmService;
-  private final ObjectMapper objectMapper;
+    private final AlarmService alarmService;
+    private final ObjectMapper objectMapper;
 
-  @RabbitListener(queues = "RESERVATION")
-  public void handler(String message) {
-    try {
-      AlarmEvent alarmEvent = objectMapper.readValue(message, AlarmEvent.class);
-      alarmService.saveAndSend(alarmEvent);
-      log.info("Alarm save and send to client");
-    } catch (JsonProcessingException e) {
-      throw new AlarmSendException();
+    @RabbitListener(queues = "q.reservation")
+    public void handler(String message) {
+        try {
+            AlarmEvent alarmEvent = objectMapper.readValue(message, AlarmEvent.class);
+            alarmService.saveAndSend(alarmEvent);
+            log.info("Alarm save and send to client");
+        } catch (JsonProcessingException e) {
+            throw new AlarmSendException();
+        }
     }
-  }
 }
