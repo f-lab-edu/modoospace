@@ -20,7 +20,7 @@ public class AlarmProducer {
   public void send(AlarmEvent alarmEvent) {
     try {
       String message = objectMapper.writeValueAsString(alarmEvent);
-      rabbitTemplate.convertAndSend("RESERVATION", message);
+      rabbitTemplate.convertAndSend("x.reservation","", message);
       log.info("AlarmEvent send to RESERVATION queue");
     } catch (JsonProcessingException e) {
       throw new AlarmSendException();
