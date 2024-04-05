@@ -8,6 +8,7 @@ import com.modoospace.alarm.controller.dto.AlarmEvent;
 import com.modoospace.alarm.domain.Alarm;
 import com.modoospace.alarm.domain.AlarmRepository;
 import com.modoospace.alarm.domain.AlarmType;
+import com.modoospace.common.exception.NotFoundEntityException;
 import com.modoospace.member.domain.Member;
 import com.modoospace.member.domain.MemberRepository;
 import com.modoospace.member.domain.Role;
@@ -15,7 +16,6 @@ import java.util.List;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import org.springframework.amqp.AmqpRejectAndDontRequeueException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.testcontainers.shaded.com.fasterxml.jackson.core.JsonProcessingException;
 import org.testcontainers.shaded.com.fasterxml.jackson.databind.ObjectMapper;
@@ -23,15 +23,15 @@ import org.testcontainers.shaded.com.fasterxml.jackson.databind.ObjectMapper;
 class AlarmConsumerTest extends AbstractIntegrationContainerBaseTest {
 
     @Autowired
-    AlarmConsumer alarmConsumer;
+    private AlarmConsumer alarmConsumer;
 
     @Autowired
-    MemberRepository memberRepository;
+    private MemberRepository memberRepository;
 
     @Autowired
-    AlarmRepository alarmRepository;
+    private AlarmRepository alarmRepository;
 
-    ObjectMapper objectMapper = new ObjectMapper();
+    private final ObjectMapper objectMapper = new ObjectMapper();
 
     @AfterEach
     public void after() {
@@ -76,6 +76,6 @@ class AlarmConsumerTest extends AbstractIntegrationContainerBaseTest {
         String message = objectMapper.writeValueAsString(alarmEvent);
 
         assertThatThrownBy(() -> alarmConsumer.handler(message))
-                .isInstanceOf(AmqpRejectAndDontRequeueException.class);
+                .isInstanceOf(NotFoundEntityException.class);
     }
 }
