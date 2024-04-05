@@ -11,8 +11,6 @@ import org.testcontainers.containers.RabbitMQContainer;
 
 public class RabbitMQTestInitializer {
 
-    private static final String QUEUE_NAME = "RESERVATION";
-
     static void initializeRabbitMQ(RabbitMQContainer container) {
         ConnectionFactory factory = new ConnectionFactory();
         factory.setHost(container.getHost());
