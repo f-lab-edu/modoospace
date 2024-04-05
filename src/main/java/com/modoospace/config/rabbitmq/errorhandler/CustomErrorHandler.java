@@ -1,4 +1,4 @@
-package com.modoospace.config.rabbitmq;
+package com.modoospace.config.rabbitmq.errorhandler;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.amqp.AmqpRejectAndDontRequeueException;

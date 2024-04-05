@@ -1,5 +1,7 @@
 package com.modoospace.config.rabbitmq;
 
+import com.modoospace.config.rabbitmq.errorhandler.CustomErrorHandler;
+import com.modoospace.config.rabbitmq.errorhandler.CustomFatalExceptionStrategy;
 import org.springframework.amqp.rabbit.config.SimpleRabbitListenerContainerFactory;
 import org.springframework.amqp.rabbit.connection.ConnectionFactory;
 import org.springframework.amqp.rabbit.listener.FatalExceptionStrategy;

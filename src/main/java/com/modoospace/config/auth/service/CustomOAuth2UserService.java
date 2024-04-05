@@ -1,4 +1,4 @@
-package com.modoospace.config.auth;
+package com.modoospace.config.auth.service;
 
 import com.modoospace.config.auth.dto.OAuthAttributes;
 import com.modoospace.member.domain.Member;

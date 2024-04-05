@@ -1,4 +1,4 @@
-package com.modoospace.config.rabbitmq;
+package com.modoospace.config.rabbitmq.errorhandler;
 
 import com.modoospace.common.exception.MessageParsingError;
 import com.modoospace.common.exception.NotFoundEntityException;

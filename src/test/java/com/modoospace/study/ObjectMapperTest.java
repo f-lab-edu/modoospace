@@ -22,121 +22,127 @@ import org.springframework.util.Assert;
  */
 public class ObjectMapperTest {
 
-  @DisplayName("@Getter와 @NoArgsConstructor가 있다면 직렬화 역직렬화 둘다 성공한다.")
-  @Test
-  public void objectMapper() throws Exception {
-    ObjectMapper objectMapper = new ObjectMapper();
-    String content = objectMapper.writeValueAsString(new Success("name", 10));
+    @DisplayName("@Getter와 @NoArgsConstructor가 있다면 직렬화 역직렬화 둘다 성공한다.")
+    @Test
+    public void objectMapper() throws Exception {
+        ObjectMapper objectMapper = new ObjectMapper();
+        String content = objectMapper.writeValueAsString(new Success("name", 10));
 
-    Success success = objectMapper.readValue(content, Success.class);
+        Success success = objectMapper.readValue(content, Success.class);
 
-    assertThat(success.getName()).isEqualTo("name");
-  }
-
-  @Getter
-  @NoArgsConstructor
-  @AllArgsConstructor
-  public static class Success {
-
-    private String name;
-    private Integer age;
-  }
-
-  @DisplayName("@Getter가 없다면 직렬화부터 실패한다.")
-  @Test
-  public void objectMapper_throwException_IfNoGetter() throws Exception {
-    ObjectMapper objectMapper = new ObjectMapper();
-
-    assertThatThrownBy(() -> objectMapper.writeValueAsString(new NoGetter("name", 10)))
-        .isInstanceOf(InvalidDefinitionException.class);
-  }
-
-  @NoArgsConstructor
-  @AllArgsConstructor
-  public static class NoGetter {
-
-    String name;
-    int age;
-  }
-
-  @DisplayName("인자없는 생성자(@NoArgsConstructor)가 없다면 직렬화는 성공하지만 역직렬화는 실패한다.")
-  @Test
-  public void objectMapper_throwException_IfNoDefaultConstructor() throws Exception {
-    ObjectMapper objectMapper = new ObjectMapper();
-    String content = objectMapper.writeValueAsString(new NoDefaultConstructor("name", 10));
-
-    assertThatThrownBy(() -> objectMapper.readValue(content, NoDefaultConstructor.class))
-        .isInstanceOf(InvalidDefinitionException.class);
-  }
-
-  @Getter
-  @AllArgsConstructor
-  public static class NoDefaultConstructor {
-
-    String name;
-    int age;
-  }
-
-  @DisplayName("Oauth2.0에 사용되는 OAuth2AuthorizationResponseType는 역직렬화에 실패한다.")
-  @Test
-  public void objectMapper_throwException_IfOAuth2AuthorizationResponseTypeRead() throws Exception{
-    ObjectMapper objectMapper = new ObjectMapper();
-    String content = objectMapper.writeValueAsString(new OAuth2AuthorizationResponseType("code"));
-
-    assertThatThrownBy(() -> objectMapper.readValue(content, OAuth2AuthorizationResponseType.class))
-        .isInstanceOf(MismatchedInputException.class);
-  }
-
-  @DisplayName("기본 생성자를 추가한 OAuth2AuthorizationResponseType는 역직렬화에 성공한다.")
-  @Test
-  public void objectMapper_readSuccess_IfOAuth2AuthorizationResponseTypeAddNoConstructor() throws Exception{
-    ObjectMapper objectMapper = new ObjectMapper();
-    String content = objectMapper.writeValueAsString(new OAuth2AuthorizationResponseType_Test("code"));
-
-    OAuth2AuthorizationResponseType_Test responseTypeTest = objectMapper
-        .readValue(content, OAuth2AuthorizationResponseType_Test.class);
-  }
-
-  public static class OAuth2AuthorizationResponseType_Test implements Serializable {
-
-    private static final long serialVersionUID = SpringSecurityCoreVersion.SERIAL_VERSION_UID;
-
-    public static final OAuth2AuthorizationResponseType_Test CODE = new OAuth2AuthorizationResponseType_Test("code");
-
-    private final String value;
-
-    public OAuth2AuthorizationResponseType_Test() {
-      this.value = "code";
+        assertThat(success.getName()).isEqualTo("name");
     }
 
-    public OAuth2AuthorizationResponseType_Test(String value) {
-      Assert.hasText(value, "value cannot be empty");
-      this.value = value;
+    @Getter
+    @NoArgsConstructor
+    @AllArgsConstructor
+    public static class Success {
+
+        private String name;
+        private Integer age;
     }
 
-    /**
-     * Returns the value of the authorization response type.
-     * @return the value of the authorization response type
-     */
-    public String getValue() {
-      return this.value;
+    @DisplayName("@Getter가 없다면 직렬화부터 실패한다.")
+    @Test
+    public void objectMapper_throwException_IfNoGetter() {
+        ObjectMapper objectMapper = new ObjectMapper();
+
+        assertThatThrownBy(() -> objectMapper.writeValueAsString(new NoGetter("name", 10)))
+                .isInstanceOf(InvalidDefinitionException.class);
     }
 
-    @Override
-    public boolean equals(Object obj) {
-      if (this == obj) {
-        return true;
-      }
-      if (obj == null || this.getClass() != obj.getClass()) {
-        return false;
-      }
-      org.springframework.security.oauth2.core.endpoint.OAuth2AuthorizationResponseType that = (org.springframework.security.oauth2.core.endpoint.OAuth2AuthorizationResponseType) obj;
-      return this.getValue().equals(that.getValue());
+    @NoArgsConstructor
+    @AllArgsConstructor
+    public static class NoGetter {
+
+        String name;
+        int age;
     }
 
-    @Override
-    public int hashCode() {
-      return this.getValue().hashCode();
+    @DisplayName("인자없는 생성자(@NoArgsConstructor)가 없다면 직렬화는 성공하지만 역직렬화는 실패한다.")
+    @Test
+    public void objectMapper_throwException_IfNoDefaultConstructor() throws Exception {
+        ObjectMapper objectMapper = new ObjectMapper();
+        String content = objectMapper.writeValueAsString(new NoDefaultConstructor("name", 10));
+
+        assertThatThrownBy(() -> objectMapper.readValue(content, NoDefaultConstructor.class))
+                .isInstanceOf(InvalidDefinitionException.class);
     }
-  }
+
+    @Getter
+    @AllArgsConstructor
+    public static class NoDefaultConstructor {
+
+        String name;
+        int age;
+    }
+
+    @DisplayName("Oauth2.0에 사용되는 OAuth2AuthorizationResponseType는 역직렬화에 실패한다.")
+    @Test
+    public void objectMapper_throwException_IfOAuth2AuthorizationResponseTypeRead()
+            throws Exception {
+        ObjectMapper objectMapper = new ObjectMapper();
+        String content = objectMapper.writeValueAsString(
+                new OAuth2AuthorizationResponseType("code"));
+
+        assertThatThrownBy(
+                () -> objectMapper.readValue(content, OAuth2AuthorizationResponseType.class))
+                .isInstanceOf(MismatchedInputException.class);
+    }
+
+    @DisplayName("기본 생성자를 추가한 OAuth2AuthorizationResponseType는 역직렬화에 성공한다.")
+    @Test
+    public void objectMapper_readSuccess_IfOAuth2AuthorizationResponseTypeAddNoConstructor()
+            throws Exception {
+        ObjectMapper objectMapper = new ObjectMapper();
+        String content = objectMapper.writeValueAsString(
+                new OAuth2AuthorizationResponseType_Test("code"));
+
+        objectMapper.readValue(content, OAuth2AuthorizationResponseType_Test.class);
+    }
+
+    public static class OAuth2AuthorizationResponseType_Test implements Serializable {
+
+        private static final long serialVersionUID = SpringSecurityCoreVersion.SERIAL_VERSION_UID;
+
+        public static final OAuth2AuthorizationResponseType_Test CODE = new OAuth2AuthorizationResponseType_Test(
+                "code");
+
+        private final String value;
+
+        public OAuth2AuthorizationResponseType_Test() {
+            this.value = "code";
+        }
+
+        public OAuth2AuthorizationResponseType_Test(String value) {
+            Assert.hasText(value, "value cannot be empty");
+            this.value = value;
+        }
+
+        /**
+         * Returns the value of the authorization response type.
+         *
+         * @return the value of the authorization response type
+         */
+        public String getValue() {
+            return this.value;
+        }
+
+        @Override
+        public boolean equals(Object obj) {
+            if (this == obj) {
+                return true;
+            }
+            if (obj == null || this.getClass() != obj.getClass()) {
+                return false;
+            }
+            org.springframework.security.oauth2.core.endpoint.OAuth2AuthorizationResponseType that = (org.springframework.security.oauth2.core.endpoint.OAuth2AuthorizationResponseType) obj;
+            return this.getValue().equals(that.getValue());
+        }
+
+        @Override
+        public int hashCode() {
+            return this.getValue().hashCode();
+        }
+    }
 }

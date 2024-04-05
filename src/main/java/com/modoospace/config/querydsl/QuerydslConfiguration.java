@@ -1,4 +1,4 @@
-package com.modoospace.config;
+package com.modoospace.config.querydsl;
 
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import javax.persistence.EntityManager;
@@ -12,9 +12,9 @@ public class QuerydslConfiguration {
   @PersistenceContext
   private EntityManager entityManager;
 
-  /* JPAQueryFactory Bean
-   *  프로젝트 내에서 jpaQueryFactory 를 주입받아 사용할 수 있도록 함
-   * */
+  /**
+   * 프로젝트 내에서 jpaQueryFactory 를 주입받아 사용할 수 있도록 함
+   */
   @Bean
   public JPAQueryFactory jpaQueryFactory() {
     return new JPAQueryFactory(entityManager);

@@ -1,5 +1,6 @@
 package com.modoospace.config.auth;
 
+import com.modoospace.config.auth.service.CustomOAuth2UserService;
 import com.modoospace.member.domain.Role;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
