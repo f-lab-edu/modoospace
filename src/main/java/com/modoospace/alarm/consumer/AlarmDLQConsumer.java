@@ -20,7 +20,7 @@ public class AlarmDLQConsumer {
     @Value("${spring.rabbitmq.retry_count}")
     private int retryCount;
 
-    @RabbitListener(queues = "q.reservation.dlx")
+    @RabbitListener(queues = "q.alarm.dead")
     public void processFailedMessagesRequeue(Message failedMessage) {
         Integer retriesCnt = (Integer) failedMessage.getMessageProperties().getHeaders()
                 .get(RETRY_COUNT_HEADER);

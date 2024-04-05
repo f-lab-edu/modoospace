@@ -27,15 +27,15 @@ public class RabbitMQTestInitializer {
     }
 
     static void createExchangeAndQueue(Channel channel) throws IOException {
-        channel.exchangeDeclare("x.reservation", BuiltinExchangeType.FANOUT);
-        channel.exchangeDeclare("x.reservation.dlx", BuiltinExchangeType.FANOUT);
+        channel.exchangeDeclare("x.alarm.work", BuiltinExchangeType.FANOUT);
+        channel.exchangeDeclare("x.alarm.dead", BuiltinExchangeType.FANOUT);
 
         HashMap<String, Object> argumentsMap = new HashMap<>();
-        argumentsMap.put("x-dead-letter-exchange", "x.reservation.dlx");
-        channel.queueDeclare("q.reservation", false, false, false, argumentsMap);
-        channel.queueBind("q.reservation", "x.reservation", "");
+        argumentsMap.put("x-dead-letter-exchange", "x.alarm.dead");
+        channel.queueDeclare("q.alarm.work", false, false, false, argumentsMap);
+        channel.queueBind("q.alarm.work", "x.alarm.work", "");
 
-        channel.queueDeclare("q.reservation.dlx", false, false, false, null);
-        channel.queueBind("q.reservation.dlx", "x.reservation.dlx", "");
+        channel.queueDeclare("q.alarm.dead", false, false, false, null);
+        channel.queueBind("q.alarm.dead", "x.alarm.dead", "");
     }
 }

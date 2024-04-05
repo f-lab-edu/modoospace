@@ -18,7 +18,7 @@ public class AlarmConsumer {
     private final AlarmService alarmService;
     private final ObjectMapper objectMapper;
 
-    @RabbitListener(queues = "q.reservation")
+    @RabbitListener(queues = "q.alarm.work")
     public void handler(String message) {
         log.info("AlarmEvent consume from q.reservation");
         try {
