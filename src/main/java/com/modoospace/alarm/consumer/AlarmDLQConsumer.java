@@ -33,7 +33,7 @@ public class AlarmDLQConsumer {
         }
         log.info("Retrying message for the {} time", retriesCnt);
         failedMessage.getMessageProperties().getHeaders().put(RETRY_COUNT_HEADER, ++retriesCnt);
-        rabbitTemplate.send("x.reservation",
+        rabbitTemplate.send("x.alarm.work",
                 failedMessage.getMessageProperties().getReceivedRoutingKey(), failedMessage);
     }
 }
