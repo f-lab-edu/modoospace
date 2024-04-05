@@ -11,6 +11,8 @@ import com.modoospace.common.exception.SSEConnectError;
 import com.modoospace.config.redis.aspect.CachePrefixEvict;
 import com.modoospace.member.domain.Member;
 import com.modoospace.member.service.MemberService;
+import java.io.IOException;
+import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
@@ -18,9 +20,6 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
-
-import java.io.IOException;
-import java.util.Optional;
 
 @Slf4j
 @RequiredArgsConstructor
@@ -56,7 +55,6 @@ public class AlarmService {
     public void saveAndSend(AlarmEvent alarmEvent) {
         Member member = memberService.findMemberByEmail(alarmEvent.getEmail());
         Alarm alarm = alarmRepository.save(alarmEvent.toEntity());
-
         send(member.getEmail(), AlarmResponse.of(alarm));
     }
 

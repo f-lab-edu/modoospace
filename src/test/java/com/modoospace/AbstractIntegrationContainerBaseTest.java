@@ -38,6 +38,7 @@ public abstract class AbstractIntegrationContainerBaseTest {
         System.setProperty("spring.rabbitmq.port", MY_RABBITMQ_CONTAINER.getMappedPort(5672).toString());
         System.setProperty("spring.rabbitmq.username", "guest");
         System.setProperty("spring.rabbitmq.password", "guest");
+        System.setProperty("spring.rabbitmq.retry_count", "3");
         RabbitMQTestInitializer.initializeRabbitMQ(MY_RABBITMQ_CONTAINER);
     }
 }
