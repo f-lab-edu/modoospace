@@ -19,7 +19,7 @@ public class AlarmProducer {
 
     public void send(AlarmEvent alarmEvent) {
         try {
-            log.info("AlarmEvent produce to x.reservation");
+            log.info("AlarmEvent produce to x.alarm.work");
             String message = objectMapper.writeValueAsString(alarmEvent);
             rabbitTemplate.convertAndSend("x.alarm.work", "", message);
         } catch (JsonProcessingException e) {
