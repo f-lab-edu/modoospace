@@ -5,14 +5,10 @@ import com.modoospace.alarm.controller.dto.AlarmResponse;
 import com.modoospace.alarm.domain.Alarm;
 import com.modoospace.alarm.domain.AlarmRepository;
 import com.modoospace.alarm.repository.AlarmQueryRepository;
-import com.modoospace.alarm.repository.EmitterLocalCacheRepository;
 import com.modoospace.common.exception.NotFoundEntityException;
-import com.modoospace.common.exception.SSEConnectError;
 import com.modoospace.config.redis.aspect.CachePrefixEvict;
 import com.modoospace.member.domain.Member;
 import com.modoospace.member.service.MemberService;
-import java.io.IOException;
-import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
@@ -21,18 +17,16 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 
-@Slf4j
 @RequiredArgsConstructor
 @Service
+@Slf4j
 public class AlarmService {
-
-    private static final Long DEFAULT_TIMEOUT = 60L * 1000 * 60;
-    private static final String ALARM_NAME = "sse";
 
     private final MemberService memberService;
     private final AlarmRepository alarmRepository;
     private final AlarmQueryRepository alarmQueryRepository;
-    private final EmitterLocalCacheRepository emitterRepository;
+    private final SseEmitterService sseEmitterService;
+    private final RedisMessageService messageService;
 
     public Page<AlarmResponse> searchAlarms(Member loginMember, Pageable pageable) {
 
@@ -40,14 +34,17 @@ public class AlarmService {
     }
 
     public SseEmitter connectAlarm(String loginEmail) {
-        SseEmitter emitter = new SseEmitter(DEFAULT_TIMEOUT);
-        emitterRepository.save(loginEmail, emitter);
+        SseEmitter sseEmitter = sseEmitterService.save(loginEmail);
 
-        emitter.onCompletion(() -> emitterRepository.delete(loginEmail));
-        emitter.onTimeout(() -> emitterRepository.delete(loginEmail));
+        sseEmitter.onTimeout(sseEmitter::complete);
+        sseEmitter.onError((e) -> sseEmitter.complete());
+        sseEmitter.onCompletion(() -> sseEmitterService.delete(loginEmail));
 
-        sendToClient(emitter, loginEmail, "EventStream Created. [userId=" + loginEmail + "]");
-        return emitter;
+        messageService.subscribe(loginEmail); // 채널 구독
+        sseEmitterService.send(sseEmitter, loginEmail,
+                "EventStream Created. [userId=" + loginEmail + "]"); // dummy 메세지 전송
+
+        return sseEmitter;
     }
 
     @Transactional
@@ -55,25 +52,8 @@ public class AlarmService {
     public void saveAndSend(AlarmEvent alarmEvent) {
         Member member = memberService.findMemberByEmail(alarmEvent.getEmail());
         Alarm alarm = alarmRepository.save(alarmEvent.toEntity());
-        send(member.getEmail(), AlarmResponse.of(alarm));
-    }
 
-    public void send(String loginEmail, Object data) {
-        Optional<SseEmitter> optionalSseEmitter = emitterRepository.find(loginEmail);
-        optionalSseEmitter.ifPresent(sseEmitter -> sendToClient(sseEmitter, loginEmail, data));
-    }
-
-    private void sendToClient(SseEmitter emitter, String email, Object data) {
-        try {
-            emitter.send(SseEmitter.event()
-                    .id(email)
-                    .name(ALARM_NAME)
-                    .data(data));
-            log.info("alarm event send SSE: " + email);
-        } catch (IOException exception) {
-            emitterRepository.delete(email);
-            throw new SSEConnectError();
-        }
+        messageService.publish(member.getEmail(), AlarmResponse.of(alarm));
     }
 
     @Transactional
