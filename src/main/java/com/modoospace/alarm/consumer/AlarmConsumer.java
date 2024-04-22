@@ -25,7 +25,7 @@ public class AlarmConsumer {
             AlarmEvent alarmEvent = objectMapper.readValue(message, AlarmEvent.class);
             alarmService.saveAndSend(alarmEvent);
         } catch (JsonProcessingException e) {
-            throw new MessageParsingError();
+            throw new MessageParsingError(e.getMessage());
         }
     }
 }

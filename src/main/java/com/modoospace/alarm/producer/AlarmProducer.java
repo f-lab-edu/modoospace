@@ -23,7 +23,7 @@ public class AlarmProducer {
             String message = objectMapper.writeValueAsString(alarmEvent);
             rabbitTemplate.convertAndSend("x.alarm.work", "", message);
         } catch (JsonProcessingException e) {
-            throw new MessageParsingError();
+            throw new MessageParsingError(e.getMessage());
         }
     }
 }
