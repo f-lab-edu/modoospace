@@ -1,18 +1,18 @@
 package com.modoospace.alarm.repository;
 
+import java.util.Map;
+import java.util.Optional;
+import java.util.concurrent.ConcurrentHashMap;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Repository;
 import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Optional;
-
 @Repository
 @RequiredArgsConstructor
-public class EmitterLocalCacheRepository {
+public class EmitterMemoryRepository {
 
-    private final Map<String, SseEmitter> sseEmitterMap = new HashMap<>();
+    // thread-safe한 자료구조
+    private final Map<String, SseEmitter> sseEmitterMap = new ConcurrentHashMap<>();
 
     public SseEmitter save(String id, SseEmitter sseEmitter) {
         sseEmitterMap.put(getKey(id), sseEmitter);
@@ -24,7 +24,7 @@ public class EmitterLocalCacheRepository {
     }
 
     public void delete(String id) {
-        sseEmitterMap.remove(id);
+        sseEmitterMap.remove(getKey(id));
     }
 
     private String getKey(String id) {
