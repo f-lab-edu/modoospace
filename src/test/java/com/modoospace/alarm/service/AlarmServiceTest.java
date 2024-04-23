@@ -1,14 +1,18 @@
 package com.modoospace.alarm.service;
 
+import static org.assertj.core.api.Assertions.assertThat;
+
 import com.modoospace.AbstractIntegrationContainerBaseTest;
 import com.modoospace.alarm.controller.dto.AlarmEvent;
 import com.modoospace.alarm.domain.Alarm;
 import com.modoospace.alarm.domain.AlarmRepository;
 import com.modoospace.alarm.domain.AlarmType;
-import com.modoospace.alarm.repository.EmitterLocalCacheRepository;
+import com.modoospace.alarm.repository.EmitterMemoryRepository;
 import com.modoospace.member.domain.Member;
 import com.modoospace.member.domain.MemberRepository;
 import com.modoospace.member.domain.Role;
+import java.util.Objects;
+import java.util.Set;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -18,11 +22,6 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
-
-import java.util.Objects;
-import java.util.Set;
-
-import static org.assertj.core.api.Assertions.assertThat;
 
 @Transactional
 class AlarmServiceTest extends AbstractIntegrationContainerBaseTest {
@@ -40,7 +39,7 @@ class AlarmServiceTest extends AbstractIntegrationContainerBaseTest {
     private StringRedisTemplate redisTemplate;
 
     @Autowired
-    private EmitterLocalCacheRepository emitterRepository;
+    private EmitterMemoryRepository emitterRepository;
 
     private Member hostMember;
 

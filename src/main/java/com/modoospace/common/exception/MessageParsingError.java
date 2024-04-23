@@ -6,4 +6,8 @@ public class MessageParsingError extends RuntimeException {
     public MessageParsingError() {
         super(MESSAGE);
     }
+
+    public MessageParsingError(String message) {
+        super(message);
+    }
 }
