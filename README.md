@@ -25,3 +25,4 @@
 - [nGrinder를 이용한 성능 테스트 및 성능 개선(ElasticSearch, Redis)](https://velog.io/@gjwjdghk123/nGrinder%EB%A5%BC-%EC%9D%B4%EC%9A%A9%ED%95%9C-%EC%84%B1%EB%8A%A5-%ED%85%8C%EC%8A%A4%ED%8A%B8-%EB%B0%8F-%EC%84%B1%EB%8A%A5-%EA%B0%9C%EC%84%A0ElasticSearch-Redis)
 - [ElasticSearch TimeOutException 해결과정](https://velog.io/@gjwjdghk123/ElasticSearch-TimeOutException-%ED%95%B4%EA%B2%B0%EA%B3%BC%EC%A0%95)
 - [ArgumentResolver를 사용한 중복로직제거 (feat. 필터, 인터셉터)](https://velog.io/@gjwjdghk123/ArgumentResolver%EB%A5%BC-%EC%82%AC%EC%9A%A9%ED%95%9C-%EC%A4%91%EB%B3%B5%EB%A1%9C%EC%A7%81%EC%A0%9C%EA%B1%B0-feat.-%ED%95%84%ED%84%B0-%EC%9D%B8%ED%84%B0%EC%85%89%ED%84%B0)
+- [Custom Error Handling을 통해 RabbitMQ의 Retry를 제한하고 Retry로직을 직접 구현해보자.](https://velog.io/@gjwjdghk123/Custom-Error-Handling)
